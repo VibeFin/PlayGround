@@ -1,0 +1,17 @@
+{
+  "name": "spline-rush-readable",
+  "version": "1.0.0",
+  "description": "Spline Rush — readable rewrite of spline-rush.vercel.app (original: minified Vite + Three.js WebGPU bundle). Six procedural circuits, five cars, quick race / time trial / championship.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3002",
+    "build": "vite build",
+    "preview": "vite preview --port 3002"
+  },
+  "dependencies": {
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
