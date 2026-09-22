@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="icon" href="data:,">
+<title>TRIBES // SKI FPS — CTF Prototype</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0a1420;font-family:'Segoe UI',system-ui,Roboto,Arial,sans-serif;color:#eaf4ff;user-select:none}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+  #crosshair{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);opacity:.95}
+  #crosshair:before,#crosshair:after{content:'';position:absolute;background:#7df9ff;box-shadow:0 0 6px #00e5ff}
+  #crosshair:before{left:11px;top:2px;width:2px;height:20px}
+  #crosshair:after{left:2px;top:11px;width:20px;height:2px}
+  #hitmarker{position:absolute;left:50%;top:50%;width:28px;height:28px;transform:translate(-50%,-50%) rotate(45deg);opacity:0}
+  #hitmarker:before,#hitmarker:after{content:'';position:absolute;background:#fff}
+  #hitmarker:before{left:13px;top:0;width:2px;height:28px}
+  #hitmarker:after{top:13px;left:0;width:28px;height:2px}
+  #hitmarker.show{animation:hit .25s ease-out}
+  @keyframes hit{0%{opacity:1;transform:translate(-50%,-50%) rotate(45deg) scale(1.4)}100%{opacity:0;transform:translate(-50%,-50%) rotate(45deg) scale(.8)}}
+  .panel{position:absolute;background:rgba(6,18,30,.55);border:1px solid rgba(125,249,255,.25);border-radius:10px;backdrop-filter:blur(6px);padding:8px 12px}
+  #speed{right:18px;bottom:18px;text-align:right;min-width:170px}
+  #speed b{font-size:42px;font-weight:800;letter-spacing:-1px;color:#fff;text-shadow:0 0 18px #00e5ff}
+  #speed span{font-size:12px;opacity:.8;letter-spacing:2px}
+  #ski-ind{font-size:12px;font-weight:700;letter-spacing:2px;color:#7df9ff}
+  #ski-ind.off{color:#5a6b7a}
+  #vitals{left:18px;bottom:18px;min-width:230px}
+  .bar{height:10px;background:#122636;border-radius:6px;overflow:hidden;margin:6px 0 2px;border:1px solid rgba(255,255,255,.15)}
+  .bar>i{display:block;height:100%;width:100%;transition:width .12s}
+  #hp>i{background:linear-gradient(90deg,#37ff8b,#b6ff5e)}
+  #en>i{background:linear-gradient(90deg,#00c3ff,#7df9ff)}
+  #vitals label{font-size:11px;letter-spacing:2px;opacity:.85}
+  #score{left:50%;top:12px;transform:translateX(-50%);display:flex;gap:14px;align-items:center;font-weight:800;font-size:22px}
+  #score .blue{color:#5ecbff}#score .red{color:#ff6b6b}
+  #score small{font-size:11px;letter-spacing:2px;opacity:.8}
+  #flags{left:50%;top:62px;transform:translateX(-50%);font-size:12px;letter-spacing:1px;display:flex;gap:12px}
+  #feed{right:18px;top:12px;text-align:right;font-size:13px;display:flex;flex-direction:column;gap:4px;max-width:320px}
+  #feed div{background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.12)}
+  #msg{left:50%;top:32%;transform:translateX(-50%);font-size:30px;font-weight:800;text-shadow:0 2px 20px #000;opacity:0;transition:opacity .2s;text-align:center}
+  #dmg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(255,30,30,.55) 100%);opacity:0;transition:opacity .15s}
+  #jetflame{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);font-size:12px;letter-spacing:3px;color:#7df9ff;opacity:0}
+  /* Menu */
+  #menu{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,.18),transparent 60%),linear-gradient(180deg,rgba(4,10,18,.72),rgba(4,10,18,.88));backdrop-filter:blur(3px)}
+  #card{max-width:640px;width:92%;background:rgba(8,20,32,.85);border:1px solid rgba(125,249,255,.35);border-radius:16px;padding:28px 28px 22px;box-shadow:0 20px 80px rgba(0,229,255,.15)}
+  #card h1{margin:0;font-size:44px;letter-spacing:1px;line-height:1}
+  #card h1 span{color:#00e5ff;text-shadow:0 0 24px #00e5ff}
+  #card p{opacity:.9;line-height:1.5;font-size:15px}
+  #card kbd{background:#13293d;border:1px solid #2a4a63;border-bottom-width:3px;border-radius:6px;padding:1px 7px;font-size:13px;font-family:inherit}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  button{pointer-events:auto;cursor:pointer;border:0;border-radius:10px;padding:13px 22px;font-size:17px;font-weight:800;letter-spacing:1px;color:#04121c;background:linear-gradient(180deg,#7df9ff,#00c3ff);box-shadow:0 6px 24px rgba(0,195,255,.45)}
+  button:hover{filter:brightness(1.08)}
+  button.ghost{background:transparent;color:#7df9ff;border:1px solid rgba(125,249,255,.5);box-shadow:none}
+  #loading{font-size:13px;opacity:.7;margin-top:10px}
+  #help{font-size:13px;opacity:.85}
+  #help grid{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+  @media(max-width:700px){#card h1{font-size:32px}#speed b{font-size:32px}#vitals{min-width:170px}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="dmg"></div>
+<div id="hud">
+  <div id="crosshair"></div><div id="hitmarker"></div>
+  <div id="score" class="panel"><span class="blue">◆ <span id="sBlue">0</span></span><small>FIRST TO 3 · CTF</small><span class="red"><span id="sRed">0</span> ◆</span></div>
+  <div id="flags"><span id="fBlue">◆ BLUE HOME</span><span id="fRed">◆ RED HOME</span></div>
+  <div id="speed" class="panel"><b id="spd">0</b> <span>KM/H</span><div id="ski-ind">SKIING</div><div style="font-size:11px;opacity:.7" id="alt">ALT 0m</div></div>
+  <div id="vitals" class="panel"><label>HEALTH</label><div class="bar" id="hp"><i></i></div><label>JET ENERGY</label><div class="bar" id="en"><i></i></div><div style="font-size:12px;margin-top:4px"><span id="wname">SPINFUSOR</span> · <span id="ammo">∞</span> · <span id="team">BLUE</span></div></div>
+  <div id="feed"></div>
+  <div id="msg"></div>
+  <div id="jetflame">▲ JETTING ▲</div>
+</div>
+<div id="menu">
+  <div id="card">
+    <h1>TRIBES <span>// SKI FPS</span></h1>
+    <p>Jetpack + ski CTF prototype. Huge hills, fast routes, spinfusor discs with splash. Grab the enemy flag, return it home. Bots included 3v3.</p>
+    <div id="help">
+      <div><kbd>W A S D</kbd> move · <kbd>Mouse</kbd> look · <kbd>Click</kbd> spinfusor · <kbd>Right-click / F</kbd> chaingun · <kbd>Space</kbd> jetpack · <kbd>C / Ctrl</kbd> toggle ski · <kbd>Shift</kbd> ski-hold · <kbd>E</kbd> switch weapon · <kbd>R</kbd> respawn</div>
+      <div style="margin-top:8px;opacity:.8">Tip: hold ski downhill to build 100+ km/h, then feather jets over the valley. Blue base west (−140), Red base east (+140).</div>
+    </div>
+    <div class="row">
+      <button id="start-button">▶ &nbsp;START GAME</button>
+      <button class="ghost" id="spec-button">Spectate fly</button>
+    </div>
+    <div id="loading">loading three.js…</div>
+  </div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+
+// ---------- utils ----------
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const $=id=>document.getElementById(id);
+function beep(freq=440,dur=.1,type='square',vol=.15,slide=0){
+  try{
+    const ctx=AC.ctx; if(!ctx||ctx.state==='suspended')return;
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),ctx.currentTime+dur);
+    g.gain.setValueAtTime(vol,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
+    o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function noiseBurst(dur=.4,vol=.4,low=400){
+  try{
+    const ctx=AC.ctx;if(!ctx||ctx.state==='suspended')return;
+    const len=Math.floor(ctx.sampleRate*dur),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+    const s=ctx.createBufferSource();s.buffer=buf;
+    const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=low;
+    const g=ctx.createGain();g.gain.value=vol;
+    s.connect(f).connect(g).connect(ctx.destination);s.start();
+  }catch(e){}
+}
+const AC={ctx:null,ensure(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()}};
+
+// ---------- terrain height (analytic, shared physics+mesh) ----------
+function terrainH(x,z){
+  // rolling hills + central valley + side mountains
+  let h = 10*Math.sin(x*0.018)*Math.cos(z*0.022)
+        + 6*Math.sin(x*0.045+1.7)*Math.sin(z*0.038+0.6)
+        + 3*Math.sin(x*0.11)*Math.cos(z*0.09);
+  // valley along z=0? make mid lower for fast routes
+  h -= 6*Math.exp(-(z*z)/(2*70*70));
+  // raise edges to bowl the map
+  const r=Math.sqrt(x*x+z*z);
+  h += Math.max(0,(r-160))*0.12;
+  // flatten base pads
+  h = flattenPad(x,z,-140,0,26,h,2);
+  h = flattenPad(x,z, 140,0,26,h,2);
+  return h;
+}
+function flattenPad(x,z,px,pz,rad,h,target){
+  const dx=x-px,dz=z-pz,d=Math.sqrt(dx*dx+dz*dz);
+  if(d>=rad)return h;
+  const t=(Math.cos(Math.PI*d/rad)*0.5+0.5); // 1 center -> 0 edge
+  return h*(1-t)+target*t;
+}
+function terrainNormal(x,z,out){
+  const e=0.6;
+  const hx=terrainH(x+e,z)-terrainH(x-e,z);
+  const hz=terrainH(x,z+e)-terrainH(x,z-e);
+  out.set(-hx/(2*e),1,-hz/(2*e)).normalize();return out;
+}
+
+// ---------- three setup ----------
+const app=$('app');
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+app.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87b8dd);
+scene.fog=new THREE.Fog(0x9fc3de,90,620);
+const camera=new THREE.PerspectiveCamera(90,innerWidth/innerHeight,0.1,2000);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+scene.add(new THREE.HemisphereLight(0xcfe8ff,0x3a5a3a,0.95));
+const sun=new THREE.DirectionalLight(0xfff2d8,1.6);
+sun.position.set(-120,180,60);scene.add(sun);
+// sun disc + clouds sprites (cheap)
+{
+  const cv=document.createElement('canvas');cv.width=cv.height=128;
+  const g=cv.getContext('2d');const gr=g.createRadialGradient(64,64,4,64,64,64);
+  gr.addColorStop(0,'rgba(255,250,230,1)');gr.addColorStop(.25,'rgba(255,240,200,.9)');gr.addColorStop(1,'rgba(255,240,200,0)');
+  g.fillStyle=gr;g.fillRect(0,0,128,128);
+  const tex=new THREE.CanvasTexture(cv);
+  const sm=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,fog:false});
+  const sp=new THREE.Sprite(sm);sp.scale.set(120,120,1);sp.position.set(-500,320,-300);scene.add(sp);
+}
+
+// terrain mesh
+let terrainMesh;
+{
+  const SIZE=480,SEG=150;
+  const geo=new THREE.PlaneGeometry(SIZE,SIZE,SEG,SEG);
+  geo.rotateX(-Math.PI/2);
+  const pos=geo.attributes.position,colors=new Float32Array(pos.count*3);
+  const cGrass=new THREE.Color(0x4d8a3f),cDry=new THREE.Color(0x8aa04e),cRock=new THREE.Color(0x7a7f82),cSnow=new THREE.Color(0xe8eef2),cSand=new THREE.Color(0xc2b280);
+  const c=new THREE.Color();
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i),z=pos.getZ(i);
+    const h=terrainH(x,z);pos.setY(i,h);
+    const slope=Math.abs(terrainH(x+1,z)-h)+Math.abs(terrainH(x,z+1)-h);
+    if(h>26)c.copy(cSnow).lerp(cRock,clamp(slope*.5,0,.6));
+    else if(slope>1.4)c.copy(cRock);
+    else if(h<1.5)c.copy(cSand).lerp(cGrass,.4);
+    else c.copy(cGrass).lerp(cDry,clamp((h/22)+Math.random()*.06,0,1));
+    // team tint near bases
+    if(Math.hypot(x+140,z)<30)c.lerp(new THREE.Color(0x3a7bd5),.25);
+    if(Math.hypot(x-140,z)<30)c.lerp(new THREE.Color(0xd53a3a),.25);
+    colors[i*3]=c.r;colors[i*3+1]=c.g;colors[i*3+2]=c.b;
+  }
+  geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+  geo.computeVertexNormals();
+  terrainMesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true}));
+  scene.add(terrainMesh);
+  // water disc in valley pools
+  const w=new THREE.Mesh(new THREE.CircleGeometry(60,32),new THREE.MeshLambertMaterial({color:0x2e86ab,transparent:true,opacity:.75}));
+  w.rotation.x=-Math.PI/2;w.position.set(0,0.4,120);scene.add(w);
+}
+
+// bases, towers, flags
+const bases={};
+function makeBase(side,px,color){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshLambertMaterial({color});
+  const dark=new THREE.MeshLambertMaterial({color:0x1c2b3a});
+  const pad=new THREE.Mesh(new THREE.CylinderGeometry(16,18,2,24),new THREE.MeshLambertMaterial({color:0x9aa4ab}));
+  pad.position.y=1;g.add(pad);
+  const tower=new THREE.Mesh(new THREE.BoxGeometry(6,22,6),dark);tower.position.set(0,12,-8);g.add(tower);
+  const top=new THREE.Mesh(new THREE.BoxGeometry(10,3,10),mat);top.position.set(0,24,-8);g.add(top);
+  const gen1=new THREE.Mesh(new THREE.BoxGeometry(5,4,5),dark);gen1.position.set(-8,3,6);g.add(gen1);
+  const gen2=gen1.clone();gen2.position.x=8;g.add(gen2);
+  // pole
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,12,8),new THREE.MeshLambertMaterial({color:0xdddddd}));
+  pole.position.set(0,8,4);g.add(pole);
+  const flagGeo=new THREE.PlaneGeometry(5,3,8,1);
+  const flag=new THREE.Mesh(flagGeo,new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide,emissive:color,emissiveIntensity:.25}));
+  flag.position.set(2.6,11,4);g.add(flag);
+  g.position.set(px,terrainH(px,0),0);
+  scene.add(g);
+  return {group:g,flagMesh:flag,flagBase:flagGeo.attributes.position.array.slice(),pole,color,side,x:px};
+}
+bases.blue=makeBase('blue',-140,0x2288ff);
+bases.red=makeBase('red',140,0xff3333);
+
+// decorative rocks/trees (instanced cheap)
+{
+  const rockGeo=new THREE.DodecahedronGeometry(1.6,0);
+  const rockMat=new THREE.MeshLambertMaterial({color:0x6b7280});
+  const rocks=new THREE.InstancedMesh(rockGeo,rockMat,90);
+  const m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),s=new THREE.Vector3(),p=new THREE.Vector3();
+  let n=0,tries=0;
+  while(n<90&&tries++<2000){
+    const x=(Math.random()-.5)*440,z=(Math.random()-.5)*440;
+    if(Math.hypot(x+140,z)<32||Math.hypot(x-140,z)<32)continue;
+    p.set(x,terrainH(x,z)+.4,z);e.set(Math.random()*3,Math.random()*3,0);q.setFromEuler(e);
+    const k=.6+Math.random()*2.2;s.set(k,k*(.6+Math.random()*.8),k);
+    m.compose(p,q,s);rocks.setMatrixAt(n++,m);
+  }
+  scene.add(rocks);
+  const trunkG=new THREE.CylinderGeometry(.3,.45,3,6),trunkM=new THREE.MeshLambertMaterial({color:0x5a3d24});
+  const leafG=new THREE.ConeGeometry(2.2,5,7),leafM=new THREE.MeshLambertMaterial({color:0x2f6b2f});
+  const trunks=new THREE.InstancedMesh(trunkG,trunkM,70),leafs=new THREE.InstancedMesh(leafG,leafM,70);
+  n=0;tries=0;
+  while(n<70&&tries++<3000){
+    const x=(Math.random()-.5)*400,z=(Math.random()-.5)*400;
+    const h=terrainH(x,z);
+    if(h>18||h<2||Math.hypot(x+140,z)<34||Math.hypot(x-140,z)<34)continue;
+    p.set(x,h+1.5,z);q.identity();s.setScalar(0.8+Math.random());m.compose(p,q,s);trunks.setMatrixAt(n,m);
+    p.set(x,h+5,z);m.compose(p,q,s);leafs.setMatrixAt(n,m);n++;
+  }
+  scene.add(trunks);scene.add(leafs);
+}
+
+// ---------- game state ----------
+const state={
+  started:false,spectate:false,over:false,
+  yaw:Math.PI/2,pitch:0, // face +x (toward red)
+  pos:new THREE.Vector3(-112,0,14),vel:new THREE.Vector3(),
+  hp:100,energy:100,ski:true,jetting:false,onGround:false,
+  weapon:'spin',spinCd:0,chainCd:0,chainAmmo:200,
+  team:'blue',score:{blue:0,red:0},
+  flags:{blue:{at:'home',pos:new THREE.Vector3(-140,0,0),carrier:null,dropT:0},red:{at:'home',pos:new THREE.Vector3(140,0,0),carrier:null,dropT:0}},
+  kills:[],respawnT:0,time:0
+};
+state.pos.y=terrainH(state.pos.x,state.pos.z)+1.7;
+
+const input={f:0,b:0,l:0,r:0,jet:false,skiHold:false,fire:false,chain:false};
+
+// player mesh for spectate/third? FPS so invisible, but add gun viewmodel
+const gun=new THREE.Group();
+{
+  const bm=new THREE.MeshLambertMaterial({color:0x16222e});
+  const am=new THREE.MeshLambertMaterial({color:0x00e5ff,emissive:0x00e5ff,emissiveIntensity:.6});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.14,.16,.7),bm);gun.add(body);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.11,.03,8,18),am);ring.position.set(0,.05,-.4);gun.add(ring);
+  const fin=new THREE.Mesh(new THREE.BoxGeometry(.04,.2,.2),bm);fin.position.set(0,-.02,-.1);gun.add(fin);
+  gun.position.set(.3,-.26,-.85);
+  gun.scale.setScalar(0.65);
+  camera.add(gun);scene.add(camera);
+  // chaingun barrels (hidden unless active)
+  var chainMesh=new THREE.Group();
+  for(let i=0;i<3;i++){const b=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.5,6),bm);b.rotation.x=Math.PI/2;b.position.set((i-1)*.04,0,0);chainMesh.add(b);}
+  chainMesh.position.set(.3,-.26,-.85);chainMesh.scale.setScalar(0.65);chainMesh.visible=false;camera.add(chainMesh);
+}
+
+// projectiles, tracers, particles, bots
+const discs=[],tracers=[],parts=[],bots=[];
+const discGeo=new THREE.SphereGeometry(.32,12,10);
+const discMat=new THREE.MeshBasicMaterial({color:0x9ffcff});
+const discLight=new THREE.PointLight(0x00e5ff,2,18);
+function spawnDisc(origin,dir,owner,speed=85,dmg=75){
+  const mesh=new THREE.Mesh(discGeo,discMat);
+  mesh.position.copy(origin);
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),color:0x00e5ff,transparent:true,depthWrite:false}));
+  glow.scale.set(2.4,2.4,1);mesh.add(glow);
+  scene.add(mesh);
+  discs.push({mesh,vel:dir.clone().multiplyScalar(speed),life:5,owner,dmg});
+  if(owner===playerRef){beep(220,.18,'sawtooth',.2,-160);noiseBurst(.15,.25,2000);gunKick=.06;}
+}
+let glowCache=null;
+function glowTex(){if(glowCache)return glowCache;const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d');const gr=g.createRadialGradient(32,32,2,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.4,'rgba(125,249,255,.8)');gr.addColorStop(1,'rgba(0,229,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);glowCache=new THREE.CanvasTexture(cv);return glowCache;}
+function explode(p,dmg,owner){
+  noiseBurst(.5,.5,900);beep(90,.35,'sine',.35,-40);
+  const flash=new THREE.PointLight(0x66f6ff,8,30);flash.position.copy(p);scene.add(flash);
+  setTimeout(()=>scene.remove(flash),120);
+  for(let i=0;i<14;i++){
+    const s=new THREE.Mesh(new THREE.BoxGeometry(.22,.22,.22),new THREE.MeshBasicMaterial({color:i%3?0x7df9ff:0xffffff}));
+    s.position.copy(p);scene.add(s);
+    parts.push({mesh:s,vel:new THREE.Vector3((Math.random()-.5)*26,Math.random()*18,(Math.random()-.5)*26),life:.6+Math.random()*.4});
+  }
+  // ring
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.5,.12,8,24),new THREE.MeshBasicMaterial({color:0xbffbff,transparent:true,opacity:.9}));
+  ring.position.copy(p);ring.lookAt(camera.position);scene.add(ring);
+  parts.push({mesh:ring,vel:new THREE.Vector3(),life:.35,grow:22});
+  // splash damage
+  damageInRadius(p,dmg,7,owner);
+  // terrain scorch? skip
+}
+function damageInRadius(p,dmg,radius,owner){
+  const hurt=(ent,pos,r)=>{
+    const d=pos.distanceTo(p);
+    if(d<radius+r){
+      const f=1-d/(radius+r)*.6;
+      dealDamage(ent,dmg*f,owner,p);
+    }
+  };
+  hurt(playerRef,state.pos,.8);
+  for(const b of bots)hurt(b,b.mesh.position,.9);
+}
+const playerRef={isPlayer:true,mesh:null,name:'YOU',team:'blue',hp:100,alive:true};
+function dealDamage(ent,amt,owner,fromPos){
+  if(state.over)return;
+  if(ent.isPlayer){
+    if(!state.started||state.respawnT>0)return;
+    if(owner&&owner.team===state.team)return; // no friendly fire from bots of same team
+    state.hp-=amt;
+    $('dmg').style.opacity=clamp(amt/60,.2,.95);
+    setTimeout(()=>$('dmg').style.opacity=0,180);
+    beep(140,.12,'square',.18,-60);
+    if(state.hp<=0)killPlayer(owner);
+  }else{
+    if(!ent.alive)return;
+    if(owner&&owner.team===ent.team)return;
+    ent.hp-=amt;
+    ent.flash=0.1;
+    if(owner===playerRef){$('hitmarker').classList.remove('show');void $('hitmarker').offsetWidth;$('hitmarker').classList.add('show');beep(900,.06,'square',.12);}
+    if(ent.hp<=0)killBot(ent,owner);
+  }
+}
+function feed(html){const d=document.createElement('div');d.innerHTML=html;$('feed').prepend(d);while($('feed').children.length>5)$('feed').lastChild.remove();setTimeout(()=>d.remove(),6000);}
+function centerMsg(t,ms=2200){const m=$('msg');m.textContent=t;m.style.opacity=1;clearTimeout(m._t);m._t=setTimeout(()=>m.style.opacity=0,ms);}
+function killPlayer(owner){
+  state.respawnT=3;state.hp=0;
+  dropFlag(state.team==='blue'?'blue':'blue'); // drop any carried enemy flag
+  dropFlag('red');
+  // actually drop carried
+  for(const k of ['blue','red']){const f=state.flags[k];if(f.carrier===playerRef){f.carrier=null;f.at='dropped';f.pos.copy(state.pos);f.pos.y=terrainH(f.pos.x,f.pos.z)+1;f.dropT=30;}}
+  feed(`<b style="color:${owner?'#ff8080':'#aaa'}">${owner?owner.name:'wilderness'}</b> ⟂ <b style="color:#5ecbff">YOU</b>`);
+  centerMsg(owner?`Killed by ${owner.name}`:'You died',1800);
+  noiseBurst(.6,.4,500);
+}
+function killBot(bot,owner){
+  bot.alive=false;bot.respawnT=4+Math.random()*2;bot.hp=0;
+  bot.mesh.visible=false;
+  // drop flag if carrying
+  for(const k of ['blue','red']){const f=state.flags[k];if(f.carrier===bot){f.carrier=null;f.at='dropped';f.pos.copy(bot.mesh.position);f.pos.y=terrainH(f.pos.x,f.pos.z)+1;f.dropT=30;}}
+  const on=owner===playerRef?'YOU':(owner?owner.name:'???');
+  const col=owner&&owner.team==='blue'?'#5ecbff':'#ff8080';
+  feed(`<b style="color:${col}">${on}</b> ⟂ <b>${bot.name}</b>`);
+  if(owner===playerRef){centerMsg(`+1 kill — ${bot.name}`,1200);beep(660,.12,'square',.15,220);}
+  explode(bot.mesh.position.clone(),0,null); // visual only (0 dmg)
+}
+
+// ---------- bots ----------
+const BOT_NAMES=['Vector','SkiMask','Turbo','Nyx','Falcon','Rogue','Blitz','Havoc'];
+function spawnBots(){
+  const teams=['blue','blue','blue','red','red','red'];
+  teams.forEach((team,i)=>{
+    const color=team==='blue'?0x2a9df4:0xf44336;
+    const g=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.CapsuleGeometry(.55,.9,4,10),new THREE.MeshLambertMaterial({color}));
+    body.position.y=1.1;g.add(body);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.34,12,10),new THREE.MeshLambertMaterial({color:0xf2d7b6}));
+    head.position.y=2.2;g.add(head);
+    const visor=new THREE.Mesh(new THREE.BoxGeometry(.5,.16,.2),new THREE.MeshBasicMaterial({color:0x00e5ff}));
+    visor.position.set(0,2.22,.28);g.add(visor);
+    // jet glow
+    const jet=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),color:0xffaa33,transparent:true,depthWrite:false}));
+    jet.scale.set(1.4,2.2,1);jet.position.y=.2;jet.visible=false;g.add(jet);
+    // name handled by feed only
+    const home=team==='blue'?-140:140;
+    g.position.set(home+(Math.random()-.5)*20,0,(Math.random()-.5)*30);
+    g.position.y=terrainH(g.position.x,g.position.z);
+    scene.add(g);
+    bots.push({name:BOT_NAMES[i% BOT_NAMES.length]+(team==='red'?' [R]':''),
+      team,mesh:g,jet,vel:new THREE.Vector3(),hp:100,alive:true,respawnT:0,
+      yaw:Math.random()*6.28,fireCd:1+Math.random()*2,ski:true,energy:100,mode:Math.random()<.5?'cap':'def',stuck:0,flash:0});
+  });
+}
+
+// flag meshes
+const flagMeshes={};
+function makeCarryFlag(color){
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(3,1.8),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide}));
+  return m;
+}
+flagMeshes.blue=makeCarryFlag(0x2288ff);flagMeshes.red=makeCarryFlag(0xff3333);
+scene.add(flagMeshes.blue);scene.add(flagMeshes.red);
+
+// ---------- input ----------
+let locked=false;
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===renderer.domElement;});
+document.addEventListener('mousemove',e=>{
+  if(!locked||!state.started||state.respawnT>0)return;
+  state.yaw-=e.movementX*0.0022;
+  state.pitch=clamp(state.pitch-e.movementY*0.0022,-1.45,1.45);
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='KeyW')input.f=1;if(e.code==='KeyS')input.b=1;
+  if(e.code==='KeyA')input.l=1;if(e.code==='KeyD')input.r=1;
+  if(e.code==='Space'){input.jet=true;e.preventDefault();}
+  if(e.code==='ShiftLeft'||e.code==='ShiftRight')input.skiHold=true;
+  if(e.code==='KeyC'||e.code==='ControlLeft'){state.ski=!state.ski;beep(state.ski?520:260,.07,'square',.12);}
+  if(e.code==='KeyE')toggleWeapon();
+  if(e.code==='KeyR'&&state.started)killPlayer(null);
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='KeyW')input.f=0;if(e.code==='KeyS')input.b=0;
+  if(e.code==='KeyA')input.l=0;if(e.code==='KeyD')input.r=0;
+  if(e.code==='Space')input.jet=false;
+  if(e.code==='ShiftLeft'||e.code==='ShiftRight')input.skiHold=false;
+});
+renderer.domElement.addEventListener('mousedown',e=>{
+  if(!state.started)return;
+  AC.ensure();
+  if(!locked){try{renderer.domElement.requestPointerLock()}catch(err){}}
+  if(e.button===0)input.fire=true;
+  if(e.button===2)input.chain=true;
+});
+addEventListener('mouseup',e=>{if(e.button===0)input.fire=false;if(e.button===2)input.chain=false;});
+addEventListener('contextmenu',e=>e.preventDefault());
+function toggleWeapon(){state.weapon=state.weapon==='spin'?'chain':'spin';$('wname').textContent=state.weapon==='spin'?'SPINFUSOR':'CHAINGUN';gun.visible=state.weapon==='spin';chainMesh.visible=state.weapon!=='spin';beep(500,.08,'square',.12,200);}
+// touch (basic)
+let touchMove=null,touchLook=null;
+renderer.domElement.addEventListener('touchstart',e=>{AC.ensure();},{passive:true});
+
+// ---------- start ----------
+let gunKick=0;
+$('start-button').onclick=()=>{
+  AC.ensure();startGame(false);
+  try{renderer.domElement.requestPointerLock()}catch(e){}
+};
+$('spec-button').onclick=()=>{AC.ensure();startGame(true);};
+function startGame(spec){
+  state.started=true;state.spectate=spec;
+  $('menu').style.display='none';
+  centerMsg(spec?'Spectating — click to play':'Capture the RED flag!  First to 3',2600);
+  beep(440,.12,'square',.15,440);
+  if(!bots.length)spawnBots();
+  // reset player to base
+  state.pos.set(-112,terrainH(-112,14)+1.7,14);state.vel.set(0,0,0);state.hp=100;state.energy=100;
+  state.yaw=Math.PI/2;state.pitch=0;
+}
+$('loading').textContent='three.js r160 ready · click START GAME';
+
+// ---------- physics + AI ----------
+const tmpN=new THREE.Vector3(),tmpF=new THREE.Vector3(),tmpR=new THREE.Vector3(),tmpD=new THREE.Vector3();
+function moveEntity(ent,pos,vel,dt,opts){
+  // opts: {ski,jet,thrust,control}
+  const g=terrainH(pos.x,pos.z);
+  const onGround=pos.y<=g+1.75;
+  tmpN.copy(terrainNormal(pos.x,pos.z,tmpF));
+  if(onGround){
+    pos.y=g+1.7;
+    if(vel.y<0)vel.y=0;
+    // slope accel
+    const slopeX=-(1-tmpN.y)*tmpN.x*30, slopeZ=-(1-tmpN.y)*tmpN.z*30;
+    vel.x+=slopeX*dt;vel.z+=slopeZ*dt;
+    // ground steering (weaker than air control when skiing, strong when walking)
+    const ctl=opts.ski?0.35:1.0;
+    vel.x+=opts.ax*ctl*dt;vel.z+=opts.az*ctl*dt;
+    const fr=opts.ski?0.12:4.5;
+    const damp=Math.exp(-fr*dt);
+    vel.x*=damp;vel.z*=damp;
+    if(opts.jet&&opts.energy>0){vel.y+=28*dt;opts.energy-=32*dt;opts.jetting=true;}
+  }else{
+    vel.y-=22*dt;
+    if(opts.jet&&opts.energy>0){vel.y+=32*dt;opts.energy-=30*dt;opts.jetting=true;}
+    else opts.jetting=false;
+    // air control
+    vel.x+=opts.ax*dt;vel.z+=opts.az*dt;
+    vel.x*=Math.exp(-0.08*dt);vel.z*=Math.exp(-0.08*dt);
+  }
+  if(!onGround&&!opts.jet)opts.energy=Math.min(100,opts.energy+18*dt);
+  if(onGround)opts.energy=Math.min(100,opts.energy+(opts.ski?26:14)*dt);
+  // clamp horizontal
+  const hs=Math.hypot(vel.x,vel.z);
+  const max=opts.ski?70:14;
+  if(hs>max){vel.x*=max/hs;vel.z*=max/hs;}
+  pos.x=clamp(pos.x+vel.x*dt,-235,235);
+  pos.z=clamp(pos.z+vel.z*dt,-235,235);
+  pos.y+=vel.y*dt;
+  const ng=terrainH(pos.x,pos.z);
+  if(pos.y<ng+1.7){pos.y=ng+1.7;if(vel.y<-25&&ent.isPlayer){dealDamage(playerRef,-vel.y*.4,null);}if(vel.y<0)vel.y*=-0.05;}
+  return onGround;
+}
+function updatePlayer(dt){
+  if(state.respawnT>0){
+    state.respawnT-=dt;
+    if(state.respawnT<=0){state.pos.set(-112,terrainH(-112,14)+1.7,14);state.vel.set(0,0,0);state.hp=100;state.energy=100;centerMsg('Respawned',1000);}
+    return;
+  }
+  const sy=Math.sin(state.yaw),cy=Math.cos(state.yaw);
+  // wish dir: forward is +x when yaw=pi/2? define forward=(cos(yaw)?) Let's use: forward = ( -sin(yaw)? ) — pick conventional FPS:
+  const fx=-Math.sin(state.yaw),fz=-Math.cos(state.yaw);
+  const rx=Math.cos(state.yaw),rz=-Math.sin(state.yaw);
+  // Wait: yaw=pi/2 should face +x. -sin(pi/2)=-1 → faces -x. Flip:
+  const F={x:Math.cos(state.yaw),z:-Math.sin(state.yaw)}; // yaw pi/2 → (0,-1)? hmm.
+  // Simpler: compute so initial yaw faces red base (+x):
+  // forward=(cos(yaw)*? ). Let's just set forward=(Math.sin(yaw),0,Math.cos(yaw)) and init yaw=pi/2 → (1,0,0)=+x. Good.
+  const fwx=Math.sin(state.yaw),fwz=Math.cos(state.yaw);
+  const rwx=Math.sin(state.yaw-Math.PI/2),rwz=Math.cos(state.yaw-Math.PI/2);
+  let mx=(input.f-input.b),mz=(input.r-input.l);
+  // combine
+  const ax=(fwx*mx+rwx*mz),az=(fwz*mx+rwz*mz);
+  const skiActive=state.ski||input.skiHold;
+  const accel=state.onGround?26:14;
+  const norm=Math.hypot(ax,az)||1;
+  const o={ski:skiActive,jet:input.jet,energy:state.energy,ax:ax/norm*accel*(mx||mz?1:0),az:az/norm*accel*(mx||mz?1:0),jetting:false};
+  state.onGround=moveEntity(playerRef,state.pos,state.vel,dt,o);
+  state.energy=o.energy;state.jetting=o.jetting;state.ski=state.ski; // ski toggle persists
+  // camera
+  camera.position.copy(state.pos);
+  camera.rotation.set(0,0,0);camera.rotation.order='YXZ';
+  camera.rotation.y=Math.PI/2-state.yaw+Math.PI/2; // convert so forward matches
+  // Let's directly: camera looks along (fwx, pitch, fwz)
+  // Use lookAt:
+  camera.rotation.order='YXZ';
+  camera.rotation.y=-state.yaw+Math.PI/2+Math.PI; // tuned below by testing math
+  // Easier robust: set yaw such that camera forward = (sin(yaw),0,cos(yaw)). Three camera forward is -Z. rotation.y = yaw+PI gives forward (sin(yaw),0,cos(yaw))? verify: rotation.y=θ → forward=(-sinθ,0,-cosθ). Want (sin(yaw),0,cos(yaw)) → -sinθ=sin(yaw), -cosθ=cos(yaw) → θ=yaw+PI. Yes.
+  camera.rotation.y=state.yaw+Math.PI;
+  camera.rotation.x=state.pitch;
+  camera.rotation.z=0;
+  gunKick=Math.max(0,gunKick-dt*0.5);
+  gun.position.z=-.85+gunKick;chainMesh.position.z=-.85+gunKick;
+  gun.rotation.x=gunKick*4;
+  $('jetflame').style.opacity=state.jetting?1:0;
+  // weapons
+  state.spinCd-=dt;state.chainCd-=dt;
+  if(input.fire&&state.weapon==='spin'&&state.spinCd<=0){
+    state.spinCd=0.75;
+    tmpD.set(Math.sin(state.yaw)*Math.cos(state.pitch),Math.sin(state.pitch),Math.cos(state.yaw)*Math.cos(state.pitch)).normalize();
+    // add inheritance: + player vel *0.5 (classic)
+    const org=state.pos.clone().add(tmpD.clone().multiplyScalar(1.2));org.y-=0.1;
+    spawnDisc(org,tmpD,playerRef,85+state.vel.dot(tmpD)*0.5,80);
+  }
+  if((input.chain||(input.fire&&state.weapon==='chain'))&&state.chainCd<=0&&state.chainAmmo>0){
+    state.chainCd=0.11;state.chainAmmo--;
+    fireChaingun(playerRef,state.pos,camera);
+  }
+  // regen hp slowly
+  state.hp=Math.min(100,state.hp+4*dt);
+}
+function fireChaingun(owner,from,cam){
+  beep(180+Math.random()*60,.07,'square',.14,-40);
+  const spread=owner.isPlayer?0.02:0.06;
+  tmpD.set(0,0,-1).applyQuaternion(cam?cam.quaternion:owner.mesh.quaternion);
+  tmpD.x+=(Math.random()-.5)*spread*2;tmpD.y+=(Math.random()-.5)*spread*2;tmpD.z+=(Math.random()-.5)*spread*2;tmpD.normalize();
+  const end=from.clone().add(tmpD.clone().multiplyScalar(120));
+  // ray vs terrain + bots/player
+  let bestT=120,hitEnt=null;
+  const testEnt=(pos,r)=>{
+    const rel=pos.clone().sub(from);const t=rel.dot(tmpD);
+    if(t<1||t>bestT)return;
+    const perp=from.clone().add(tmpD.clone().multiplyScalar(t)).distanceTo(pos);
+    if(perp<r+0.6){bestT=t;hitEnt={pos,t};}
+    return hitEnt;
+  };
+  // we only need entity hits; terrain check:
+  for(let t=2;t<120;t+=4){
+    const p=from.clone().add(tmpD.clone().multiplyScalar(t));
+    if(p.y<terrainH(p.x,p.z)){end.copy(p);bestT=t;hitEnt=null;break;}
+  }
+  // entities
+  const candidates=owner.isPlayer?bots:[playerRef,...bots.filter(b=>b!==owner&&b.team!==owner.team)];
+  let hitB=null,hitT=bestT;
+  for(const c of candidates){
+    const p=c.isPlayer?state.pos:c.mesh.position.clone().add(new THREE.Vector3(0,1.2,0));
+    if(c.isPlayer&&c===owner)continue;
+    if(!c.isPlayer&&!c.alive)continue;
+    if(c.team===owner.team)continue;
+    const rel=p.clone().sub(from);const t=rel.dot(tmpD);
+    if(t<1||t>hitT)continue;
+    const perp=from.clone().add(tmpD.clone().multiplyScalar(t)).distanceTo(p);
+    if(perp<1.2){hitT=t;hitB=c;}
+  }
+  // tracer visual
+  const g=new THREE.BufferGeometry().setFromPoints([from.clone().add(tmpD.clone().multiplyScalar(1)),from.clone().add(tmpD.clone().multiplyScalar(hitB?hitT:bestT))]);
+  const line=new THREE.Line(g,new THREE.LineBasicMaterial({color:0xffe08a,transparent:true,opacity:.9}));
+  scene.add(line);tracers.push({mesh:line,life:.08});
+  if(hitB)dealDamage(hitB.isPlayer?playerRef:hitB,12,owner,from);
+  else if(bestT<119){for(let i=0;i<3;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,.15),new THREE.MeshBasicMaterial({color:0xffcc66}));s.position.copy(end);scene.add(s);parts.push({mesh:s,vel:new THREE.Vector3((Math.random()-.5)*8,Math.random()*6,(Math.random()-.5)*8),life:.4});}}
+  if(owner.isPlayer)$('ammo').textContent=state.chainAmmo;
+  if(owner.isPlayer&&state.chainAmmo<=0){toggleWeapon();state.chainAmmo=200;$('ammo').textContent='∞';}
+}
+
+function updateBots(dt){
+  for(const b of bots){
+    if(!b.alive){
+      b.respawnT-=dt;
+      if(b.respawnT<=0){
+        const hx=b.team==='blue'?-140:140;
+        b.mesh.position.set(hx+(Math.random()-.5)*10,0,(Math.random()-.5)*16);
+        b.mesh.position.y=terrainH(b.mesh.position.x,b.mesh.position.z)+0;
+        b.hp=100;b.alive=true;b.vel.set(0,0,0);b.energy=100;b.mesh.visible=true;
+      }
+      continue;
+    }
+    // AI target: enemy flag or own flag return or chase carrier
+    const myFlag=state.flags[b.team],enFlag=state.flags[b.team==='blue'?'red':'blue'];
+    let tx,tz;
+    if(enFlag.carrier===b){const home=b.team==='blue'?-140:140;tx=home;tz=0;} // return home
+    else if(myFlag.at==='dropped'){tx=myFlag.pos.x;tz=myFlag.pos.z;}
+    else if(enFlag.at!=='carried-bymate'&&b.mode==='cap'){tx=enFlag.pos.x;tz=enFlag.pos.z;}
+    else{
+      // defend or hunt nearest enemy
+      let best=null,bd=1e9;
+      const foes=b.team==='blue'?bots.filter(o=>o.team==='red'&&o.alive):bots.filter(o=>o.team==='blue'&&o.alive);
+      if(b.team==='red'&&state.respawnT<=0){const d=b.mesh.position.distanceTo(state.pos);if(d<bd){bd=d;best='player';}}
+      for(const f of foes){const d=b.mesh.position.distanceTo(f.mesh.position);if(d<bd){bd=d;best=f;}}
+      if(best==='player'){tx=state.pos.x;tz=state.pos.z;}
+      else if(best){tx=best.mesh.position.x;tz=best.mesh.position.z;}
+      else{tx=(b.team==='blue'?140:-140);tz=0;}
+    }
+    const dx=tx-b.mesh.position.x,dz=tz-b.mesh.position.z;
+    const want=Math.atan2(dx,dz);
+    let dy=want-b.yaw;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;
+    b.yaw+=clamp(dy,-2.5*dt,2.5*dt);
+    const dist=Math.hypot(dx,dz);
+    const fwx=Math.sin(b.yaw),fwz=Math.cos(b.yaw);
+    const speedWant=dist>8?1:0.3;
+    const o={ski:true,jet:false,energy:b.energy,ax:fwx*16*speedWant,az:fwz*16*speedWant,jetting:false};
+    // jet if uphill or stuck or random hop, or flying route when capping
+    const aheadH=terrainH(b.mesh.position.x+fwx*6,b.mesh.position.z+fwz*6);
+    const curH=terrainH(b.mesh.position.x,b.mesh.position.z);
+    if(aheadH>curH+2||b.stuck>0.6||(b.mode==='cap'&&dist>40&&Math.sin(state.time*0.7+b.yaw*3)>0.2))o.jet=true;
+    const prevX=b.mesh.position.x,prevZ=b.mesh.position.z;
+    // bots ride at y+0 (feet). moveEntity expects eye height; wrap: use temp
+    const eye=b.mesh.position.clone();eye.y+=1.7;
+    const vel=b.vel;
+    moveEntity(b,eye,vel,dt,o);
+    b.energy=o.energy;
+    b.mesh.position.set(eye.x,eye.y-1.7,eye.z);
+    b.jet.visible=!!o.jetting;
+    b.mesh.rotation.y=b.yaw;
+    const moved=Math.hypot(b.mesh.position.x-prevX,b.mesh.position.z-prevZ);
+    b.stuck=moved<1.2*dt?b.stuck+dt:0;
+    if(b.flash>0){b.flash-=dt;}
+    // shooting
+    b.fireCd-=dt;
+    const tgt=b.team==='blue'?(bots.find(o=>o.team==='red'&&o.alive)):null;
+    let aimP=null;
+    if(b.team==='red'&&state.respawnT<=0&&b.mesh.position.distanceTo(state.pos)<90)aimP=state.pos;
+    else{
+      let bd2=90;for(const f of bots){if(f.team===b.team||!f.alive)continue;const d=b.mesh.position.distanceTo(f.mesh.position);if(d<bd2){bd2=d;aimP=f.mesh.position.clone().add(new THREE.Vector3(0,1.2,0));}}}
+    if(aimP&&b.fireCd<=0){
+      b.fireCd=1.1+Math.random()*1.6;
+      const from=b.mesh.position.clone();from.y+=1.6;
+      tmpD.copy(aimP).sub(from).normalize();
+      // lead + inaccuracy
+      tmpD.x+=(Math.random()-.5)*.12;tmpD.y+=(Math.random()-.5)*.08+0.03;tmpD.z+=(Math.random()-.5)*.12;tmpD.normalize();
+      if(Math.random()<.6)spawnDisc(from,tmpD,b,70,60);
+      else{ // chaingun tracer from bot
+        const fakeCam={quaternion:new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(from,aimP,new THREE.Vector3(0,1,0)))};
+        // build quaternion that points -Z toward aim
+        const m=new THREE.Matrix4().lookAt(from,aimP,new THREE.Vector3(0,1,0));
+        fakeCam.quaternion.setFromRotationMatrix(m);
+        fireChaingun(b,from,fakeCam);
+      }
+    }
+    // flag pickup/capture handled globally
+  }
+}
+
+function updateFlags(dt){
+  for(const k of ['blue','red']){
+    const f=state.flags[k];
+    if(f.carrier){
+      const cp=f.carrier.isPlayer?state.pos:f.carrier.mesh.position;
+      f.pos.set(cp.x,cp.y,cp.z);
+    }else if(f.at==='dropped'){
+      f.dropT-=dt;
+      if(f.dropT<=0){f.at='home';feed(`◆ ${k} flag returned`);}
+    }
+    const home=k==='blue'?-140:140;
+    if(f.at==='home')f.pos.set(home,terrainH(home,0)+2,0);
+    const mesh=flagMeshes[k];
+    if(f.carrier){
+      const cp=f.carrier.isPlayer?state.pos.clone():f.carrier.mesh.position.clone().add(new THREE.Vector3(0,2.6,0));
+      mesh.position.copy(cp);
+      mesh.visible=f.carrier.isPlayer?false:true; // hide own carried? show all for simplicity except player
+      if(f.carrier.isPlayer)mesh.visible=false;
+      else mesh.visible=true;
+      if(f.carrier.isPlayer){/* HUD indicator */}
+    }else{
+      mesh.position.copy(f.pos);mesh.position.y+=1.5;mesh.visible=true;
+    }
+    mesh.rotation.y+=dt*1.5;
+  }
+  // pickups: player
+  if(state.respawnT<=0&&state.started){
+    for(const k of ['blue','red']){
+      const f=state.flags[k];
+      if(f.carrier)continue;
+      const d=state.pos.distanceTo(f.pos);
+      if(d<3.2){
+        if(k!==state.team){f.carrier=playerRef;f.at='carried';centerMsg('ENEMY FLAG TAKEN — return home!',2000);beep(700,.15,'square',.2,300);feed('<b style="color:#5ecbff">YOU</b> took the <b style="color:#ff8080">RED flag</b>');}
+        else if(k===state.team&&f.at==='dropped'){f.at='home';centerMsg('Flag returned',1400);beep(600,.1,'square',.15);}
+      }
+    }
+    // capture: player carries red and near blue home with blue home
+    const rf=state.flags.red;
+    if(rf.carrier===playerRef){
+      const d=Math.hypot(state.pos.x+140,state.pos.z);
+      if(d<10&&state.flags.blue.at==='home'){rf.carrier=null;rf.at='home';state.score.blue++;$('sBlue').textContent=state.score.blue;centerMsg('★ FLAG CAPTURED ★  '+state.score.blue+' - '+state.score.red,2600);beep(880,.3,'square',.25,440);noiseBurst(.3,.3,1500);checkWin();}
+    }
+  }
+  // bots pickups/captures
+  for(const b of bots){
+    if(!b.alive)continue;
+    for(const k of ['blue','red']){
+      const f=state.flags[k];
+      if(f.carrier)continue;
+      const d=b.mesh.position.distanceTo(f.pos);
+      if(d<3.2){
+        if(k!==b.team){f.carrier=b;f.at='carried';feed(`<b>${b.name}</b> took <b>${k}</b> flag`);}
+        else if(f.at==='dropped'){f.at='home';feed(`<b>${b.name}</b> returned ${k} flag`);}
+      }
+    }
+    // capture
+    const ef=state.flags[b.team==='blue'?'red':'blue'];
+    const hf=state.flags[b.team];
+    if(ef.carrier===b){
+      const hx=b.team==='blue'?-140:140;
+      if(Math.hypot(b.mesh.position.x-hx,b.mesh.position.z)<10&&hf.at==='home'){
+        ef.carrier=null;ef.at='home';state.score[b.team]++;$(b.team==='blue'?'sBlue':'sRed').textContent=state.score[b.team];
+        feed(`<b>${b.name}</b> CAPTURED! ${state.score.blue} - ${state.score.red}`);centerMsg(`${b.team.toUpperCase()} CAPTURES — ${state.score.blue} : ${state.score.red}`,2000);
+        checkWin();
+      }
+    }
+  }
+  $('fBlue').textContent='◆ BLUE '+(flagStatus('blue'));
+  $('fRed').textContent='◆ RED '+(flagStatus('red'));
+  $('fBlue').style.color=state.flags.blue.at==='home'?'#5ecbff':'#ffdd55';
+  $('fRed').style.color=state.flags.red.at==='home'?'#ff8080':'#ffdd55';
+}
+function flagStatus(k){
+  const f=state.flags[k];
+  if(f.carrier)return f.carrier.isPlayer?'YOU HAVE IT':'TAKEN ('+f.carrier.name+')';
+  if(f.at==='dropped')return 'DROPPED';
+  return 'HOME';
+}
+function checkWin(){
+  if(state.score.blue>=3||state.score.red>=3){
+    state.over=true;
+    centerMsg(state.score.blue>=3?'★ BLUE WINS ★':'★ RED WINS ★',8000);
+    feed(state.score.blue>=3?'<b style="color:#5ecbff">BLUE TEAM WINS</b>':'<b style="color:#ff8080">RED TEAM WINS</b>');
+    setTimeout(()=>{if(confirm('Game over — play again?'))location.reload()},4000);
+  }
+}
+
+function updateDiscs(dt){
+  for(let i=discs.length-1;i>=0;i--){
+    const d=discs[i];
+    d.life-=dt;
+    d.vel.y-=6*dt; // slight arc
+    d.mesh.position.addScaledVector(d.vel,dt);
+    // trail
+    if(Math.random()<.6){const t=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.12),new THREE.MeshBasicMaterial({color:0x7df9ff,transparent:true,opacity:.8}));t.position.copy(d.mesh.position);scene.add(t);parts.push({mesh:t,vel:new THREE.Vector3(),life:.3,shrink:true});}
+    let hit=false;
+    const p=d.mesh.position;
+    if(p.y<terrainH(p.x,p.z)+0.2){explode(p.clone(),d.dmg,d.owner);scene.remove(d.mesh);discs.splice(i,1);continue;}
+    // vs player
+    if(d.owner.team!==state.team&&state.respawnT<=0){
+      if(p.distanceTo(state.pos)<1.4){explode(p.clone(),d.dmg,d.owner);scene.remove(d.mesh);discs.splice(i,1);continue;}
+    }
+    // vs bots
+    for(const b of bots){
+      if(!b.alive||b===d.owner||b.team===d.owner.team)continue;
+      tmpD.copy(b.mesh.position);tmpD.y+=1.2;
+      if(p.distanceTo(tmpD)<1.6){explode(p.clone(),d.dmg,d.owner);scene.remove(d.mesh);discs.splice(i,1);hit=true;break;}
+    }
+    if(hit)continue;
+    // vs base structures: simple radius
+    if(d.life<=0){explode(p.clone(),d.dmg,d.owner);scene.remove(d.mesh);discs.splice(i,1);continue;}
+    if(Math.abs(p.x)>245||Math.abs(p.z)>245){scene.remove(d.mesh);discs.splice(i,1);}
+  }
+  // tracers
+  for(let i=tracers.length-1;i>=0;i--){tracers[i].life-=dt;if(tracers[i].life<=0){scene.remove(tracers[i].mesh);tracers.splice(i,1);}}
+  // particles
+  for(let i=parts.length-1;i>=0;i--){
+    const pt=parts[i];pt.life-=dt;
+    if(pt.life<=0){scene.remove(pt.mesh);parts.splice(i,1);continue;}
+    if(pt.grow){pt.mesh.scale.multiplyScalar(1+pt.grow*dt);pt.mesh.material.opacity=Math.max(0,pt.life*2);}
+    else{
+      pt.vel.y-=20*dt;pt.mesh.position.addScaledVector(pt.vel,dt);
+      if(pt.shrink)pt.mesh.scale.multiplyScalar(0.94);
+    }
+  }
+}
+
+// flag wave
+function waveFlags(t){
+  for(const k of ['blue','red']){
+    const b=bases[k];
+    const arr=b.flagMesh.geometry.attributes.position;
+    const base=b.flagBase;
+    for(let i=0;i<arr.count;i++){
+      const x=base[i*3];
+      arr.setZ(i,Math.sin(t*4+x*1.5)*0.3*(x/5+0.5));
+    }
+    arr.needsUpdate=true;
+  }
+}
+
+// spectate cam
+let specT=0;
+function updateSpectate(dt){
+  specT+=dt*0.05;
+  const cx=Math.sin(specT)*180,cz=Math.cos(specT*0.7)*180;
+  camera.position.set(cx,terrainH(cx,cz)+40,cz);
+  camera.lookAt(0,5,0);
+}
+
+// HUD
+function updateHUD(){
+  const spd=Math.hypot(state.vel.x,state.vel.z)*3.6;
+  $('spd').textContent=Math.round(spd);
+  $('alt').textContent='ALT '+Math.round(state.pos.y-terrainH(state.pos.x,state.pos.z))+'m';
+  const skiActive=state.ski||input.skiHold;
+  $('ski-ind').textContent=skiActive?(state.onGround?'SKIING':'AIRBORNE'):'WALK';
+  $('ski-ind').className=skiActive?'':'off';
+  document.querySelector('#hp>i').style.width=clamp(state.hp,0,100)+'%';
+  document.querySelector('#en>i').style.width=clamp(state.energy,0,100)+'%';
+  if(state.respawnT>0)centerMsgOnce('Respawning in '+Math.ceil(state.respawnT)+'…');
+}
+let lastCenter='';
+function centerMsgOnce(t){if($('msg').style.opacity!=1||lastCenter!==t){/* avoid fight */}}
+
+// main loop
+const clock=new THREE.Clock();
+function loop(){
+  requestAnimationFrame(loop);
+  const dt=Math.min(clock.getDelta(),0.05);
+  state.time+=dt;
+  if(state.started&&!state.spectate&&!state.over)updatePlayer(dt);
+  else if(state.started&&state.spectate)updateSpectate(dt);
+  else{
+    // menu idle: slow orbit
+    const t=state.time*0.08;
+    camera.position.set(Math.sin(t)*190,terrainH(Math.sin(t)*190,Math.cos(t)*190)+45,Math.cos(t)*190);
+    camera.lookAt(0,8,0);
+  }
+  if(state.started){updateBots(dt);updateFlags(dt);updateDiscs(dt);updateHUD();}
+  else{updateDiscs(dt);}
+  waveFlags(state.time);
+  renderer.render(scene,camera);
+}
+loop();
+window.__tribes={state,startGame,terrainH};
+</script>
+</body>
+</html>
