@@ -6,9 +6,9 @@
 <link rel="icon" href="data:,">
 <title>TRIBES // SKI FPS — CTF Prototype</title>
 <style>
-  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0a1420;font-family:'Segoe UI',system-ui,Roboto,Arial,sans-serif;color:#eaf4ff;user-select:none}
-  #app{position:fixed;inset:0}
-  canvas{display:block}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0a1420;font-family:'Segoe UI',system-ui,Roboto,Arial,sans-serif;color:#eaf4ff;user-select:none;-webkit-user-select:none;touch-action:none;overscroll-behavior:none}
+  #app{position:fixed;inset:0;touch-action:none}
+  canvas{display:block;touch-action:none}
   /* HUD */
   #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
   #crosshair{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);opacity:.95}
@@ -36,10 +36,10 @@
   #score{left:50%;top:12px;transform:translateX(-50%);display:flex;gap:14px;align-items:center;font-weight:800;font-size:22px}
   #score .blue{color:#5ecbff}#score .red{color:#ff6b6b}
   #score small{font-size:11px;letter-spacing:2px;opacity:.8}
-  #flags{left:50%;top:62px;transform:translateX(-50%);font-size:12px;letter-spacing:1px;display:flex;gap:12px}
+  #flags{position:absolute;left:50%;top:62px;transform:translateX(-50%);font-size:12px;letter-spacing:1px;display:flex;gap:12px;white-space:nowrap}
   #feed{right:18px;top:12px;text-align:right;font-size:13px;display:flex;flex-direction:column;gap:4px;max-width:320px}
   #feed div{background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.12)}
-  #msg{left:50%;top:32%;transform:translateX(-50%);font-size:30px;font-weight:800;text-shadow:0 2px 20px #000;opacity:0;transition:opacity .2s;text-align:center}
+  #msg{position:absolute;left:50%;top:32%;transform:translateX(-50%);font-size:30px;font-weight:800;text-shadow:0 2px 20px #000;opacity:0;transition:opacity .2s;text-align:center}
   #dmg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(255,30,30,.55) 100%);opacity:0;transition:opacity .15s}
   #jetflame{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);font-size:12px;letter-spacing:3px;color:#7df9ff;opacity:0}
   /* Menu */
@@ -57,6 +57,26 @@
   #help{font-size:13px;opacity:.85}
   #help grid{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
   @media(max-width:700px){#card h1{font-size:32px}#speed b{font-size:32px}#vitals{min-width:170px}}
+  /* ---- mobile touch controls ---- */
+  #touch-ui{position:fixed;inset:0;z-index:6;pointer-events:none;display:none;touch-action:none}
+  body.touch.playing #touch-ui{display:block}
+  #stick{position:absolute;left:22px;bottom:110px;width:128px;height:128px;border-radius:50%;background:rgba(125,249,255,.08);border:1px solid rgba(125,249,255,.35);pointer-events:auto;touch-action:none}
+  #knob{position:absolute;left:50%;top:50%;width:56px;height:56px;border-radius:50%;background:rgba(125,249,255,.35);border:1px solid rgba(125,249,255,.7);transform:translate(-50%,-50%)}
+  .tbtn{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;letter-spacing:1px;border:1px solid rgba(125,249,255,.5);background:rgba(8,20,32,.55);color:#7df9ff}
+  .tbtn:active,.tbtn.on{background:rgba(0,229,255,.4);color:#04121c}
+  #btn-fire{right:26px;bottom:120px;width:92px;height:92px;font-size:15px;border-color:rgba(255,120,120,.7);color:#ffb3b3}
+  #btn-fire:active{background:rgba(255,80,80,.5);color:#fff}
+  #btn-jet{right:132px;bottom:96px;width:68px;height:68px;font-size:13px}
+  #btn-ski{right:44px;bottom:226px;width:60px;height:60px;font-size:12px}
+  #btn-wpn{right:120px;bottom:196px;width:60px;height:60px;font-size:12px}
+  #btn-jump{right:206px;bottom:170px;width:60px;height:60px;font-size:12px}
+  body.touch #vitals{left:12px;bottom:12px;min-width:150px;padding:6px 8px}
+  body.touch #speed{right:12px;top:110px;bottom:auto;min-width:110px;padding:6px 8px}
+  body.touch #speed b{font-size:26px}
+  body.touch #feed{top:170px;right:12px;font-size:12px;max-width:220px}
+  body.touch #score{font-size:16px;gap:8px;white-space:nowrap;padding:6px 10px}
+  body.touch #score small{font-size:9px}
+  body.touch #flags{top:60px;font-size:11px}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
@@ -75,6 +95,13 @@
   <div id="msg"></div>
   <div id="jetflame">▲ JETTING ▲</div>
 </div>
+<div id="touch-ui">
+  <div id="stick"><div id="knob"></div></div>
+  <div class="tbtn" id="btn-fire">FIRE</div>
+  <div class="tbtn" id="btn-jet">JET</div>
+  <div class="tbtn" id="btn-ski">SKI</div>
+  <div class="tbtn" id="btn-wpn">WPN</div>
+</div>
 <div id="menu">
   <div id="card">
     <h1>TRIBES <span>// SKI FPS</span></h1>
@@ -82,6 +109,7 @@
     <div id="help">
       <div><kbd>W A S D</kbd> move · <kbd>Mouse</kbd> look · <kbd>Click</kbd> spinfusor · <kbd>Right-click / F</kbd> chaingun · <kbd>Space</kbd> jetpack · <kbd>C / Ctrl</kbd> toggle ski · <kbd>Shift</kbd> ski-hold · <kbd>E</kbd> switch weapon · <kbd>R</kbd> respawn</div>
       <div style="margin-top:8px;opacity:.8">Tip: hold ski downhill to build 100+ km/h, then feather jets over the valley. Blue base west (−140), Red base east (+140).</div>
+      <div id="touch-help" style="display:none;margin-top:8px;opacity:.9">📱 <b>Mobile:</b> left stick = ski-steer · drag right side = look · FIRE = spinfusor · JET = hold to fly · SKI toggles · WPN swaps weapon.</div>
     </div>
     <div class="row">
       <button id="start-button">▶ &nbsp;START GAME</button>
@@ -359,9 +387,7 @@ function feed(html){const d=document.createElement('div');d.innerHTML=html;$('fe
 function centerMsg(t,ms=2200){const m=$('msg');m.textContent=t;m.style.opacity=1;clearTimeout(m._t);m._t=setTimeout(()=>m.style.opacity=0,ms);}
 function killPlayer(owner){
   state.respawnT=3;state.hp=0;
-  dropFlag(state.team==='blue'?'blue':'blue'); // drop any carried enemy flag
-  dropFlag('red');
-  // actually drop carried
+  // drop any carried flag
   for(const k of ['blue','red']){const f=state.flags[k];if(f.carrier===playerRef){f.carrier=null;f.at='dropped';f.pos.copy(state.pos);f.pos.y=terrainH(f.pos.x,f.pos.z)+1;f.dropT=30;}}
   feed(`<b style="color:${owner?'#ff8080':'#aaa'}">${owner?owner.name:'wilderness'}</b> ⟂ <b style="color:#5ecbff">YOU</b>`);
   centerMsg(owner?`Killed by ${owner.name}`:'You died',1800);
@@ -447,20 +473,102 @@ renderer.domElement.addEventListener('mousedown',e=>{
 });
 addEventListener('mouseup',e=>{if(e.button===0)input.fire=false;if(e.button===2)input.chain=false;});
 addEventListener('contextmenu',e=>e.preventDefault());
-function toggleWeapon(){state.weapon=state.weapon==='spin'?'chain':'spin';$('wname').textContent=state.weapon==='spin'?'SPINFUSOR':'CHAINGUN';gun.visible=state.weapon==='spin';chainMesh.visible=state.weapon!=='spin';beep(500,.08,'square',.12,200);}
-// touch (basic)
-let touchMove=null,touchLook=null;
-renderer.domElement.addEventListener('touchstart',e=>{AC.ensure();},{passive:true});
+function toggleWeapon(){state.weapon=state.weapon==='spin'?'chain':'spin';$('wname').textContent=state.weapon==='spin'?'SPINFUSOR':'CHAINGUN';gun.visible=state.weapon==='spin';chainMesh.visible=state.weapon!=='spin';beep(500,.08,'square',.12,200);syncSkiBtn();}
+// ---------- touch controls (mobile) ----------
+const IS_TOUCH=new URLSearchParams(location.search).has('touch')||('ontouchstart' in window)||navigator.maxTouchPoints>0;
+if(IS_TOUCH){document.body.classList.add('touch');const th=$('touch-help');if(th)th.style.display='block';}
+function syncSkiBtn(){const b=$('btn-ski');if(b)b.classList.toggle('on',!!state.ski);}
+syncSkiBtn();
+(function initTouch(){
+  if(!IS_TOUCH)return;
+  const stick=$('stick'),knob=$('knob');
+  let moveId=null,sx=0,sy=0;
+  let lookId=null,lx=0,ly=0;
+  const R=48;
+  function setKnob(dx,dy){knob.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;}
+  function clearMove(){moveId=null;input.f=input.b=input.l=input.r=0;setKnob(0,0);}
+  stick.addEventListener('touchstart',e=>{AC.ensure();e.preventDefault();const t=e.changedTouches[0];moveId=t.identifier;const r=stick.getBoundingClientRect();sx=r.left+r.width/2;sy=r.top+r.height/2;},{passive:false});
+  addEventListener('touchmove',e=>{
+    if(!state.started)return;
+    for(const t of e.changedTouches){
+      if(t.identifier===moveId){
+        let dx=t.clientX-sx,dy=t.clientY-sy;
+        const len=Math.hypot(dx,dy);
+        if(len>R){dx*=R/len;dy*=R/len;}
+        setKnob(dx,dy);
+        // analog: forward = -dy, strafe = dx
+        const fw=-dy/R, st=dx/R;
+        input.f=Math.max(0,fw);input.b=Math.max(0,-fw);
+        input.r=Math.max(0,st);input.l=Math.max(0,-st);
+      }else if(t.identifier===lookId){
+        const dx=t.clientX-lx,dy=t.clientY-ly;
+        lx=t.clientX;ly=t.clientY;
+        state.yaw-=dx*0.0042;
+        state.pitch=clamp(state.pitch-dy*0.0042,-1.45,1.45);
+      }
+    }
+    // always suppress browser gestures (scroll/pinch) during play so button
+    // holds + aim drags never get hijacked; menu stays scrollable pre-start
+    e.preventDefault();
+  },{passive:false});
+  // legacy iOS pinch-zoom gesture hook (touch-action covers modern browsers)
+  document.addEventListener('gesturestart',e=>e.preventDefault());
+  const endTouch=e=>{
+    for(const t of e.changedTouches){
+      if(t.identifier===moveId)clearMove();
+      if(t.identifier===lookId)lookId=null;
+    }
+  };
+  addEventListener('touchend',endTouch);addEventListener('touchcancel',endTouch);
+  // look: drag anywhere on right 60% of screen (except buttons/stick)
+  addEventListener('touchstart',e=>{
+    AC.ensure();
+    if(!state.started)return;
+    for(const t of e.changedTouches){
+      const el=document.elementFromPoint(t.clientX,t.clientY);
+      if(el&&(el.closest('.tbtn')||el.closest('#stick')||el.closest('#menu')))continue;
+      if(t.clientX>innerWidth*0.4&&lookId===null){lookId=t.identifier;lx=t.clientX;ly=t.clientY;}
+    }
+  },{passive:true});
+  const hold=(id,down,up)=>{
+    const el=$(id);
+    el.addEventListener('touchstart',e=>{e.preventDefault();AC.ensure();down();},{passive:false});
+    el.addEventListener('touchend',e=>{e.preventDefault();if(up)up();},{passive:false});
+    el.addEventListener('touchcancel',()=>{if(up)up();});
+  };
+  hold('btn-fire',()=>{input.fire=true;},()=>{input.fire=false;});
+  hold('btn-jet',()=>{input.jet=true;},()=>{input.jet=false;});
+  hold('btn-ski',()=>{state.ski=!state.ski;beep(state.ski?520:260,.07,'square',.12);syncSkiBtn();});
+  hold('btn-wpn',()=>{toggleWeapon();});
+  // tap-to-fire fallback: quick tap on right side fires one disc (helps testing)
+  // tracked per-touch so button holds + aim drags on other fingers never interfere
+  const taps=new Map();
+  addEventListener('touchstart',e=>{for(const t of e.changedTouches)taps.set(t.identifier,{t:performance.now(),x:t.clientX,y:t.clientY});},{passive:true});
+  addEventListener('touchend',e=>{
+    if(!state.started)return;
+    for(const t of e.changedTouches){
+      const s=taps.get(t.identifier);taps.delete(t.identifier);
+      if(!s)continue;
+      const dt=performance.now()-s.t;
+      if(dt<220&&Math.hypot(t.clientX-s.x,t.clientY-s.y)<12&&t.clientX>innerWidth*0.4){
+        const el=document.elementFromPoint(t.clientX,t.clientY);
+        if(el&&(el.closest('.tbtn')||el.closest('#stick')||el.closest('#menu')))continue;
+        input.fire=true;setTimeout(()=>input.fire=false,120);
+      }
+    }
+  },{passive:true});
+})();
 
 // ---------- start ----------
 let gunKick=0;
 $('start-button').onclick=()=>{
   AC.ensure();startGame(false);
-  try{renderer.domElement.requestPointerLock()}catch(e){}
+  if(!IS_TOUCH){try{renderer.domElement.requestPointerLock()}catch(e){}}
 };
 $('spec-button').onclick=()=>{AC.ensure();startGame(true);};
 function startGame(spec){
   state.started=true;state.spectate=spec;
+  document.body.classList.add('playing');
   $('menu').style.display='none';
   centerMsg(spec?'Spectating — click to play':'Capture the RED flag!  First to 3',2600);
   beep(440,.12,'square',.15,440);
@@ -875,7 +983,7 @@ function loop(){
   renderer.render(scene,camera);
 }
 loop();
-window.__tribes={state,startGame,terrainH};
+window.__tribes={state,startGame,terrainH,input,IS_TOUCH,toggleWeapon};
 </script>
 </body>
 </html>
