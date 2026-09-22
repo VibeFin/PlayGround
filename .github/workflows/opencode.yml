@@ -21,24 +21,26 @@ jobs:
   prepare:
     if: github.event_name == 'workflow_dispatch' || (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'OpenCode'))
     permissions:
-      contents: read
+      contents: write
+      id-token: write
       issues: write
       actions: write
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@0c32f6841472d28fb38dc7c1095eb38297e9ff3b
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-prepare.yml@bc6a5a1c02349a41b58d0aabe41ebfadad668478
     with:
-      runtime_ref: 0c32f6841472d28fb38dc7c1095eb38297e9ff3b
+      runtime_ref: bc6a5a1c02349a41b58d0aabe41ebfadad668478
 
   opencode:
     needs: prepare
     if: needs.prepare.outputs.approved == 'true'
     permissions:
       contents: write
+      id-token: write
       issues: write
       actions: read
       pull-requests: write
-    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@0c32f6841472d28fb38dc7c1095eb38297e9ff3b
+    uses: AgentsLoop/OhMyGithub/.github/workflows/opencode-reusable.yml@bc6a5a1c02349a41b58d0aabe41ebfadad668478
     with:
-      runtime_ref: 0c32f6841472d28fb38dc7c1095eb38297e9ff3b
+      runtime_ref: bc6a5a1c02349a41b58d0aabe41ebfadad668478
       issue_number: ${{ needs.prepare.outputs.issue_number }}
       request: ${{ needs.prepare.outputs.request }}
       issue_title: ${{ needs.prepare.outputs.issue_title }}
