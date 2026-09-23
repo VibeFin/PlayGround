@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0014" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>QUAKE LIVE — Pocket Arena</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0014'/><text x='16' y='24' font-size='22' text-anchor='middle' fill='%23d6ff3f' font-family='sans-serif' font-weight='bold'>Q</text></svg>" />
+  <script type="module" crossorigin src="./assets/index-BF-PCIxF.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DGUzPJwZ.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="crosshair"><div class="ch-dot"></div></div>
+    <div id="hitmarker"></div>
+    <div id="dmg-vignette"></div>
+    <div id="heal-flash"></div>
+
+    <div id="topbar">
+      <div id="score-chip"><span id="frags">0</span><label>FRAGS</label></div>
+      <div id="match-chip"><span id="match-time">6:00</span><label id="frag-limit">FIRST TO 20</label></div>
+      <div id="place-chip"><span id="place">#1</span><label>PLACE</label></div>
+    </div>
+
+    <div id="killfeed"></div>
+
+    <div id="bottombar">
+      <div class="stat" id="stat-hp"><label>HEALTH</label><span id="hp">100</span></div>
+      <div class="stat" id="stat-ar"><label>ARMOR</label><span id="armor">0</span></div>
+      <div id="weapon-chip">
+        <div id="wname">NAILGUN</div>
+        <div id="ammo">∞</div>
+      </div>
+    </div>
+
+    <div id="respawn-banner" class="hidden">YOU WERE FRAGGED<br /><span id="respawn-in">2.5</span></div>
+    <div id="center-banner" class="hidden"></div>
+    <div id="pickup-toast" class="hidden"></div>
+  </div>
+
+  <!-- Touch controls -->
+  <div id="touch-ui" class="hidden">
+    <div id="stick-zone"><div id="stick-base"><div id="stick-nub"></div></div></div>
+    <div id="look-zone"></div>
+    <div id="touch-btns">
+      <button id="btn-weapon" class="tbtn small" aria-label="Switch weapon">⇄</button>
+      <button id="btn-jump" class="tbtn small" aria-label="Jump">▲</button>
+      <button id="btn-fire" class="tbtn big" aria-label="Fire">◎</button>
+    </div>
+    <button id="btn-pause" aria-label="Pause">II</button>
+    <button id="btn-score" aria-label="Scores">☰</button>
+  </div>
+
+  <!-- Scoreboard -->
+  <div id="scoreboard" class="hidden">
+    <h2>POCKET ARENA</h2>
+    <div id="score-rows"></div>
+    <p class="hint">tap anywhere to close</p>
+  </div>
+
+  <!-- Menu -->
+  <div id="menu">
+    <div class="menu-inner">
+      <div class="logo-sub">▚▚▚ ARENA FPS ▚▚▚</div>
+      <h1>QUAKE<span> LIVE</span></h1>
+      <div class="logo-sub2">POCKET ARENA · phone / tablet / desktop</div>
+      <button id="btn-play">▶ &nbsp;ENTER THE ARENA</button>
+      <div class="menu-row">
+        <label>SENSITIVITY <input id="opt-sens" type="range" min="0.3" max="3" step="0.1" value="1" /></label>
+      </div>
+      <div class="menu-row btns">
+        <button id="opt-quality" class="mini">QUALITY: AUTO</button>
+        <button id="opt-sound" class="mini">SOUND: ON</button>
+      </div>
+      <div class="controls-help">
+        <div><b>PHONE / TABLET</b><br />left stick — move · drag right side — look<br />◎ fire · ▲ jump · ⇄ weapons</div>
+        <div><b>DESKTOP</b><br />WASD move · mouse look · click fire<br />space jump · 1/2 or wheel weapons · tab scores</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pause-menu" class="hidden">
+    <div class="menu-inner">
+      <h1>PAUSED</h1>
+      <button id="btn-resume">▶ &nbsp;RESUME</button>
+      <button id="btn-quit" class="ghost">QUIT TO MENU</button>
+    </div>
+  </div>
+
+</body>
+</html>
