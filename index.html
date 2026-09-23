@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CHOKLATE — Bean to Bar Atelier</title>
+<meta name="description" content="CHOKLATE — small-batch dark, milk & plombir-cream waffle chocolate. Bean to bar atelier." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍫</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="grain"></div>
+<div class="cursor" id="cursor"></div>
+
+<header class="nav" id="top">
+  <a class="brand" href="#top"><span class="brand-mark">C</span> CHOKLATE <em>atelier</em></a>
+  <nav class="links">
+    <a href="#shop">Shop</a>
+    <a href="#story">Craft</a>
+    <a href="#plombir">Plombir Waffles</a>
+    <a href="#tasting">Tasting</a>
+    <a href="#visit">Visit</a>
+  </nav>
+  <div class="nav-cta">
+    <button class="icon-btn" id="searchBtn" aria-label="search">⌕</button>
+    <button class="cart-btn" id="cartOpen">Cart <span class="cart-count" id="cartCount">0</span></button>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#shop">Shop</a><a href="#story">Craft</a><a href="#plombir">Plombir Waffles</a><a href="#tasting">Tasting</a><a href="#visit">Visit</a>
+</div>
+
+<main>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="drip"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="pill">● Small-batch № 07 — Plombir Edition</div>
+      <h1>Melt<br><span class="italic">slower.</span><br>Taste <span class="gold">more.</span></h1>
+      <p class="lede">Bean-to-bar chocolate folded around legendary plombir cream and crisp waffle. Inspired by a Saratov classic — reimagined as a modern atelier.</p>
+      <div class="hero-actions">
+        <a href="#shop" class="btn solid">Shop the collection →</a>
+        <a href="#story" class="btn ghost">Our craft film ▸</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>72%</strong><span>Ecuador dark</span></div>
+        <div><strong>48h</strong><span>stone conche</span></div>
+        <div><strong>9</strong><span>waffle layers</span></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="product-stage">
+        <div class="bar-wrap">
+          <div class="choc-bar">
+            <div class="square"></div><div class="square"></div><div class="square"></div>
+            <div class="square"></div><div class="square"></div><div class="square"></div>
+            <div class="shine"></div>
+          </div>
+          <div class="waffle-stack">
+            <div class="waffle w1"></div><div class="waffle w2"></div><div class="waffle w3"></div><div class="cream"></div>
+          </div>
+        </div>
+        <div class="float-tag t1">Plombir cream<br><small>vanilla bean + condensed milk</small></div>
+        <div class="float-tag t2">Single origin<br><small>Napo Valley cacao</small></div>
+        <div class="price-sticker">$8.5<br><small>120g</small></div>
+      </div>
+      <div class="hero-card-foot">
+        <div><h3>Plombir Waffle Bar</h3><p>★★★★★ 2,417 reviews — “tastes like childhood, upgraded”</p></div>
+        <button class="btn solid small" data-add="Plombir Waffle Bar" data-price="8.5">Add +</button>
+      </div>
+    </div>
+  </div>
+  <div class="marquee"><div class="track" id="marqueeTrack">
+    <span>BEAN TO BAR ✦ PLOMBIR CREAM ✦ CRISPY WAFFLE ✦ 72% DARK ✦ SMALL BATCH ✦ </span><span>BEAN TO BAR ✦ PLOMBIR CREAM ✦ CRISPY WAFFLE ✦ 72% DARK ✦ SMALL BATCH ✦ </span>
+  </div></div>
+</section>
+
+<!-- SHOP -->
+<section class="section" id="shop">
+  <div class="sec-head">
+    <div><p class="kicker">01 — The collection</p><h2>Choose your <span class="italic">craving</span></h2></div>
+    <div class="filters" id="filters">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="dark">Dark</button>
+      <button class="chip" data-filter="milk">Milk</button>
+      <button class="chip" data-filter="waffle">Waffle</button>
+      <button class="chip" data-filter="gift">Gifts</button>
+    </div>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</section>
+
+<!-- STORY / CRAFT -->
+<section class="section dark" id="story">
+  <div class="split">
+    <div>
+      <p class="kicker light">02 — Craft</p>
+      <h2>From pod to <span class="italic gold">plombir.</span></h2>
+      <p class="muted">We roast in 12kg micro-lots, conche for 48 hours on granite, then layer with slow-churned plombir and hand-pressed waffle. No lecithin shortcuts. No palm oil. Just patience.</p>
+      <div class="steps">
+        <div class="step"><span>01</span><div><h4>Roast & winnow</h4><p>Napo Valley cacao, light roast to keep apricot & honey notes.</p></div></div>
+        <div class="step"><span>02</span><div><h4>Stone conche 48h</h4><p>Silk texture, low bitterness. 72%, 54% and creamy 34%.</p></div></div>
+        <div class="step"><span>03</span><div><h4>Plombir fold</h4><p>Vanilla-bean condensed-milk cream + 9-layer crisp waffle.</p></div></div>
+      </div>
+      <div class="meter-wrap">
+        <label>Cacao intensity — drag to explore</label>
+        <input type="range" id="cacaoRange" min="34" max="90" value="72" />
+        <div class="meter-read"><strong id="cacaoVal">72%</strong><span id="cacaoNote">Bold & jammy — black cherry, molasses</span></div>
+      </div>
+    </div>
+    <div class="craft-visual">
+      <div class="rings"></div>
+      <div class="percent">72%</div>
+      <div class="craft-cards">
+        <div class="mini-card">🌰<b>Single origin</b><i>Ecuador</i></div>
+        <div class="mini-card">🥛<b>Plombir</b><i>real cream</i></div>
+        <div class="mini-card">🧇<b>Waffle</b><i>9 layers</i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLOMBIR FEATURE -->
+<section class="section plombir" id="plombir">
+  <div class="plombir-box">
+    <div class="plombir-copy">
+      <p class="kicker">03 — Icon · Вафли Пломбир</p>
+      <h2>The waffle from <span class="italic">the photo.</span></h2>
+      <p>You sent us that white pack with brown script — Saratovskaya “Plombir Waffles”. We tasted it, loved its milky nostalgia, and built this page as a tribute: same soul, atelier finish.</p>
+      <ul class="ticks">
+        <li>✓ Light vanilla plombir cream, not too sweet</li>
+        <li>✓ Extra-crisp waffle, stays crunchy in milk</li>
+        <li>✓ White + milk + dark chocolate coating options</li>
+      </ul>
+      <div class="plombir-actions">
+        <button class="btn solid" data-add="Plombir Waffle Box (12 pcs)" data-price="19">Add box — $19</button>
+        <span class="note">*variant servirovki — serving suggestion, as on the pack ;)</span>
+      </div>
+    </div>
+    <div class="plombir-pack">
+      <div class="pack">
+        <div class="pack-top">*вариант сервировки<br>🐇 САРАТОВСКАЯ<br><small>кондитерская фабрика</small></div>
+        <div class="pack-mid">Пломбир</div>
+        <div class="pack-bot">ВАФЛИ</div>
+        <div class="pack-side"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TASTING QUIZ -->
+<section class="section" id="tasting">
+  <div class="sec-head"><div><p class="kicker">04 — Finder</p><h2>Find your <span class="italic">bar in 10 sec</span></h2></div></div>
+  <div class="quiz" id="quiz">
+    <div class="q" data-q="1"><h3>How do you drink coffee?</h3><div class="opts"><button data-v="dark">Espresso, black</button><button data-v="milk">Cappuccino</button><button data-v="waffle">Milkshake + waffles</button></div></div>
+    <div class="q hidden" data-q="2"><h3>Pick a texture</h3><div class="opts"><button data-v="dark">Snap & intense</button><button data-v="milk">Silky & mellow</button><button data-v="waffle">Crunchy layers</button></div></div>
+    <div class="q hidden" data-q="3"><h3>Ideal evening?</h3><div class="opts"><button data-v="dark">Jazz + red wine</button><button data-v="milk">Movie + blanket</button><button data-v="gift">Dinner party gift</button></div></div>
+    <div class="q hidden result" data-q="4"><h3 id="quizResult">Your bar: Plombir Waffle Bar</h3><p id="quizDesc"></p><button class="btn solid" id="quizAdd">Add to cart</button> <button class="btn ghost" id="quizRestart">↺ Restart</button></div>
+    <div class="progress"><div id="quizBar"></div></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="section dark reviews">
+  <p class="kicker light">05 — Reviews</p>
+  <h2>Loved, snapped, <span class="italic gold">melted.</span></h2>
+  <div class="rev-grid">
+    <blockquote>“The Plombir waffle bar is dangerous. Crispy for days.”<cite>— Alina, Saratov ★★★★★</cite></blockquote>
+    <blockquote>“72% dark tastes like cherries and brown sugar. Superb snap.”<cite>— Marcus, Berlin ★★★★★</cite></blockquote>
+    <blockquote>“Bought the gift box. Kept it. Bought another.”<cite>— Priya, Dubai ★★★★★</cite></blockquote>
+  </div>
+  <div class="logos">VOGUE FOOD ✦ BEAN-TO-BAR AWARDS ’25 ✦ GREAT TASTE ★★ ✦ SIAL GOLD</div>
+</section>
+
+<!-- VISIT -->
+<section class="section" id="visit">
+  <div class="split">
+    <div>
+      <p class="kicker">06 — Visit</p>
+      <h2>Come smell <span class="italic">the roast.</span></h2>
+      <p class="muted">Choklate Atelier, 14 Cacao Lane, open daily 10–22. Tastings every hour. Waffle-press live on weekends.</p>
+      <form class="newsletter" id="newsForm"><input id="newsEmail" type="email" required placeholder="you@sweet.tooth" /><button class="btn solid">Get 10% off →</button></form>
+      <p class="small" id="newsMsg"></p>
+    </div>
+    <div class="map-card">
+      <div class="map-grid"></div>
+      <div class="map-pin">📍 CHOKLATE<br><small>14 Cacao Lane</small></div>
+      <div class="hours"><div><b>Mon–Fri</b> 10–22</div><div><b>Sat–Sun</b> 9–23</div><div><b>Tastings</b> :00 hourly</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="foot-grid">
+    <div><a class="brand" href="#top"><span class="brand-mark">C</span> CHOKLATE</a><p class="muted">Small-batch chocolate & plombir waffles. Made slowly.</p></div>
+    <div><b>Shop</b><a href="#shop">Dark</a><a href="#shop">Milk</a><a href="#shop">Waffles</a><a href="#shop">Gifts</a></div>
+    <div><b>Atelier</b><a href="#story">Craft</a><a href="#tasting">Tasting finder</a><a href="#visit">Visit</a></div>
+    <div><b>Contact</b><a href="#">hello@choklate.shop</a><a href="#">+7 8452 00-00-07</a></div>
+  </div>
+  <div class="foot-base">© 2026 Choklate Atelier · Inspired by Saratovskaya Plombir Waffles · Made with cacao & love</div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay"></div>
+<aside class="cart" id="cart">
+  <div class="cart-head"><h3>Your cart</h3><button id="cartClose">✕</button></div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot"><div class="total"><span>Subtotal</span><strong id="cartTotal">$0.00</strong></div><button class="btn solid full" id="checkoutBtn">Checkout →</button><p class="small" id="checkoutMsg"></p></div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
