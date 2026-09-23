@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Turbo Kart 3D — Arcade Racer</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-wrap">
+  <canvas id="scene"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="top-bar">
+      <div class="pill" id="lap-pill">LAP <span id="lap">1</span>/3</div>
+      <div class="pill pos" id="pos-pill"><span id="pos">4</span><span id="pos-suffix">th</span><span class="pos-of">/6</span></div>
+      <div class="pill" id="time-pill">⏱ <span id="time">0:00.0</span></div>
+    </div>
+    <div id="item-slot"><span id="item-emoji">❔</span></div>
+    <canvas id="minimap" width="150" height="150"></canvas>
+    <div id="speedo"><span id="speed">0</span><small>km/h</small></div>
+    <div id="msg"></div>
+    <div id="countdown"></div>
+  </div>
+
+  <!-- Touch controls -->
+  <div id="touch" class="hidden">
+    <div id="steer-zone">
+      <button id="btn-left" class="tbtn steer" aria-label="left">◀</button>
+      <button id="btn-right" class="tbtn steer" aria-label="right">▶</button>
+    </div>
+    <div id="pedal-zone">
+      <button id="btn-item" class="tbtn item" aria-label="use item">🎁</button>
+      <button id="btn-brake" class="tbtn pedal brake" aria-label="brake">▼<small>BRK</small></button>
+      <button id="btn-gas" class="tbtn pedal gas" aria-label="gas">▲<small>GAS</small></button>
+    </div>
+  </div>
+
+  <!-- Title screen -->
+  <div id="title">
+    <div class="title-card">
+      <div class="logo-sub">3D ARCADE RACER</div>
+      <h1>TURBO<br><span>KART</span></h1>
+      <p class="tag">Mushroom-cup style kart battle &bull; 6 racers &bull; 3 laps<br>phone + tablet ready 🎮</p>
+      <div class="char-row" id="char-row"></div>
+      <button id="startBtn">START</button>
+      <div class="hint">Arrows / WASD on desktop &bull; touch buttons on mobile<br>Grab ❔ boxes for 🚀 🟢 🍌 &bull; drift with BRK + steer</div>
+      <label class="auto-gas"><input type="checkbox" id="autogas" checked> auto-accelerate (recommended on touch)</label>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" class="hidden">
+    <div class="title-card">
+      <div class="logo-sub" id="res-head">RACE COMPLETE</div>
+      <h2 id="res-place">1st!</h2>
+      <div id="res-table"></div>
+      <button id="againBtn">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <div id="gl-error" class="hidden">WebGL is not available in this browser.</div>
+</div>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
