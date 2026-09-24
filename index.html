@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>HALO: Motor Assault — 3D Desktop</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='none' stroke='%2339e6ff' stroke-width='5'/></svg>" />
+<link rel="stylesheet" href="./style.css" />
+<script type="importmap">
+{ "imports": { "three": "./three.module.js" } }
+</script>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- In-game HUD -->
+<div id="hud" class="hidden">
+  <div id="vignette"></div>
+  <div id="shield-hit"></div>
+  <div id="crosshair"><div class="dot"></div><div class="r t"></div><div class="r b"></div><div class="r l"></div><div class="r r"></div></div>
+  <div id="hitmarker">✕</div>
+  <div id="topbar">
+    <div class="tb-block blue"><span class="lbl">🔵 BLUE</span><span id="blue-caps">0</span></div>
+    <div class="tb-block red"><span class="lbl">🔴 RED</span><span id="red-caps">0</span></div>
+    <div class="tb-block"><span class="lbl">SCORE</span><span id="score">0</span></div>
+    <div class="tb-block"><span class="lbl">KILLS</span><span id="kills">0</span></div>
+  </div>
+  <div id="objective">⬢ CTF — steal the red flag home</div>
+  <div id="wave-banner" class="hidden">CTF</div>
+  <div id="prompt" class="hidden">Press <b>E</b> to enter Warthog</div>
+  <div id="killfeed"></div>
+  <div id="bottom-left">
+    <div class="bar-label">SHIELD</div>
+    <div class="bar shield"><div id="shield-fill"></div></div>
+    <div class="bar-label">HEALTH</div>
+    <div class="bar health"><div id="health-fill"></div></div>
+    <div id="status-row"><span id="state-label">ON FOOT</span><span id="pos-label"></span></div>
+  </div>
+  <div id="bottom-right">
+    <div id="weapon-name">MA5 ASSAULT RIFLE</div>
+    <div id="ammo">60 / ∞</div>
+    <div id="vehicle-stats" class="hidden">
+      <div class="bar-label">HULL</div>
+      <div class="bar hull"><div id="hull-fill"></div></div>
+      <div id="speed">0 km/h</div>
+    </div>
+    <div id="reload-tip" class="hidden">RELOADING…</div>
+  </div>
+  <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="controls-hint">WASD move · Mouse aim · LMB fire · RMB aim · G grenade · R reload · E enter/exit · Space jump · H help · Esc pause</div>
+  <!-- Touch controls (shown on mobile / touch devices) -->
+  <div id="touch-ui" class="hidden">
+    <div id="stick"><div id="stick-knob"></div></div>
+    <div id="touch-btns">
+      <button id="btn-fire" class="tbtn big">FIRE</button>
+      <button id="btn-jump" class="tbtn">JUMP</button>
+      <button id="btn-use" class="tbtn">USE</button>
+      <button id="btn-nade" class="tbtn small">✸</button>
+      <button id="btn-reload" class="tbtn small">RLD</button>
+      <button id="btn-down" class="tbtn hidden">▼</button>
+    </div>
+    <button id="btn-pause" class="tbtn tiny" aria-label="Pause">❚❚</button>
+  </div>
+</div>
+
+<!-- Main menu -->
+<div id="menu">
+  <div class="menu-inner">
+    <div class="kicker">UNSC // RINGWORLD DEFENSE</div>
+    <h1>HALO<span>: MOTOR ASSAULT</span></h1>
+    <p class="tag">Team battle CTF: fight with <b>🔵 Marine teammates</b> against the <b>🔴 Covenant</b> — steal their flag to your base, first to <b>3 captures</b> wins. Drive <b>Warthogs</b>, roll <b>Scorpions</b>, fly <b>Wasps</b> from glowing pads.</p>
+    <div class="btn-row">
+      <button id="play-btn">Play</button>
+      <button id="help-btn" class="ghost">How to play</button>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="ico">🚙</div><h3>Warthog</h3><p>Fast attack car. Machine-gun on LMB. Great for hit-and-run.</p></div>
+      <div class="card"><div class="ico">🛡️</div><h3>Scorpion</h3><p>Heavy tank. Explosive 90mm cannon, turret follows your aim.</p></div>
+      <div class="card"><div class="ico">🚀</div><h3>Wasp</h3><p>VTOL spaceship. <kbd>W</kbd> thrust · <kbd>Space</kbd>/<kbd>C</kbd> climb/sink · flies anywhere.</p></div>
+    </div>
+    <div id="menu-help" class="hidden">
+      <h2>Controls (desktop)</h2>
+      <table>
+        <tr><td><kbd>W A S D</kbd></td><td>Move / drive / fly</td></tr>
+        <tr><td><kbd>Mouse</kbd></td><td>Aim (click game to lock pointer)</td></tr>
+        <tr><td><kbd>Left click</kbd></td><td>Fire weapon / vehicle gun</td></tr>
+        <tr><td><kbd>Right click</kbd></td><td>Aim down sights (on foot)</td></tr>
+        <tr><td><kbd>E</kbd></td><td>Enter / exit car, tank, spaceship</td></tr>
+        <tr><td><kbd>G</kbd> / <kbd>R</kbd></td><td>Plasma grenade / reload</td></tr>
+        <tr><td><kbd>Space</kbd> / <kbd>Shift</kbd></td><td>Jump / sprint (handbrake in car, climb in ship)</td></tr>
+        <tr><td><kbd>C</kbd> / <kbd>H</kbd> / <kbd>Esc</kbd></td><td>Sink ship / help / pause</td></tr>
+        <tr><td><kbd>🚩 CTF</kbd></td><td>Walk over the 🔴 flag to grab it, carry it to your 🔵 base. Own flag must be home to score. Touch a dropped 🔵 flag to return it.</td></tr>
+      </table>
+      <p>Tip: your shield recharges. Vehicles have their own hull — exit before they explode. Green beacons drop shields &amp; health.</p>
+      <h2>Controls (touch)</h2>
+      <table>
+        <tr><td><kbd>Left stick</kbd></td><td>Move / drive / fly (push far to sprint)</td></tr>
+        <tr><td><kbd>Drag screen</kbd></td><td>Aim / look</td></tr>
+        <tr><td><kbd>FIRE</kbd> · <kbd>USE</kbd></td><td>Shoot · enter / exit car, tank, ship</td></tr>
+        <tr><td><kbd>JUMP</kbd> / <kbd>▲</kbd> · <kbd>▼</kbd></td><td>Jump (handbrake in car, climb in ship) / sink ship</td></tr>
+        <tr><td><kbd>✸</kbd> / <kbd>RLD</kbd></td><td>Plasma grenade / reload (on foot)</td></tr>
+        <tr><td><kbd>🚩 CTF</kbd></td><td>Walk onto the 🔴 flag to grab it, deliver to 🔵 base. Touch dropped 🔵 flag to return it.</td></tr>
+      </table>
+    </div>
+    <div class="foot">Desktop: mouse + keyboard · Mobile: touch controls appear automatically · sound on 🔊</div>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="pause" class="hidden overlay">
+  <div class="panel">
+    <h2>Paused</h2>
+    <p>Pointer unlocked. Click resume, then click the game to re-lock aim.</p>
+    <div class="btn-row"><button id="resume-btn">Resume</button><button id="quit-btn" class="ghost">Restart run</button></div>
+  </div>
+</div>
+
+<!-- Game over -->
+<div id="gameover" class="hidden overlay">
+  <div class="panel">
+    <h2 id="go-title">You died</h2>
+    <p id="go-sub">The ring still needs you.</p>
+    <div class="btn-row"><button id="restart-btn">Restart</button></div>
+  </div>
+</div>
+
+<div id="help-toast" class="hidden">WASD move · LMB fire · E vehicle · G grenade · Space jump · Shift sprint</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>
