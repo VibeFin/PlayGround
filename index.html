@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="icon" href="data:,">
+<title>SKI//HALO — Tribal Clash CTF</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0a0e1a; font-family:'Segoe UI',system-ui,Roboto,Arial,sans-serif; color:#e8eefc; }
+  #app { position:fixed; inset:0; }
+  canvas#scene { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  /* HUD */
+  #hud { position:absolute; inset:0; pointer-events:none; display:none; }
+  #hud.on { display:block; }
+  #crosshair { position:absolute; left:50%; top:50%; width:22px; height:22px; transform:translate(-50%,-50%); }
+  #crosshair:before,#crosshair:after { content:''; position:absolute; background:rgba(255,255,255,.9); box-shadow:0 0 4px #000; }
+  #crosshair:before { left:10px; top:2px; width:2px; height:18px; }
+  #crosshair:after { left:2px; top:10px; width:18px; height:2px; }
+  #hitmarker { position:absolute; left:50%; top:50%; width:26px; height:26px; transform:translate(-50%,-50%) rotate(45deg); opacity:0; }
+  #hitmarker:before,#hitmarker:after { content:''; position:absolute; background:#ffd34d; }
+  #hitmarker:before { left:12px; top:0; width:2px; height:26px; }
+  #hitmarker:after { left:0; top:12px; width:26px; height:2px; }
+  #hitmarker.show { animation:hit .25s ease-out; }
+  @keyframes hit { 0%{opacity:1; transform:translate(-50%,-50%) rotate(45deg) scale(1.4);} 100%{opacity:0; transform:translate(-50%,-50%) rotate(45deg) scale(.8);} }
+  .panel { background:rgba(8,12,24,.72); border:1px solid rgba(120,160,255,.25); border-radius:10px; backdrop-filter: blur(6px); }
+  #topbar { position:absolute; top:10px; left:50%; transform:translateX(-50%); display:flex; gap:14px; align-items:center; padding:8px 18px; font-weight:700; letter-spacing:.5px; }
+  #topbar .score { font-size:26px; min-width:40px; text-align:center; }
+  #topbar .red { color:#ff6b6b; } #topbar .blue { color:#5db4ff; }
+  #topbar .mid { font-size:12px; opacity:.85; text-align:center; line-height:1.2; }
+  #vitals { position:absolute; left:14px; bottom:14px; padding:12px 14px; width:280px; }
+  #vitals .barwrap { margin:6px 0; }
+  #vitals label { font-size:11px; letter-spacing:1px; opacity:.8; }
+  .bar { height:10px; border-radius:6px; background:rgba(255,255,255,.12); overflow:hidden; margin-top:3px; }
+  .bar > div { height:100%; border-radius:6px; transition:width .15s; }
+  #shieldfill { background:linear-gradient(90deg,#37e0ff,#7aa8ff); }
+  #healthfill { background:linear-gradient(90deg,#57ff8a,#c6ff5d); }
+  #jetfill { background:linear-gradient(90deg,#ff9d2e,#ffd34d); }
+  #speedo { font-size:30px; font-weight:800; margin-top:6px; font-variant-numeric:tabular-nums; }
+  #speedo small { font-size:12px; font-weight:600; opacity:.7; }
+  #weapons { position:absolute; right:14px; bottom:14px; padding:10px 12px; display:flex; gap:8px; }
+  .wslot { padding:8px 10px; border-radius:8px; border:1px solid transparent; font-size:12px; text-align:center; min-width:86px; }
+  .wslot b { display:block; font-size:13px; }
+  .wslot.active { border-color:#ffd34d; background:rgba(255,211,77,.12); }
+  #flags { position:absolute; left:14px; top:14px; padding:10px 12px; font-size:13px; line-height:1.5; }
+  #killfeed { position:absolute; right:14px; top:14px; padding:8px 10px; font-size:12px; text-align:right; max-width:300px; }
+  #killfeed div { margin:2px 0; opacity:.95; }
+  #msg { position:absolute; left:50%; top:22%; transform:translateX(-50%); font-size:26px; font-weight:800; text-shadow:0 2px 12px #000; text-align:center; opacity:0; transition:opacity .3s; }
+  #prompt { position:absolute; left:50%; bottom:24%; transform:translateX(-50%); padding:8px 16px; font-size:15px; font-weight:700; display:none; }
+  #minimap { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); border-radius:10px; overflow:hidden; border:1px solid rgba(120,160,255,.3); }
+  #respawn { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(5,8,18,.55); }
+  #respawn.on { display:flex; }
+  #respawn .box { padding:24px 34px; text-align:center; }
+  /* Menu */
+  #menu { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:radial-gradient(ellipse at 50% 30%, rgba(60,90,200,.35), rgba(5,8,18,.88) 70%); z-index:10; }
+  #menu.hidden { display:none; }
+  #menu .card { max-width:720px; width:92%; padding:28px 30px; text-align:center; }
+  #menu h1 { font-size:42px; letter-spacing:2px; font-weight:900; }
+  #menu h1 .a { color:#5db4ff; } #menu h1 .b { color:#ff6b6b; }
+  #menu h2 { font-size:14px; letter-spacing:3px; opacity:.75; margin:6px 0 14px; }
+  #menu p { font-size:14px; line-height:1.55; opacity:.9; }
+  #controls { display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; text-align:left; font-size:13px; margin:16px auto; max-width:560px; background:rgba(255,255,255,.05); padding:14px 16px; border-radius:10px; }
+  #controls b { color:#ffd34d; font-weight:700; }
+  #playBtn { pointer-events:auto; cursor:pointer; margin-top:10px; font-size:20px; font-weight:800; letter-spacing:1px; padding:14px 44px; border-radius:12px; border:1px solid #ffd34d; background:linear-gradient(180deg,#ffd34d,#ff9d2e); color:#1a1200; }
+  #playBtn:hover { filter:brightness(1.08); }
+  #endscreen { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(5,8,18,.7); z-index:9; }
+  #endscreen.on { display:flex; }
+  #endscreen .box { padding:30px 44px; text-align:center; }
+  #endscreen h2 { font-size:44px; }
+  #againBtn { pointer-events:auto; cursor:pointer; margin-top:14px; font-size:16px; font-weight:800; padding:12px 30px; border-radius:10px; border:1px solid #5db4ff; background:#152a52; color:#fff; }
+  #skiInd { position:absolute; left:50%; bottom:110px; transform:translateX(-50%); font-size:12px; font-weight:800; letter-spacing:2px; color:#7df9ff; display:none; }
+  #vehHud { position:absolute; left:50%; bottom:76px; transform:translateX(-50%); padding:6px 14px; font-size:13px; font-weight:700; display:none; }
+  #creditsLine { font-size:13px; font-weight:800; color:#ffd34d; margin-top:4px; letter-spacing:.5px; }
+  #buyPrompt { position:absolute; left:50%; bottom:31%; transform:translateX(-50%); padding:8px 16px; font-size:14px; font-weight:700; display:none; border-color:#ffd34d; }
+  /* Buy menu (vehicle bay) */
+  #buyMenu { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:18px 20px; z-index:20; display:none; text-align:center; pointer-events:auto; min-width:330px; max-width:92%; }
+  #buyMenu.on { display:block; }
+  #buyMenu h3 { font-size:18px; letter-spacing:1px; }
+  #buyMenu h3 span { color:#ffd34d; }
+  #buyMenu p { font-size:12px; opacity:.75; margin:6px 0 12px; }
+  #buyMenu .buyrow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  #buyMenu .buyrow button { cursor:pointer; padding:12px 10px; border-radius:10px; border:1px solid #5db4ff; background:#152a52; color:#fff; min-width:104px; }
+  #buyMenu .buyrow button b { display:block; font-size:14px; color:#ffd34d; }
+  #buyMenu .buyrow button span { font-size:11px; opacity:.8; }
+  #buyMenu .buyrow button:disabled { opacity:.4; cursor:default; }
+  #buyClose { margin-top:12px; cursor:pointer; padding:8px 22px; border-radius:8px; border:1px solid #888; background:#222a3d; color:#fff; font-weight:700; }
+  #buyMsg { min-height:18px; font-size:12px; margin-top:8px; color:#ffb3b3; }
+  /* Touch controls */
+  #touch { position:absolute; inset:0; display:none; pointer-events:none; z-index:5; }
+  body.touch #touch.ingame { display:block; }
+  #stick { position:absolute; left:22px; bottom:110px; width:132px; height:132px; border-radius:50%; border:2px solid rgba(255,255,255,.35); background:rgba(255,255,255,.06); pointer-events:auto; touch-action:none; }
+  #nub { position:absolute; left:50%; top:50%; width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,.35); transform:translate(-50%,-50%); }
+  #tbtns { position:absolute; right:14px; bottom:110px; display:grid; grid-template-columns:repeat(2,64px); gap:10px; pointer-events:auto; }
+  .tb { width:64px; height:64px; border-radius:50%; border:2px solid rgba(255,255,255,.4); background:rgba(20,30,55,.55); color:#fff; font-size:12px; font-weight:800; touch-action:none; }
+  .tb:active { background:rgba(255,211,77,.5); }
+  #tFire { width:84px; height:84px; border-color:#ffd34d; grid-row:span 2; align-self:center; }
+  @media (max-width:760px){ #vitals{width:200px} #controls{grid-template-columns:1fr} #menu h1{font-size:30px} #minimap{display:none} #weapons{display:none} #killfeed{max-width:190px;font-size:11px;top:70px} #topbar{gap:8px;padding:6px 12px} #stick{bottom:262px;left:14px} #tbtns{bottom:150px;right:10px} #buyPrompt{bottom:44%} }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+  <div id="hud">
+    <div id="topbar" class="panel"><span class="score blue" id="scoreBlue">0</span><span class="mid"><span id="timer">15:00</span><br>CTF • FIRST TO 3</span><span class="score red" id="scoreRed">0</span></div>
+    <div id="flags" class="panel">🔷 <span id="flagBlue">HOME</span><br>🔴 <span id="flagRed">HOME</span></div>
+    <div id="killfeed" class="panel"></div>
+    <div id="vitals" class="panel">
+      <div class="barwrap"><label>SHIELD</label><div class="bar"><div id="shieldfill" style="width:100%"></div></div></div>
+      <div class="barwrap"><label>HEALTH</label><div class="bar"><div id="healthfill" style="width:100%"></div></div></div>
+      <div class="barwrap"><label>JETPACK</label><div class="bar"><div id="jetfill" style="width:100%"></div></div></div>
+      <div id="speedo">0 <small>km/h</small></div>
+      <div id="creditsLine">◉ <span id="credits">150</span> CR</div>
+      <div id="posLabel" style="font-size:11px;opacity:.7"></div>
+    </div>
+    <div id="weapons" class="panel">
+      <div class="wslot" id="w1"><b>1 · BR-55</b><span>Rifle</span></div>
+      <div class="wslot" id="w2"><b>2 · SPINFUSOR</b><span>Disc</span></div>
+      <div class="wslot" id="w3"><b>3 · LONGSHOT</b><span>Sniper</span></div>
+    </div>
+    <div id="crosshair"></div><div id="hitmarker"></div>
+    <div id="msg"></div>
+    <div id="prompt" class="panel">Press E to enter vehicle</div>
+    <div id="buyPrompt" class="panel">Press B — BUY VEHICLES</div>
+    <div id="skiInd">— SKIING —</div>
+    <div id="vehHud" class="panel"></div>
+    <canvas id="minimap" width="220" height="220"></canvas>
+  </div>
+  <div id="touch">
+    <div id="stick"><div id="nub"></div></div>
+    <div id="tbtns">
+      <button class="tb" id="tFire">FIRE</button>
+      <button class="tb" id="tJet">JET</button>
+      <button class="tb" id="tSki">SKI</button>
+      <button class="tb" id="tWpn">WPN</button>
+      <button class="tb" id="tUse">USE</button>
+      <button class="tb" id="tBuy">BUY</button>
+    </div>
+  </div>
+  <div id="buyMenu" class="panel">
+    <h3>🛒 VEHICLE BAY · <span id="buyCredits">150</span> CR</h3>
+    <p>Kills +100 · flag return +150 · capture +500 · vehicle kill +150.<br>New vehicles are delivered to the ridge in front of your base.</p>
+    <div class="buyrow">
+      <button data-kind="buggy"><b>BUGGY · 250</b><span>Fast + MG</span></button>
+      <button data-kind="tank"><b>TANK · 600</b><span>Siege cannon</span></button>
+      <button data-kind="wasp"><b>WASP · 800</b><span>VTOL flyer</span></button>
+    </div>
+    <button id="buyClose">CLOSE [B]</button>
+    <div id="buyMsg"></div>
+  </div>
+  <div id="respawn"><div class="box panel"><h2 id="respawnText">You were splattered</h2><p>Respawning…</p></div></div>
+  <div id="menu">
+    <div class="card panel">
+      <h1><span class="a">SKI//</span><span class="b">HALO</span></h1>
+      <h2>TRIBAL CLASH • CTF • VEHICLES • BASES</h2>
+      <p><b>Tribes</b> speed (jetpack + ski) meets <b>Halo</b> CTF (shields, vehicles, bases). Grab the enemy flag, dodge turrets, hijack a Warthog-style buggy, a siege tank or a Wasp flyer, and capture <b>3 flags</b> to win. Bots fight alongside you 5v5.</p>
+      <div id="controls">
+        <div><b>WASD</b> move · <b>Mouse</b> look</div><div><b>SPACE</b> hold = jetpack · tap = jump</div>
+        <div><b>C</b> toggle ski · <b>SHIFT</b> sprint</div><div><b>Click</b> fire · <b>1/2/3</b> weapons</div>
+        <div><b>E</b> enter / exit vehicle</div><div><b>F</b> drop flag · <b>B</b> buy vehicles</div>
+        <div><b>Mobile</b> left stick moves · drag right side aims</div><div><b>BUY</b> earns credits from kills + captures</div>
+      </div>
+      <button id="playBtn">Play Game</button>
+      <p style="margin-top:10px;font-size:12px;opacity:.7">Click locks the mouse. Works with keyboard+mouse. Vehicles: buggy = fast, tank = cannon, wasp = fly (W/S pitch, Space/C up/down).</p>
+    </div>
+  </div>
+  <div id="endscreen"><div class="box panel"><h2 id="endTitle">VICTORY</h2><p id="endSub"></p><br><button id="againBtn">Play Again</button></div></div>
+</div>
+<script type="importmap">{ "imports": { "three": "./three.module.js" } }</script>
+<script type="module" src="./game.js"></script>
+</body>
+</html>
