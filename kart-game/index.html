@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kart Game — Three.js Mario Kart Clone</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1020; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    #app { position: fixed; inset: 0; }
+    #app canvas { display: block; width: 100%; height: 100%; }
+    #hud {
+      position: fixed; inset: 0; pointer-events: none; z-index: 10;
+      color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.7);
+    }
+    #hud-top {
+      position: absolute; top: 12px; left: 16px; right: 16px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      font-size: 20px; font-weight: 700;
+    }
+    #hud-lap, #hud-time, #hud-pos { background: rgba(0,0,0,.45); padding: 6px 12px; border-radius: 10px; }
+    #hud-speed {
+      position: absolute; bottom: 18px; right: 20px;
+      font-size: 28px; font-weight: 800; background: rgba(0,0,0,.5);
+      padding: 8px 16px; border-radius: 12px;
+    }
+    #hud-item {
+      position: absolute; bottom: 18px; left: 20px;
+      font-size: 22px; font-weight: 700; background: rgba(0,0,0,.5);
+      padding: 8px 16px; border-radius: 12px;
+    }
+    #hud-message {
+      position: absolute; top: 22%; width: 100%; text-align: center;
+      font-size: 42px; font-weight: 900; letter-spacing: 1px;
+    }
+    #menu {
+      position: fixed; inset: 0; z-index: 20;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; color: #fff; background: rgba(5,8,20,.78); text-align: center; padding: 24px;
+    }
+    #menu.hidden { display: none; }
+    #menu h1 { font-size: 52px; font-weight: 900; letter-spacing: 2px; }
+    #menu h1 span { color: #ffcf3f; }
+    #menu p { opacity: .85; font-size: 16px; max-width: 560px; line-height: 1.5; }
+    #menu button {
+      pointer-events: auto; cursor: pointer; border: 0; border-radius: 12px;
+      padding: 12px 34px; font-size: 20px; font-weight: 800; background: #ffcf3f; color: #1a1a1a;
+    }
+    #menu button:hover { filter: brightness(1.08); }
+    #countdown {
+      position: fixed; inset: 0; z-index: 15; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 120px; font-weight: 900; color: #ffcf3f;
+      text-shadow: 0 6px 30px rgba(0,0,0,.8); pointer-events: none;
+    }
+    #countdown.hidden { display: none; }
+    #minimap {
+      position: fixed; left: 16px; bottom: 16px; z-index: 11;
+      width: 180px; height: 180px; border-radius: 12px;
+      background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.25);
+    }
+    #paused-banner {
+      position: fixed; inset: 0; z-index: 18; display: none;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,.55); color: #fff; font-size: 40px; font-weight: 900;
+    }
+    #paused-banner.visible { display: flex; }
+    @media (max-width: 700px) {
+      #menu h1 { font-size: 34px; }
+      #hud-message { font-size: 28px; }
+      #minimap { width: 120px; height: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud">
+    <div id="hud-top">
+      <div id="hud-lap">LAP 1/3</div>
+      <div id="hud-time">0:00.0</div>
+      <div id="hud-pos">1st</div>
+    </div>
+    <div id="hud-message"></div>
+    <div id="hud-item">ITEM: —</div>
+    <div id="hud-speed">0 km/h</div>
+  </div>
+
+  <canvas id="minimap" width="180" height="180"></canvas>
+
+  <div id="countdown" class="hidden">3</div>
+
+  <div id="menu">
+    <h1>KART<span>·</span>GAME</h1>
+    <p>WASD / Arrows to drive &middot; Space = item / drift &middot; R = reset &middot; Enter = start.<br/>Desktop 1280&times;720+ recommended. 3 laps — first to finish wins.</p>
+    <button id="start-btn" type="button">START RACE (Enter)</button>
+    <p id="menu-status">Loading…</p>
+  </div>
+
+  <div id="paused-banner">PAUSED — click to resume</div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
