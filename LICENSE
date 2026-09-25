@@ -28,3 +28,8 @@ Third-party notices:
 - Voice clips (assets/voice/*.mp3) were generated with ElevenLabs
   (voice: "Callum") and are distributed under ElevenLabs' license terms,
   not the MIT license above.
+- Station base model (assets/models/station.glb) is "Low-Poly Space Station
+  - 3December" by Šimon Ustal (https://sketchfab.com/simonustal) via
+  Sketchfab, distributed under CC Attribution 4.0
+  (https://creativecommons.org/licenses/by/4.0/), not the MIT license above.
+  See assets/models/station.glb.attribution.json.

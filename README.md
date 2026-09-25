@@ -52,7 +52,47 @@ system harder than the last.
 | Shift | boost |
 | Space + Ctrl | brake-turn |
 | F | fire |
+| J | hyper jump (from a clear sky — no wave bonus, no upgrade) |
 | Esc | pause · settings (mouse sensitivity, invert Y) |
+| H | how to play (start / pause screens) |
+
+Touch devices get on-screen controls: left stick to steer, ◀ ROLL / ROLL ▶
+to bank, FIRE / BOOST / BRAKE hold buttons, a JUMP tap button, and a drag
+THRUST slider.
+TILT enables gyro steering (accelerometer fallback where the gyro is
+unavailable) — hold the phone like a yoke, tap TILT once to enable (current
+pose becomes center), ◎ re-centers mid-flight. The stick keeps working
+alongside tilt.
+
+## How to play
+
+**Objective.** Survive pirate ambushes, clear each wave, and warp to the
+next system — every system hits harder than the last. Kills and wave clears
+score, your best score persists between runs, and a lost hull ends the run.
+
+**The loop.** Cruise until raiders warp in → fight (shields absorb hits and
+regenerate, the hull doesn't) → red alert means shields are down → clear the
+wave to spin up the warp drive → ride the tunnel out and repeat. Drifting
+close to a planet drops you into its atmosphere; climb out and pitch up to
+leave.
+
+**Ship systems.** Shields (100) regenerate after 5 s without damage; hull
+(100) never does — unless you dock: five station bases orbit every system,
+and inside a beacon bubble shields repair fast and the hull slowly.
+The photon cannon builds heat per shot and locks out on overheat, so fire in
+bursts — each cleared wave installs a cannon upgrade
+(MK I → MK IV) that doubles heat endurance. Boost more than doubles top
+speed; brake-turn tightens turns but bleeds speed. Asteroids are solid: a
+head-on impact at speed strips a full shield. Press **J** on a clear sky to
+hyper jump out early — you skip the fight, but also the wave bonus and the
+upgrade.
+
+**Hostiles.** Raiders are baseline chase fighters; interceptors are fast,
+fragile strafers; gunships (system 2+) are slow, tanky, long-range turrets.
+
+**Tips.** Watch the thermal gauge and ease off before overheat; hold
+brake-turn to snap onto crossing targets; boost toward distant targets but
+cut it before overshooting; Esc holds the sim (settings, controls, guide).
 
 ## How it was built
 
@@ -95,6 +135,11 @@ This is a tech demo, and it knows it:
   a gauntlet loop, directed and playtested by
   [Jason Croucher](https://github.com/jason-c-dev). MIT licensed.
 - **Rendering**: [three.js](https://threejs.org) (MIT, vendored).
+- **Station bases**: "Low-Poly Space Station - 3December" by
+  [Šimon Ustal](https://sketchfab.com/simonustal) via Sketchfab,
+  [CC Attribution](https://creativecommons.org/licenses/by/4.0/) —
+  `assets/models/station.glb` (+ attribution sidecar). A procedural fallback
+  station stands in if the GLB can't load.
 - **Ship's computer**: voice lines generated with
   [ElevenLabs](https://elevenlabs.io) (voice: Callum). Distributed under
   ElevenLabs' terms, not MIT — see [LICENSE](LICENSE).

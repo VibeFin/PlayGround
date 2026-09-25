@@ -218,6 +218,23 @@ export function initUI(G) {
 }
 #ir-ui .ir-seg button:hover { color: #ffe6c8; }
 #ir-ui .hidden { display: none !important; }
+/* ---- how to play ---- */
+#ir-howto { width: 560px; max-width: 100%; margin: 14px auto 0; text-align: left; }
+#ir-howto h3 {
+  margin: 16px 0 7px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.28em;
+  color: #ffa23c; text-transform: uppercase;
+}
+#ir-howto h3:first-child { margin-top: 0; }
+#ir-howto p, #ir-howto li {
+  font-size: 11.5px; font-weight: 400; letter-spacing: 0.04em; line-height: 1.65;
+  color: rgba(246,236,224,0.80); text-transform: none;
+}
+#ir-howto p b, #ir-howto li b { color: #ffe6c8; font-weight: 700; }
+#ir-howto ol, #ir-howto ul { margin: 0; padding-left: 20px; }
+#ir-howto li { margin-bottom: 4px; }
+#ir-howto li::marker { color: rgba(255,162,60,0.8); }
+#ir-howto .ir-controls { margin: 8px 0 0; width: 100%; grid-template-columns: 200px 1fr; gap: 8px 18px; }
 /* ---- game over ---- */
 #ir-ui #ir-gameover { padding-top: 150px; }
 /* stat listing: WHITE-first values (the in-world HUD's data grammar — white
@@ -268,6 +285,19 @@ export function initUI(G) {
   margin-top: 3px; font-size: 9px; font-weight: 600; letter-spacing: 0.22em;
   color: rgba(255,255,255,0.42);
 }
+/* ---- small screens: panels fit a phone, controls stack ---- */
+@media (max-width: 720px) {
+  #ir-ui #ir-start, #ir-ui #ir-gameover { padding-top: 40px; }
+  #ir-ui #ir-pause { padding-top: 80px; }
+  #ir-ui .ir-panel { width: calc(100vw - 24px) !important; }
+  #ir-ui .ir-body { padding: 16px 16px 0; }
+  #ir-ui .ir-title { font-size: 28px !important; white-space: normal; }
+  #ir-ui .ir-controls { grid-template-columns: 1fr; gap: 4px; width: 100%; }
+  #ir-ui .ir-act { margin-bottom: 8px; }
+  #ir-ui .ir-btn { width: 100%; max-width: 320px; }
+  #ir-hudscore { top: 12px; right: 14px; }
+  #ir-hudscore .val { font-size: 19px; }
+}
 `;
   document.head.appendChild(style);
 
@@ -280,6 +310,12 @@ export function initUI(G) {
       <span class="ir-headr">${right}</span>
     </div>`;
   const key = (k) => `<span class="ir-key">${k}</span>`;
+  const isTouch = (() => {
+    try {
+      if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return true;
+    } catch (e) {}
+    return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  })();
   const controlRows = [
     [key('MOUSE') + key('HOLD LMB'), 'STEER &nbsp;&middot;&nbsp; FIRE'],
     [key('W') + key('S'), 'THRUST &nbsp;&middot;&nbsp; BRAKE'],
@@ -288,7 +324,16 @@ export function initUI(G) {
     [key('SHIFT'), 'BOOST'],
     [key('SPACE') + key('CTRL'), 'BRAKE-TURN'],
     [key('F'), 'FIRE'],
+    [key('J'), 'HYPER JUMP (CLEAR SKY ONLY)'],
     [key('ESC'), 'PAUSE'],
+    ...(isTouch ? [
+      [key('LEFT STICK'), 'STEER (PITCH &nbsp;&middot;&nbsp; YAW)'],
+      [key('TILT') + key('◎'), 'GYRO / ACCEL STEER &nbsp;&middot;&nbsp; RE-CENTER'],
+      [key('FIRE') + key('THRUST'), 'HOLD FIRE &nbsp;&middot;&nbsp; DRAG THRUST'],
+      [key('BOOST') + key('BRAKE'), 'HOLD BOOST &nbsp;&middot;&nbsp; BRAKE-TURN'],
+      [key('JUMP'), 'HYPER JUMP (CLEAR SKY ONLY)'],
+      [key('◀ ROLL ▶'), 'BANK'],
+    ] : []),
   ].map(([k, a]) => `<div class="ir-keys">${k}</div><div class="ir-act">${a}</div>`).join('');
 
   root.innerHTML = `
@@ -303,7 +348,9 @@ export function initUI(G) {
         <div class="ir-controls">${controlRows}</div>
         <div class="ir-rule"></div>
         <button class="ir-btn primary pulse" id="ir-fly"><i>&#8250;&#8250;</i>CLICK TO FLY</button>
+        <button class="ir-btn" id="ir-start-howto"><i>&#8250;&#8250;</i>HOW TO PLAY</button>
         <button class="ir-btn" id="ir-start-set"><i>&#8250;&#8250;</i>FLIGHT SETTINGS</button>
+        <div id="ir-start-howto-host"></div>
         <div id="ir-start-settings-host"></div>
         <div class="ir-foot">CLICK THE CANOPY TO LAUNCH &middot; <b>ESC</b> HOLDS FLIGHT IN-FLIGHT</div>
       </div>
@@ -317,8 +364,10 @@ export function initUI(G) {
         <div class="ir-sub">SIMULATION SUSPENDED</div>
         <div class="ir-rule"></div>
         <button class="ir-btn primary" id="ir-resume"><i>&#8250;&#8250;</i>RESUME FLIGHT</button>
+        <button class="ir-btn" id="ir-howto-btn"><i>&#8250;&#8250;</i>HOW TO PLAY</button>
         <button class="ir-btn" id="ir-settings-btn"><i>&#8250;&#8250;</i>FLIGHT SETTINGS</button>
         <button class="ir-btn" id="ir-ctl-btn"><i>&#8250;&#8250;</i>CONTROLS</button>
+        <div id="ir-pause-howto-host"></div>
         <div id="ir-pause-settings-host"></div>
         <div class="ir-controls hidden" id="ir-pause-controls" style="margin-top:16px">${controlRows}</div>
         <div class="ir-foot"><b>ESC</b> RESUMES AND RE-ENGAGES THE STICK</div>
@@ -437,6 +486,7 @@ export function initUI(G) {
   const settingsBtnFor = { 'ir-start-settings-host': 'ir-start-set', 'ir-pause-settings-host': 'ir-settings-btn' };
   let settingsOpenBtn = null;
   function openSettings(hostId) {
+    closeHowto();
     el(hostId).appendChild(settingsEl);
     settingsEl.classList.remove('hidden');
     settingsOpenBtn = el(settingsBtnFor[hostId]);
@@ -452,6 +502,71 @@ export function initUI(G) {
     else closeSettings();
   }
   settingsEl.addEventListener('click', (e) => e.stopPropagation());
+
+  // ---------------- how to play ----------------
+  // One node, hosted by whichever overlay is open (same pattern as settings).
+  const howtoEl = document.createElement('div');
+  howtoEl.id = 'ir-howto';
+  howtoEl.className = 'hidden';
+  howtoEl.innerHTML = `
+    <h3>Objective</h3>
+    <p>Survive pirate ambushes, clear each wave, and warp to the next system.
+    Every system hits harder than the last. Kills and wave clears score —
+    your <b>best score</b> persists between runs. If your hull hits zero,
+    the vessel is lost.</p>
+    <h3>The loop</h3>
+    <ol>
+      <li><b>Cruise</b> until raiders warp in — the first wave finds you fast.</li>
+      <li><b>Fight:</b> shields take the hits and regenerate; the hull does not.</li>
+      <li><b>Red alert</b> means shields are down — kill or evade until they bite again.</li>
+      <li><b>Clear the wave</b> to spin up the warp drive, ride the tunnel out, repeat.</li>
+      <li>Impatient? <b>Hyper jump (J)</b> spools the drive from a clear sky — no wave bonus, no upgrade.</li>
+      <li>Five <b>station bases</b> orbit every system: dock inside a beacon bubble to repair shields and hull.</li>
+      <li>Drifting close to a planet drops you into its atmosphere — climb out and pitch up to leave.</li>
+    </ol>
+    <h3>Ship systems</h3>
+    <ul>
+      <li><b>Shields (100)</b> regenerate after 5 s without damage; <b>hull (100)</b> never does.</li>
+      <li><b>Photon cannon</b> builds heat per shot and locks out on overheat — fire in bursts.</li>
+      <li>Each cleared wave installs a <b>cannon upgrade (MK I → MK IV)</b>, doubling heat endurance.</li>
+      <li><b>Boost</b> more than doubles top speed; <b>brake-turn</b> tightens turns but bleeds speed.</li>
+      <li>Asteroids are solid — a head-on impact at speed strips a full shield.</li>
+    </ul>
+    <h3>Hostiles</h3>
+    <ul>
+      <li><b>Raiders</b> — the baseline pirate; honest chase fighters.</li>
+      <li><b>Interceptors</b> — fast, fragile strafers that are hard to track.</li>
+      <li><b>Gunships</b> (system 2+) — slow, tanky, long-range turret fire. Keep moving.</li>
+    </ul>
+    <h3>Tips</h3>
+    <ul>
+      <li>Watch the <b>thermal gauge</b>: ease off before overheat or you go silent for seconds.</li>
+      <li>Hold <b>brake-turn</b> to snap the nose onto a crossing target.</li>
+      <li><b>Boost</b> toward distant targets, cut it before you overshoot into their guns.</li>
+      <li><b>Esc</b> holds the sim — settings, controls and this guide live there.</li>
+    </ul>
+    <h3>Controls</h3>
+    <div class="ir-controls">${controlRows}</div>`;
+  howtoEl.addEventListener('click', (e) => e.stopPropagation());
+
+  const howtoBtnFor = { 'ir-start-howto-host': 'ir-start-howto', 'ir-pause-howto-host': 'ir-howto-btn' };
+  let howtoOpenBtn = null;
+  function openHowto(hostId) {
+    closeSettings();
+    el(hostId).appendChild(howtoEl);
+    howtoEl.classList.remove('hidden');
+    howtoOpenBtn = el(howtoBtnFor[hostId]);
+    howtoOpenBtn.classList.add('active');
+  }
+  function closeHowto() {
+    howtoEl.classList.add('hidden');
+    if (howtoOpenBtn) howtoOpenBtn.classList.remove('active');
+    howtoOpenBtn = null;
+  }
+  function toggleHowto(hostId) {
+    if (howtoEl.classList.contains('hidden')) openHowto(hostId);
+    else closeHowto();
+  }
 
   // ---------------- pointer lock helpers ----------------
   // Chrome imposes a short lockout after an Esc-initiated exit and requires a
@@ -474,6 +589,7 @@ export function initUI(G) {
     G.uiHold = false;
     startLayer.classList.add('hidden');
     closeSettings();
+    closeHowto();
     paintScoreHud();  // readout up on the same frame as the launch
     G.post.whiteout = 1; // arrival-style fade into flight (game's own grammar)
     tryLock();           // audio unlocks itself off this same click (audio.js)
@@ -493,6 +609,7 @@ export function initUI(G) {
     G.uiHold = true;
     pausedAt = performance.now();
     closeSettings();
+    closeHowto();
     pauseControls.classList.add('hidden');
     el('ir-ctl-btn').classList.remove('active');
     paintScoreHud();  // readout down with the sim, not 150ms later
@@ -509,6 +626,7 @@ export function initUI(G) {
     G.uiState = 'running';
     G.uiHold = false;
     closeSettings();
+    closeHowto();
     pauseLayer.classList.add('hidden');
     paintScoreHud();
     if (G.state === 'red-alert' && G.audio && G.audio.klaxonOn) G.audio.klaxonOn();
@@ -538,6 +656,7 @@ export function initUI(G) {
     el('ir-go-shipline').textContent =
       `HULL INTEGRITY ZERO · VESSEL ${G.names.ship} LOST`.toUpperCase();
     closeSettings();
+    closeHowto();
     pauseLayer.classList.add('hidden');
     gameoverLayer.classList.remove('hidden');
     if (G.audio && G.audio.klaxonOff) G.audio.klaxonOff();
@@ -584,16 +703,20 @@ export function initUI(G) {
 
   // start overlay: any click launches, except clicks on its own controls
   startLayer.addEventListener('click', () => {
-    if (!settingsEl.classList.contains('hidden')) return; // settings open: explicit launch only
+    // settings or guide open: explicit launch only
+    if (!settingsEl.classList.contains('hidden') || !howtoEl.classList.contains('hidden')) return;
     start();
   });
-  el('ir-fly').addEventListener('click', (e) => { e.stopPropagation(); closeSettings(); start(); });
+  el('ir-fly').addEventListener('click', (e) => { e.stopPropagation(); closeSettings(); closeHowto(); start(); });
+  el('ir-start-howto').addEventListener('click', (e) => { e.stopPropagation(); toggleHowto('ir-start-howto-host'); });
   el('ir-start-set').addEventListener('click', (e) => { e.stopPropagation(); toggleSettings('ir-start-settings-host'); });
 
   el('ir-resume').addEventListener('click', (e) => { e.stopPropagation(); resume(); });
+  el('ir-howto-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleHowto('ir-pause-howto-host'); });
   el('ir-settings-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleSettings('ir-pause-settings-host'); });
   el('ir-ctl-btn').addEventListener('click', (e) => {
     e.stopPropagation();
+    closeHowto();
     const showing = pauseControls.classList.toggle('hidden');
     el('ir-ctl-btn').classList.toggle('active', !showing);
   });
@@ -603,6 +726,11 @@ export function initUI(G) {
   // catches it). In the menu Esc resumes, guarded so the browser's lock-exit
   // Esc cannot pause and resume within one press.
   window.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyH') {
+      if (G.uiState === 'start') toggleHowto('ir-start-howto-host');
+      else if (G.uiState === 'paused') toggleHowto('ir-pause-howto-host');
+      return;
+    }
     if (e.code !== 'Escape') return;
     if (G.uiState === 'running') {
       pause();
@@ -614,6 +742,17 @@ export function initUI(G) {
   // browser-reserved Esc during pointer lock: lock drops -> pause
   document.addEventListener('pointerlockchange', () => {
     if (document.pointerLockElement !== canvas && G.uiState === 'running') pause();
+  });
+
+  // touch: friendlier launch label + auto-pause when the tab is backgrounded
+  // (mobile browsers juggle tabs aggressively; returning to a live sim that
+  // ran on while hidden is a cheap death).
+  if (isTouch) {
+    const fly = el('ir-fly');
+    if (fly) fly.innerHTML = '<i>&#8250;&#8250;</i>TAP TO FLY';
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && G.uiState === 'running') pause();
   });
 
   return { start, pause, resume };

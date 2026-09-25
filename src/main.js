@@ -10,6 +10,8 @@ import { initVfx } from './vfx.js';
 import { initFlight } from './flight.js';
 import { initCockpit } from './cockpit.js';
 import { runPrewarm } from './prewarm.js';
+import { initTouch } from './touch.js';
+import { initStations } from './stations.js';
 
 // ---------------- error capture (before anything can throw) ----------------
 const errors = [];
@@ -125,6 +127,7 @@ const G = {
     wave: 0, shotsFired: 0, hitsRegistered: 0, enemiesKilled: 0,
     enemyShotsFired: 0, enemyEvadeEvents: 0, enemyLeadShots: 0,
     warpCount: 0, redAlertsEntered: 0,
+    hyperJumps: 0, // manual hyper jumps (J key) — wave-clear warps are not counted
     boostSeconds: 0, brakeTurns: 0, waveStats: [],
     // r9 gameplay-systems package
     score: 0, deaths: 0, wavesCleared: 0, waveBonusTotal: 0,
@@ -168,6 +171,8 @@ initVfx(G);
 initFlight(G);
 initCockpit(G);
 initPost(G);
+initTouch(G); // touch controls: no DOM + neutral state under harness (see touch.js)
+initStations(G); // station bases: procedural now, GLB body settles async (see stations.js)
 
 G.space.setSystem(0);
 G.planet.setSystem(0);
@@ -200,6 +205,28 @@ function exitPlanetMode() {
 }
 G.enterPlanetMode = enterPlanetMode;
 G.exitPlanetMode = exitPlanetMode;
+
+G.requestHyperJump = () => {
+  // Manual hyper jump (J key / JUMP touch button): skip the wave grind and
+  // spool the warp drive straight to the next system. Same tunnel as a
+  // wave-clear warp, but no wave bonus and no cannon upgrade — those are
+  // earned by fighting, not by leaving. Only spools from a clear sky:
+  // cruise/planet in space mode with no live hostiles and nothing spawning.
+  if (SCRIPTED || G.momentMode) return false;
+  if (G.mode !== 'space') return false;
+  if (G.state !== 'cruise' && G.state !== 'planet') return false;
+  const F = G.flight;
+  if (!F) return false;
+  if (F.aliveCount() > 0 || (F.wave.active && F.wave.toSpawn > 0)) return false;
+  SM.set('warp-charge', 3.5);
+  const nrng = G.rngFor('names' + (G.systemIndex + 1));
+  G.names.nextSystem = genSystemName(nrng);
+  G.audio.warpSwell();
+  G.audio.say && G.audio.say('warp-charge');
+  SM.beginSystemBuild(G.systemIndex + 1);
+  G.telemetryData.hyperJumps++;
+  return true;
+};
 
 G.enterRedAlert = () => {
   if (G.state === 'red-alert') return;
@@ -393,6 +420,7 @@ const SM = {
           G.noteSpike('warp-off');
           G.vfx.setWarp(false);
           G.systemIndex++;
+          G.stations.setSystem(G.systemIndex); // reposition only — no new geometry
           G.names.system = G.names.nextSystem;
           const nrng = G.rngFor('pnames' + G.systemIndex);
           G.names.planet = genPlanetName(nrng);
@@ -458,12 +486,20 @@ const SM = {
 
 // ---------------- input ----------------
 const keys = {};
-window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+let hyperJumpPressed = false; // edge-triggered by the J key (consumed in tick)
+window.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+  if (e.code === 'KeyJ' && !e.repeat) hyperJumpPressed = true;
+});
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 let mouseDX = 0, mouseDY = 0, mouseDown = false;
 renderer.domElement.addEventListener('mousedown', () => {
   mouseDown = true;
-  if (!SESSION && !MOMENT && document.pointerLockElement !== renderer.domElement) {
+  // touch devices have no pointer lock — requesting it from a tap just throws
+  // the player into a lock-error / Esc-to-exit loop, so stand down when a
+  // touch session is live.
+  const touchLive = G.touch && (G.touch.active || G.touch.stickActive || G.touch.fire || G.touch.tiltEnabled);
+  if (!SESSION && !MOMENT && !touchLive && document.pointerLockElement !== renderer.domElement) {
     renderer.domElement.requestPointerLock?.();
   }
 });
@@ -492,6 +528,36 @@ function pollInput(dt) {
   inp.boost = !!keys.ShiftLeft || !!keys.ShiftRight;
   inp.brake = !!keys.Space || !!keys.ControlLeft;
   inp.fire = mouseDown || !!keys.KeyF;
+  // touch controls (touch.js) — neutral under harness/moment/session, so this
+  // block is a no-op there and determinism is untouched. Stick deflection and
+  // tilt attitude add to the keyboard/mouse axes like extra hands on one yoke;
+  // buttons OR in; the thrust slider overrides the W/S default only once the
+  // player has dragged it.
+  const T = G.touch;
+  if (T && !SCRIPTED && !MOMENT) {
+    let touchYawExtra = 0;
+    if (T.stickActive) {
+      inp.pitch = THREE.MathUtils.clamp(inp.pitch + T.stickPitch, -1, 1);
+      inp.yaw = THREE.MathUtils.clamp(inp.yaw + T.stickYaw, -1, 1);
+      touchYawExtra += T.stickYaw;
+    }
+    if (T.tiltActive) {
+      inp.pitch = THREE.MathUtils.clamp(inp.pitch + T.tiltPitch, -1, 1);
+      inp.yaw = THREE.MathUtils.clamp(inp.yaw + T.tiltYaw, -1, 1);
+      touchYawExtra += T.tiltYaw;
+    }
+    // coordinated bank: yawing the stick / yoke rolls the ship a little, so
+    // mobile turns feel like turns even without touching the ROLL buttons
+    if (touchYawExtra !== 0 && !keys.KeyA && !keys.KeyD && !T.rollLeft && !T.rollRight) {
+      inp.roll = THREE.MathUtils.clamp(inp.roll - touchYawExtra * 0.6, -1, 1);
+    }
+    if (T.rollLeft) inp.roll = THREE.MathUtils.clamp(inp.roll + 1, -1, 1);
+    if (T.rollRight) inp.roll = THREE.MathUtils.clamp(inp.roll - 1, -1, 1);
+    if (T.thrust !== null && T.thrust !== undefined) inp.thrust = T.thrust;
+    if (T.boost) inp.boost = true;
+    if (T.brake) inp.brake = true;
+    if (T.fire) inp.fire = true;
+  }
 }
 
 // ---------------- autopilot (?session=1) ----------------
@@ -1035,6 +1101,14 @@ let _dieTestT = 1.5; // ?dietest=1 integrity-cascade cadence (first tick after 1
 function tick(dt) {
   G.time += dt;
   pollInput(dt);
+  // manual hyper jump (J key / JUMP touch button): edge-triggered, consumed
+  // here so one press spools exactly one jump. requestHyperJump re-checks the
+  // sky, so a press mid-fight is silently dropped, not queued.
+  if (hyperJumpPressed || (G.touch && G.touch.jumpRequested)) {
+    hyperJumpPressed = false;
+    if (G.touch) G.touch.jumpRequested = false;
+    G.requestHyperJump();
+  }
   if (G.state === 'destroyed') {
     // dead stick: controls are gone, the tumble in SM owns the camera
     const inp = G.input;
@@ -1089,7 +1163,10 @@ function tick(dt) {
     G.flight.update(dt); sec(0);
     SM.update(dt); sec(1);
     G.space.update(dt, G.time); sec(2);
-    G.planet.update(dt, G.time); sec(3);
+    G.planet.update(dt, G.time);
+    // stations share the planet timing slot (index 3): 5 static bases, no
+    // geometry work per frame — well below the spike-attribution threshold.
+    G.stations.update(dt, G.time); sec(3);
     G.vfx.update(dt, G.time); sec(4);
     G.cockpit.update(dt, G.time); sec(5);
     G.audio.update(dt); sec(6);
@@ -1293,6 +1370,17 @@ window.__telemetry = function () {
       enemyLeadShots: T.enemyLeadShots,
       warpCount: T.warpCount,
       redAlertsEntered: T.redAlertsEntered,
+      // manual hyper jumps (J key / JUMP button). Wave-clear warps are counted
+      // in warpCount only — this is the "skipped the fight" counter.
+      hyperJumps: T.hyperJumps,
+      // dock entries at station bases (stations.js repair bubble). Direct event
+      // counter, same rationale as the r14/r15 counters above.
+      stationsDocked: T.stationsDocked || 0,
+      stationsPerSystem: G.stations ? G.stations.count : 0,
+      // which station body the boot settled on: 'glb' (Sketchfab model) or
+      // 'fallback' (procedural). A fallback here means the GLB fetch/parse
+      // failed — check G.stations.loadInfo.error in that case.
+      stationModel: G.stations ? G.stations.loadInfo.mode : 'none',
       boostSeconds: Math.round(T.boostSeconds * 10) / 10,
       brakeTurns: T.brakeTurns,
       // r14-collide: ship-vs-asteroid contacts, surfaced here because this
@@ -1358,6 +1446,9 @@ if (MOMENT >= 1 && MOMENT <= 5) {
 // src/prewarm.js for the measurement that motivated the rewrite and for what
 // happens when a future round adds a variant this file has never heard of.
 // Kept here: only the call site and the report handoff.
+// Station bodies settle first (GLB before the sweep, bounded wait): anything
+// created after boot would trip the prewarm tripwire on first draw.
+await G.stations.ready;
 const prewarmReport = runPrewarm({ G, scene, camera, renderer, FIXED_DT, planetSysNow, harness: HARNESS });
 
 
