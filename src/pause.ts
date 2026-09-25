@@ -9,7 +9,7 @@
 const TAP = 0.4; // s: shorter Esc presses are taps
 const HOLD = 0.5; // s: with keyboard lock, release the mouse once Esc has been held this long
 
-const CONTROLS: [string, string][] = [
+const DESKTOP_CONTROLS: [string, string][] = [
   ["W  S", "pedal · brake"],
   ["A  D", "steer"],
   ["Shift", "sprint · run"],
@@ -21,6 +21,26 @@ const CONTROLS: [string, string][] = [
   ["B", "bell"],
   ["M", "mute"],
 ];
+
+const TOUCH_CONTROLS: [string, string][] = [
+  ["Stick", "pedal · brake · steer"],
+  ["Drag", "look around"],
+  ["»", "sprint (hold) · run"],
+  ["F", "walk · ride"],
+  ["C", "cinematic cameras"],
+  ["V", "first person"],
+  ["T", "time of day"],
+  ["♪", "bell"],
+];
+
+function touchDevice(): boolean {
+  const forced = new URLSearchParams(location.search).get("touch");
+  if (forced === "1") return true;
+  if (forced === "0") return false;
+  return "ontouchstart" in window || navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches;
+}
+
+const CONTROLS: [string, string][] = touchDevice() ? TOUCH_CONTROLS : DESKTOP_CONTROLS;
 
 type Nav = Navigator & { keyboard?: { lock?: (codes?: string[]) => Promise<void>; unlock?: () => void } };
 
@@ -49,7 +69,11 @@ export class Pause {
       <div class="prule"></div>
       <dl class="pkeys">${CONTROLS.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>
       <div class="pgo">click to resume</div>
-      <div class="pnote"><b>Esc</b> · <b>Enter</b> · <b>Space</b> also resume &nbsp;—&nbsp; hold <b>Esc</b> to free the mouse</div>
+      <div class="pnote">${
+        touchDevice()
+          ? `tap <b>II</b> or the screen to resume`
+          : `<b>Esc</b> · <b>Enter</b> · <b>Space</b> also resume &nbsp;—&nbsp; hold <b>Esc</b> to free the mouse`
+      }</div>
     </div>`;
     document.body.appendChild(this.el);
     this.el.addEventListener("pointerdown", (e) => {

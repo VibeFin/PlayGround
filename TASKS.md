@@ -14,6 +14,7 @@ The game is live on GitHub Pages (public repo StarKnightt/summer-cycle), the Ver
 - [x] Synthesized soundscape (bike, wind, cicadas, birds, water, ambience)
 
 ## In progress
+- [x] Mobile controls + mobile perf tier (`src/core/touch.ts`): thumb stick (pedal/brake/steer, camera-relative walk on foot), drag-to-look while riding, pinch zoom on foot, sprint/F/C/V/T/bell buttons via the existing key handlers, pause button; low tier on coarse pointers (pixel ratio ≤ 1, MSAA 0 + SMAA, 1k shadows, quarter-res reflections every 3rd frame); `?quality=`, `?touch=`, `?dpr=` overrides; loader/pause hints touch-aware; README updated. Verified headless (software GL): low tier + touch UI + stick pedal/steer/walk + pause/resume, zero console errors; desktop defaults unchanged. Unconfirmed: `scripts/explore.mjs` (no GPU here), real-device feel and frame rate
 - [x] Performance pass to ≥90 fps: 118 fps avg / 110 min afternoon, 116 sunset, 112 dusk (MSAA x4) — shader specialisation, distance LOD, half-rate paddy mirror with far-LOD trees
 - [x] Detailed mamachari bicycle (`feature/bike`, merged, branch + worktree removed)
 - [x] Pointer lock after loader + mouse look while riding/FPP (`feature/mouse`, merged, branch + worktree removed)

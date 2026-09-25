@@ -68,10 +68,18 @@ export class Loader {
     this.go = go;
     this.el.classList.add("go");
     this.pendingText = null;
-    this.show("click or press any key to ride", true);
+    const qs = new URLSearchParams(location.search);
+    const touch =
+      qs.get("touch") === "1" ||
+      (qs.get("touch") !== "0" &&
+        ("ontouchstart" in window || navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches));
+    this.show(touch ? "tap to ride" : "click or press any key to ride", true);
     const hint = this.el.querySelector<HTMLElement>(".hint");
-    const auto = new URLSearchParams(location.search).has("autoplay");
-    if (hint && !auto) hint.innerHTML = "<b>W</b> pedal &nbsp;·&nbsp; <b>Shift</b> sprint &nbsp;·&nbsp; <b>A D</b> steer &nbsp;·&nbsp; <b>S</b> brake &nbsp;·&nbsp; <b>V</b> view &nbsp;·&nbsp; <b>mouse</b> look &nbsp;·&nbsp; <b>B</b> bell &nbsp;·&nbsp; <b>Esc</b> pause";
+    const auto = qs.has("autoplay");
+    if (hint && !auto)
+      hint.innerHTML = touch
+        ? "<b>stick</b> pedal &amp; steer &nbsp;·&nbsp; <b>drag</b> look &nbsp;·&nbsp; <b>»</b> sprint &nbsp;·&nbsp; <b>F</b> walk"
+        : "<b>W</b> pedal &nbsp;·&nbsp; <b>Shift</b> sprint &nbsp;·&nbsp; <b>A D</b> steer &nbsp;·&nbsp; <b>S</b> brake &nbsp;·&nbsp; <b>V</b> view &nbsp;·&nbsp; <b>mouse</b> look &nbsp;·&nbsp; <b>B</b> bell &nbsp;·&nbsp; <b>Esc</b> pause";
   }
 
   /** Watercolour dissolve: holes bloom outward from the middle through the paper, pigment pooling at the edges. */

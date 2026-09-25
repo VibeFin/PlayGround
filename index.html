@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23f2c028'/%3E%3C/svg%3E" />
     <title>Summer Cycle — a summer afternoon on two wheels</title>
     <meta name="description" content="A Ghibli- and Shinkai-style bicycle ride through the Japanese countryside at four times of day, with every mesh, texture and sound generated in code. Plays in your browser." />
@@ -23,8 +23,9 @@
     <meta name="twitter:image" content="https://starknightt.github.io/summer-cycle/og.jpg" />
     <meta name="twitter:image:alt" content="A girl cycling past flooded rice paddies at sunset, under the title Summer Cycle" />
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #f4ecd8; }
-      canvas { display: block; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #f4ecd8;
+        overscroll-behavior: none; touch-action: none; }
+      canvas { display: block; touch-action: none; }
       #hud {
         position: fixed; right: 28px; bottom: 22px;
         font: 500 15px/1 "Georgia", "Times New Roman", serif; letter-spacing: 0.08em;

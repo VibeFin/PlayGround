@@ -3,7 +3,9 @@ import { defineConfig } from "vite";
 export default defineConfig({
   base: "./",
   server: { port: 5421, strictPort: true, open: false },
-  preview: { port: 5420, strictPort: true, open: false },
+  // allowedHosts: start.sh serves dist/ through `vite preview` behind a public
+  // tunnel whose hostname changes per session, so the preview must accept it.
+  preview: { port: 5420, strictPort: true, open: false, allowedHosts: true },
   build: {
     target: "es2022",
     sourcemap: false,

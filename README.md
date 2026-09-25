@@ -23,6 +23,8 @@ sets the sun from afternoon to dusk over 40 seconds.
 **The brief it was built from: [PROMPT.md](PROMPT.md).**
 
 It wants a desktop GPU and a Chromium-based browser. It was built and measured on an RTX 4060.
+Phones and tablets get a touch UI (thumb stick, drag-to-look, action buttons) and a lighter
+rendering tier automatically; see the controls and URL options below.
 
 ## Running it locally
 
@@ -73,6 +75,20 @@ On foot, W A S D walk relative to the camera, the mouse orbits it and the wheel 
 wander the verges, the lots around the houses and the paddy banks, but not the water, the houses,
 the poles, the trunks or the fences.
 
+### Touch (phones and tablets)
+
+| Input | Action |
+|---|---|
+| Left stick | Push up to pedal (walk ahead on foot), down to brake, sideways to steer |
+| Drag the scene | Look around while riding; orbits the camera on foot (pinch zooms) |
+| » (hold) | Sprint while riding; jog while on foot |
+| F · C · V · T · ♪ | Same as the keyboard: walk/ride, cinematic cameras, first person, time of day, bell |
+| II | Pause; tap the screen to resume |
+
+Coarse-pointer devices automatically use the lighter rendering tier: pixel ratio capped at 1,
+SMAA instead of MSAA, 1k shadow maps, and quarter-resolution paddy reflections refreshed every
+third frame. The desktop defaults are unchanged.
+
 | URL option | Effect |
 |---|---|
 | `autoplay=1` | Rides by itself, steering a line left of centre, with no UI; ignores the mouse |
@@ -83,6 +99,9 @@ the poles, the trunks or the fences.
 | `fs=0` | Does not go fullscreen on the starting click |
 | `start=-54` | Starts at another point along the road (metres; -54 is the opening composition) |
 | `msaa=0\|2\|4` | Pins the anti-aliasing level instead of adapting it |
+| `quality=low\|high` | Pins the mobile rendering tier (low: capped pixel ratio, SMAA, 1k shadows, cheaper reflections) instead of auto-detecting it |
+| `touch=0\|1` | Hides / forces the touch UI instead of auto-detecting it |
+| `dpr=1` | Caps the pixel ratio directly |
 | `prof=1` | Turns on the GPU timer-query profiler used by `scripts/perf.mjs` |
 | `kuwahara=0` | Turns the paint filter off, for comparison |
 | `nohud=1` | Hides the speed readout |
@@ -264,7 +283,9 @@ prints GPU milliseconds per pass alongside the frame rate, which is how contenti
   untested.
 - **Fonts.** The shop signs are drawn with the system's Japanese fonts. Without a CJK font
   installed they render as boxes.
-- **Hardware.** It needs a desktop-class GPU. There is no mobile or low-quality mode.
+- **Hardware.** It needs a desktop-class GPU for the full tier. Phones and tablets fall back to
+  a lighter tier (capped pixel ratio, SMAA, smaller shadows and reflections), which is untested
+  on real mobile GPUs.
 
 ## How it was built
 

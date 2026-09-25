@@ -10,3 +10,19 @@ shots/critic-*/
 # research scratch
 refs/web/
 scripts/_refgrab.mjs
+
+screenshots/
+
+*.pid
+
+.agents/
+
+.agentsweb/
+
+.omgithub-runtime/
+
+.opencode-ssh/
+
+.opencode-web/
+
+node_modules/

@@ -575,12 +575,15 @@ export class Explore {
   }
 
   private locomotion(dt: number, input: Input): void {
-    let fwd = (input.up ? 1 : 0) - (input.down ? 1 : 0);
-    let str = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    // Keyboard booleans OR the touch joystick (clamped to -1..1).
+    let fwd = (input.up ? 1 : 0) - (input.down ? 1 : 0) + Math.max(-1, Math.min(1, input.ay));
+    let str = (input.right ? 1 : 0) - (input.left ? 1 : 0) + Math.max(-1, Math.min(1, input.ax));
+    fwd = Math.max(-1, Math.min(1, fwd));
+    str = Math.max(-1, Math.min(1, str));
     const sy = Math.sin(this.oYaw), cy = Math.cos(this.oYaw);
     let wx = -sy * fwd + cy * str;
     let wz = -cy * fwd - sy * str;
-    let runKey = this.shiftKey;
+    let runKey = this.shiftKey || input.sprint;
     if (this.autoWalk) {
       wx = this.autoWalk.dx;
       wz = this.autoWalk.dz;
@@ -593,7 +596,8 @@ export class Explore {
     if (len > 0.01) {
       wx /= len;
       wz /= len;
-      want = runKey ? RUN : WALK;
+      // Partial joystick deflection walks slower (keyboard stays full speed).
+      want = (runKey ? RUN : WALK) * Math.min(1, len);
       const err = this.steerToward(Math.atan2(-wx, -wz), dt, want > WALK ? 7 : 9);
       // Turn on the spot for big direction changes, then set off.
       want *= clamp(Math.cos(err) * 1.2, 0.1, 1);
@@ -642,6 +646,12 @@ export class Explore {
     this.oDist = clamp(dist, 1.4, 7);
     this.dCur = this.oDist;
     this.touched = 1e9;
+  }
+
+  /** Touch pinch zoom: factor > 1 moves the camera out (same limits as the wheel). */
+  zoomBy(factor: number): void {
+    this.oDist = clamp(this.oDist * factor, 1.4, 7);
+    this.touched = 3;
   }
 
   /** Test hook: stand at road-relative (u, z) facing `yaw`. */

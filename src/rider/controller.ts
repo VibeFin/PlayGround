@@ -68,9 +68,13 @@ export class Controller {
       const delta = Math.atan((2 * BIKE.WHEELBASE * Math.sin(err)) / la);
       steerIn = clamp(delta / 0.3, -1, 1);
     } else {
-      throttle = input.up ? 1 : 0;
-      brake = input.down ? 1 : 0;
-      steerIn = (input.left ? 1 : 0) - (input.right ? 1 : 0);
+      // Keyboard booleans OR the touch joystick (clamped to -1..1).
+      const joyF = Math.max(-1, Math.min(1, input.ay));
+      const joyS = Math.max(-1, Math.min(1, input.ax));
+      throttle = input.up ? 1 : Math.max(0, joyF);
+      brake = input.down ? 1 : Math.max(0, -joyF);
+      steerIn = (input.left ? 1 : 0) - (input.right ? 1 : 0) - joyS;
+      steerIn = Math.max(-1, Math.min(1, steerIn));
     }
 
     // Sprint: Shift (with or without W) pushes toward SPRINT_MAX; releasing lets the cap sink back

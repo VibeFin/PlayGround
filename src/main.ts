@@ -11,6 +11,7 @@ import { Controller } from "./rider/controller";
 import { ChaseCam, type CamMode } from "./rider/camera";
 import { Explore, houseAt } from "./rider/onfoot";
 import { Input } from "./core/input";
+import { TouchControls, touchUI } from "./core/touch";
 import { RideAudio } from "./audio";
 import { Loader, fatal, type Stage } from "./loader";
 import { Pause } from "./pause";
@@ -25,6 +26,20 @@ import { specializeUber } from "./render/materials";
 const params = new URLSearchParams(location.search);
 const AUTOPLAY = params.has("autoplay") && params.get("autoplay") !== "0";
 const KUWA = params.get("kuwahara") !== "0";
+/**
+ * Mobile quality tier. Coarse pointers / mobile UAs get the low tier unless
+ * ?quality=high pins it back up; desktops can opt in with ?quality=low (?low=1).
+ * Low tier: pixel ratio capped at 1, no scene MSAA (SMAA instead), 1k shadows,
+ * quarter-res paddy reflections refreshed every 3rd frame.
+ */
+const QUALITY = params.get("quality") ?? (params.has("low") && params.get("low") !== "0" ? "low" : "");
+const COARSE = matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const LOW = QUALITY === "low" ? true : QUALITY === "high" ? false : COARSE;
+const TOUCH = touchUI();
+const dprParam = Number(params.get("dpr"));
+const PR_CAP = params.has("dpr") && Number.isFinite(dprParam) && dprParam > 0 ? dprParam : LOW ? 1 : 1.5;
+const MSAA_DEFAULT = LOW ? 0 : 4;
+const REFL_SCALE = LOW ? 0.25 : 0.5;
 /** Go straight into the ride once built (no "click to ride" wait) — for automated captures. */
 const SKIP_INTRO = params.has("skipintro") && params.get("skipintro") !== "0";
 // Loader progress weights (sum 1), proportional to measured build time on a desktop GPU.
@@ -47,7 +62,7 @@ renderer.domElement.addEventListener("webglcontextlost", (e) => {
 });
 // Render targets and programs would all need rebuilding: a clean reload is the reliable path.
 renderer.domElement.addEventListener("webglcontextrestored", () => location.reload());
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setPixelRatio(Math.min(devicePixelRatio, PR_CAP));
 renderer.setSize(innerWidth, innerHeight);
 renderer.autoClear = true;
 renderer.info.autoReset = false;
@@ -101,8 +116,9 @@ scene.add(birds.group);
 const fireflies = new Fireflies();
 scene.add(fireflies.mesh);
 
-const shadow = new SunShadow(2048, 55);
-const reflection = new PaddyReflection(Math.floor(innerWidth * 0.5), Math.floor(innerHeight * 0.5));
+const shadow = new SunShadow(LOW ? 1024 : 2048, 55);
+const reflection = new PaddyReflection(Math.floor(innerWidth * REFL_SCALE), Math.floor(innerHeight * REFL_SCALE));
+reflection.every = LOW ? 3 : 2;
 
 const startParam = params.get("start");
 const ctl = new Controller(AUTOPLAY, startParam !== null && Number.isFinite(Number(startParam)) ? Number(startParam) : undefined);
@@ -112,7 +128,7 @@ if (camParam === "fpp") {
   chase.fpp = 1;
 } else if (camParam) chase.mode = camParam as CamMode;
 if (!params.has("nospec")) for (const o of [rider.root, rider.walker, birds.group, fireflies.mesh]) specializeUber(o);
-const post = new Post(renderer, innerWidth, innerHeight, { kuwahara: KUWA, msaa: Number(params.get("msaa") ?? 4) });
+const post = new Post(renderer, innerWidth, innerHeight, { kuwahara: KUWA, msaa: Number(params.get("msaa") ?? MSAA_DEFAULT) });
 const prof = new Profiler(renderer, params.has("prof"));
 post.prof = prof;
 const MSAA_PINNED = params.has("msaa");
@@ -220,6 +236,7 @@ chase.mouseLook = !AUTOPLAY;
 explore.lockRiding = !AUTOPLAY;
 const canvasEl = renderer.domElement;
 const lockPointer = () => {
+  if (TOUCH) return; // phones/tablets look with a drag, there is no pointer to lock
   try {
     const p = canvasEl.requestPointerLock() as unknown as Promise<void> | undefined;
     p?.catch?.(() => {});
@@ -245,12 +262,12 @@ Object.assign(lookHint.style, {
   userSelect: "none",
   opacity: "0",
   transition: "opacity 0.8s ease",
-  display: AUTOPLAY || params.has("nohud") ? "none" : "block",
+  display: AUTOPLAY || TOUCH || params.has("nohud") ? "none" : "block",
 });
 document.body.appendChild(lookHint);
 let lookHintTimer = 0;
 const showLookHint = () => {
-  if (AUTOPLAY || explore.onFoot || pause.paused) return;
+  if (AUTOPLAY || TOUCH || explore.onFoot || pause.paused) return;
   lookHint.style.opacity = "1";
   clearTimeout(lookHintTimer);
   lookHintTimer = window.setTimeout(() => (lookHint.style.opacity = "0"), 2000);
@@ -261,7 +278,8 @@ document.addEventListener("pointerlockchange", () => {
 });
 
 // Esc: tap = pause menu, hold = just free the mouse. Blur / tab switch pause too.
-const FULLSCREEN = params.get("fs") !== "0";
+// (Touch devices get a pause button instead of Esc; no fullscreen either.)
+const FULLSCREEN = params.get("fs") !== "0" && !TOUCH;
 const pause = new Pause(canvasEl, {
   onPause: () => {
     audio.setPaused(true);
@@ -275,12 +293,32 @@ const pause = new Pause(canvasEl, {
   lookHint: () => showLookHint(),
 });
 
+// Touch controls: thumb stick + look drag + action buttons (no-op without touch).
+// Hidden during autoplay (she steers herself) and while the pause menu is up.
+const touch = new TouchControls(
+  input,
+  {
+    onFirst: () => audio.start(),
+    onLook: (dx, dy) => {
+      if (!explore.onFoot) chase.lookBy(dx, dy);
+    },
+    isOnFoot: () => explore.onFoot,
+    onPauseToggle: () => {
+      if (pause.paused) pause.resume(true);
+      else pause.pause();
+    },
+    onPinch: (f) => explore.zoomBy(f),
+  },
+  canvasEl,
+);
+touch.attach();
+
 addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
   chase.cam.aspect = innerWidth / innerHeight;
   chase.cam.updateProjectionMatrix();
   post.setSize(innerWidth, innerHeight);
-  reflection.setSize(Math.floor(innerWidth * 0.5), Math.floor(innerHeight * 0.5));
+  reflection.setSize(Math.floor(innerWidth * REFL_SCALE), Math.floor(innerHeight * REFL_SCALE));
   // Resizing clears the canvas: redraw the frozen frame once.
   if (pause.paused) post.render(scene, chase.cam, t);
 });
@@ -314,6 +352,8 @@ let warm = 0;
 /** Intro mode: the finished frame waits (clock frozen, loop idle) behind the loader for a gesture. */
 let waiting = false;
 function frame(now: number) {
+  // Overlay visibility first: the loop keeps ticking (without simulating) while paused.
+  touch.show(!AUTOPLAY && started && !waiting && !pause.paused);
   if (pause.paused) {
     // Frozen: no simulation and no drawing (the last frame stays on screen); no dt jump on resume.
     last = now;
@@ -499,6 +539,17 @@ window.__ride = {
   /** Test hook: hold/release Shift-sprint. */
   setSprint(v: boolean) {
     input.sprint = v;
+  },
+  /** Mobile tier + touch UI (test hooks). */
+  get lowQuality() {
+    return LOW;
+  },
+  get touchActive() {
+    return touch.active;
+  },
+  setTouchJoy(x: number, y: number) {
+    input.ax = x;
+    input.ay = y;
   },
   get msaa() {
     return post.msaa;
