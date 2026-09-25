@@ -1,0 +1,196 @@
+/* ==========================================================================
+   3D client: canvas, world-anchored labels and the HUD that floats over it.
+   Everything here is scoped to body.mode3d so the text interface is untouched.
+   ========================================================================== */
+
+#world, #world-ui { display: none; }
+body.mode3d { background: #000; overflow: hidden; }
+body.mode3d #world { display: block; position: fixed; inset: 0; z-index: 0; }
+body.mode3d #world-ui { display: block; position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+body.mode3d.w3d-hidden #world, body.mode3d.w3d-hidden #world-ui { display: none; }
+.w3d-canvas { width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+#world-ui [hidden] { display: none !important; }
+
+/* #app sits above the canvas but lets clicks through to it, except on actual HUD panels. */
+body.mode3d:not(.w3d-hidden) #app { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+body.mode3d:not(.w3d-hidden) #app .loading { pointer-events: auto; background: #000; }
+body.mode3d .overlay { pointer-events: auto; }
+body.mode3d #toasts { top: calc(var(--hud-top, 48px) + .6em); }
+
+/* ---------- world-anchored labels ---------- */
+.w3d-labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.w3d-label { position: absolute; left: 0; top: 0; will-change: transform; white-space: nowrap; }
+.w3d-nameplate { text-align: center; text-shadow: 0 1px 3px #000, 0 0 6px #000; line-height: 1.15; }
+.w3d-nameplate .nm { font-family: var(--display); color: #f8e7c2; font-size: 1.02em; letter-spacing: .04em; }
+.w3d-nameplate .tt { color: #cdbb98; font-size: .74em; font-style: italic; }
+.w3d-nameplate .qmark { font-family: var(--display); font-weight: 700; font-size: 2em; line-height: 1; margin-bottom: .05em;
+  animation: qbob 1.6s ease-in-out infinite; }
+.w3d-nameplate .qmark.offer { color: #ffd24a; text-shadow: 0 0 10px #ffb400, 0 2px 3px #000; }
+.w3d-nameplate .qmark.turnin { color: #ffe27a; text-shadow: 0 0 12px #8ff0ff, 0 2px 3px #000; }
+@keyframes qbob { 50% { transform: translateY(-5px); } }
+
+.w3d-exit { font-size: .82em; padding: .12em .6em; border-radius: 10px; background: #120d09c8; border: 1px solid #7a603c;
+  color: #f0d9a8; text-shadow: 0 1px 2px #000; }
+.w3d-exit.visited { color: #b9a888; border-color: #54432d; }
+.w3d-exit.locked { color: #ffae90; border-color: #8a3a32; }
+
+/* combat unit plates */
+.w3d-unit { min-width: 124px; max-width: 170px; text-align: center; font-size: .8em; text-shadow: 0 1px 2px #000; }
+.w3d-unit .un { color: #f6e4c4; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w3d-unit .un small { color: #b9a888; font-weight: normal; }
+.w3d-unit.enemy .un { color: #ffc2b0; }
+.w3d-unit.boss .un { color: #ffb08a; font-family: var(--display); font-size: 1.12em; letter-spacing: .04em; }
+.w3d-unit .hpb { position: relative; height: 9px; margin-top: 2px; background: #0c0907d8; border: 1px solid #000; border-radius: 3px; overflow: hidden; }
+.w3d-unit .hpb i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(#e0574f, #8e2520); transition: width .3s ease; }
+.w3d-unit.ally .hpb i { background: linear-gradient(#6ed06a, #2d7a2a); }
+.w3d-unit .hpb b { position: absolute; inset: 0 auto 0 0; background: #bfefffa0; }
+.w3d-unit .hpb span { position: absolute; inset: 0; font-size: 8px; line-height: 9px; color: #fff; }
+.w3d-unit .chg { color: #fff; background: #a0301f; border: 1px solid #ff7050; border-radius: 3px; margin-top: 2px; font-weight: bold; animation: pulse 1s infinite; }
+.w3d-unit .sts { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 2px; }
+.w3d-unit .sts .st { font-size: .8em; background: #0c0907c0; cursor: default; }
+.w3d-unit.current .un::before { content: "▶ "; color: var(--gold); }
+.w3d-unit.targetable .hpb { border-color: #ff6a50; box-shadow: 0 0 8px #ff4a30; }
+.w3d-unit.targetable .un { color: #fff; }
+
+/* floating combat text */
+.w3d-float { position: absolute; left: 0; top: 0; pointer-events: none; white-space: nowrap; font-family: var(--display); font-weight: 700;
+  font-size: 1.35em; color: #fff4dc; text-shadow: 0 0 4px #000, 0 2px 3px #000, 0 0 10px #0008; will-change: transform, opacity; }
+.w3d-float.taken { color: #ff8a7a; }
+.w3d-float.crit { color: #ffd24a; font-size: 1.9em; text-shadow: 0 0 10px #ff8a00, 0 2px 3px #000; }
+.w3d-float.dot { font-size: 1.05em; opacity: .9; }
+.w3d-float.heal { color: #7dff8a; }
+.w3d-float.shield { color: #bfefff; }
+.w3d-float.miss { color: #c8c0b0; font-size: 1.05em; font-style: italic; }
+.w3d-float.status { color: #e2b8ff; font-size: 1em; font-family: var(--serif); }
+.w3d-float.status.buff { color: #8ff0ff; }
+.w3d-float.warn { color: #ff9a50; font-size: 1.15em; }
+.w3d-float.ability { color: #ffe7b0; font-size: 1.05em; font-family: var(--serif); font-style: italic; }
+.w3d-float.info { color: #d8ccb4; font-size: .95em; font-family: var(--serif); }
+.w3d-float.small { font-size: .8em; }
+.w3d-float.el-fire:not(.taken) { color: #ffb070; }
+.w3d-float.el-frost:not(.taken) { color: #a8e4ff; }
+.w3d-float.el-lightning:not(.taken) { color: #fff38a; }
+.w3d-float.el-poison:not(.taken) { color: #b6f07a; }
+.w3d-float.el-arcane:not(.taken), .w3d-float.el-aether:not(.taken) { color: #b8f4ff; }
+.w3d-float.el-shadow:not(.taken) { color: #d0a0ff; }
+
+/* ---------- world HUD elements (created by world.js / interact.js) ---------- */
+.w3d-veil { position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity .18s ease; pointer-events: none; }
+.w3d-veil.on { opacity: 1; }
+
+.w3d-banner { position: absolute; top: 38%; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: .4em; pointer-events: none; }
+.w3d-banner-item { text-align: center; font-family: var(--display); color: #f7e3b8; letter-spacing: .18em; text-shadow: 0 0 16px #000, 0 2px 4px #000;
+  animation: w3dBannerIn .7s ease-out; }
+.w3d-banner-item small { display: block; font-size: .75em; letter-spacing: .4em; color: var(--aether); text-transform: uppercase; margin-bottom: .2em; }
+.w3d-banner-item.place div { font-size: clamp(1.8em, 4vw, 2.8em); }
+.w3d-banner-item.round div { font-size: 1.5em; color: #ffe0a0; }
+.w3d-banner-item.phase div { font-size: 2em; color: #ff9a6a; text-shadow: 0 0 20px #ff4a00, 0 2px 4px #000; }
+.w3d-banner-item.out { animation: w3dBannerOut .8s forwards; }
+@keyframes w3dBannerIn { from { opacity: 0; letter-spacing: .5em; filter: blur(4px); } to { opacity: 1; } }
+@keyframes w3dBannerOut { to { opacity: 0; transform: translateY(-10px); } }
+
+.w3d-compass { position: absolute; top: calc(var(--hud-top, 48px) + .3em); left: 50%; transform: translateX(-50%); width: min(420px, 60vw); height: 1.6em;
+  border-bottom: 1px solid #e8b04a66; background: linear-gradient(90deg, transparent, #0c0907a0 20%, #0c0907a0 80%, transparent); pointer-events: none; }
+.w3d-compass::after { content: ""; position: absolute; left: 50%; bottom: -1px; width: 2px; height: .5em; background: var(--gold); }
+.w3d-compass span { position: absolute; top: .15em; transform: translateX(-50%); font-size: .85em; color: #cdbb98; text-shadow: 0 1px 2px #000; }
+.w3d-compass span.card { font-family: var(--display); color: #f0d9a8; }
+.w3d-compass span.door { color: #8ff0ff; font-size: .7em; top: .35em; }
+.w3d-compass span.door.locked { color: #ff9a80; }
+
+.w3d-prompt { position: absolute; left: 50%; bottom: 7.2em; transform: translateX(-50%); padding: .45em .9em; border-radius: 6px;
+  background: #140f0be6; border: 1px solid var(--edge-hi); box-shadow: 0 6px 18px #000a; text-align: center; animation: fadein .15s; max-width: 70vw; }
+.w3d-prompt .key { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin-right: .5em; border: 1px solid var(--gold); border-radius: 4px;
+  color: var(--gold); font-family: monospace; font-weight: bold; }
+.w3d-prompt .verb { color: #cdbb98; margin-right: .35em; }
+.w3d-prompt b { color: #fff0d0; }
+.w3d-prompt .sub { font-size: .8em; color: var(--muted); margin-top: .15em; }
+.w3d-prompt.locked { border-color: #8a3a32; }
+.w3d-prompt.locked .key { border-color: #8a3a32; color: #ff9a80; }
+
+.w3d-actmenu { position: absolute; left: 50%; bottom: 7em; transform: translateX(-50%); min-width: 280px; max-width: 460px; pointer-events: auto;
+  display: flex; flex-direction: column; gap: .35em; animation: fadein .15s; }
+.w3d-actmenu h4 { margin: 0; color: var(--gold); }
+.w3d-actmenu .btn { text-align: left; }
+.w3d-actmenu .btn .hk { color: var(--gold); margin-right: .3em; font-weight: bold; }
+.w3d-actmenu .hint { font-size: .78em; }
+
+.w3d-note { position: absolute; right: 1em; top: 50%; transform: translateY(-50%); max-width: 420px; max-height: 60vh; overflow-y: auto;
+  pointer-events: auto; animation: fadein .2s; }
+.w3d-note h4 { color: var(--gold); }
+.w3d-note .hint { font-size: .78em; margin-top: .6em; }
+
+.w3d-stats { position: absolute; left: 50%; bottom: .4em; transform: translateX(-50%); font: 11px monospace; color: #9f9; background: #000a; padding: .1em .5em; border-radius: 3px; }
+
+/* ---------- exploration HUD ---------- */
+.hud3d { position: fixed; inset: 0; pointer-events: none; }
+.hud3d > * { pointer-events: auto; }
+.hud3d .topbar { background: linear-gradient(#1f1812e8, #140f0bd0); backdrop-filter: blur(3px); }
+.hud-loc { position: absolute; left: 1em; top: calc(var(--hud-top, 48px) + .6em); cursor: pointer; text-shadow: 0 2px 6px #000, 0 0 12px #000; max-width: 40vw; }
+.hud-loc .region { color: var(--aether); font-size: .78em; letter-spacing: .2em; text-transform: uppercase; }
+.hud-loc h1 { font-size: 1.5em; color: #f6e2b8; margin: 0; }
+.hud-loc .danger { font-size: .75em; color: var(--bad); border: 1px solid #8a3a32; border-radius: 3px; padding: 0 .4em; background: #140f0bb0; }
+.hud-right { position: absolute; right: 1em; top: calc(var(--hud-top, 48px) + .6em); width: 300px; max-height: 42vh; overflow-y: auto; }
+.hud-right .panel { background: #1a140fd8; padding: .6em .8em; }
+.hud-log { position: absolute; left: 1em; bottom: 1em; width: min(400px, 40vw); background: #140f0bc8; border: 1px solid var(--edge); border-radius: 6px; padding: .4em .6em; }
+.hud-log h4 { margin: 0; }
+.hud-log .log { max-height: 7.5em; overflow-y: auto; font-size: .82em; }
+.hud-log.open .log { max-height: 42vh; }
+.hud-card { position: absolute; left: 50%; top: calc(var(--hud-top, 48px) + 2.6em); transform: translateX(-50%); width: min(620px, 56vw); max-height: 34vh; overflow-y: auto;
+  background: #1a140fe6; border: 1px solid var(--edge); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: .7em 2em .7em 1em;
+  box-shadow: 0 8px 24px #0009; animation: fadein .4s; font-size: .95em; }
+.hud-card.stay { animation: none; }
+.hud-card.locdesc { border-left-color: var(--aether); }
+.hud-card.ephemeral { animation: w3dFadeAway 2s forwards; }
+@keyframes w3dFadeAway { to { opacity: 0; visibility: hidden; } }
+.hud-card .close { position: absolute; top: .2em; right: .2em; }
+.hud-actions { position: absolute; right: 1em; bottom: 1em; display: flex; flex-direction: column; align-items: flex-end; gap: .4em; }
+.hud-actions .btn { position: relative; padding-right: 2em; }
+.hud-actions .btn .hk { position: absolute; right: .5em; top: .45em; font-size: .7em; color: var(--dim); }
+.hud-actions .hint { font-size: .75em; text-shadow: 0 1px 2px #000; pointer-events: none; }
+
+/* dialogue & shop float over the scene instead of blanking it */
+body.mode3d .overlay[data-key="dialogue"] { background: linear-gradient(transparent 45%, #000a); align-items: end; padding-bottom: 1.5em; }
+body.mode3d .overlay[data-key="dialogue"] > .panel { max-height: 52vh; overflow-y: auto; background: #1a140ff0; }
+body.mode3d .overlay[data-key="shop"], body.mode3d .overlay[data-key="panel"], body.mode3d .overlay[data-key="menu"] { background: #000a; }
+body.mode3d .overlay.result-overlay { background: radial-gradient(circle, #0008, #000b); }
+
+/* ---------- 3D combat HUD ---------- */
+.combat3d { position: fixed; inset: 0; pointer-events: none; }
+.combat3d > * { pointer-events: auto; }
+.combat3d .combat-top { background: #1a120dd0; }
+.c3d-foes { position: absolute; right: .8em; top: calc(var(--hud-top, 48px) + .5em); display: flex; flex-direction: column; gap: .4em; max-height: 52vh; overflow-y: auto; }
+.c3d-foes .unit { width: 210px; font-size: .84em; padding: .35em .5em; background: #1c1411d8; }
+.c3d-foes .unit.boss { width: 250px; }
+.c3d-bottom { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-end; gap: .8em; padding: .6em .8em; pointer-events: none; }
+.c3d-bottom > * { pointer-events: auto; }
+.c3d-left { width: min(380px, 36vw); display: flex; flex-direction: column; gap: .4em; }
+.c3d-left .player-card { width: 100%; background: #1c1411e8; }
+.c3d-left .combat-log { max-height: 20vh; background: #140f0bd0; padding: .4em .6em; }
+.c3d-bar { flex: 1; min-width: 0; }
+.c3d-bar .actionbar { border: 1px solid var(--edge); border-radius: 6px; background: #1a120de6; }
+
+/* ---------- title & creation over the 3D backdrop ---------- */
+body.mode3d .title-screen { pointer-events: auto; background: radial-gradient(ellipse at 50% 55%, transparent 20%, #000a 80%); }
+body.mode3d .title-screen::before { display: none; }
+body.mode3d .title-inner { background: radial-gradient(ellipse, #0c0907b0 30%, transparent 70%); padding: 2em 4em; }
+body.mode3d .screen-scroll { pointer-events: auto; }
+body.mode3d .screen-scroll:has(.creation) { width: min(62vw, 1000px); background: linear-gradient(90deg, #0c0907f2 80%, #0c090700); padding-right: 3em; }
+body.mode3d .creation-grid { grid-template-columns: 1fr; }
+body.mode3d .creation .choice-cards { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 900px) {
+  body.mode3d .screen-scroll:has(.creation) { width: 100%; background: #0c0907f2; }
+  .hud-right, .c3d-foes { display: none; }
+  .hud-card { width: 90vw; }
+}
+
+/* ---------- dev panel ---------- */
+#dev-root { position: fixed; top: calc(var(--hud-top, 48px) + .6em); left: 1em; z-index: 250; }
+.dev-panel { width: 440px; max-height: 80vh; overflow-y: auto; font-size: .88em; background: #0f0b08f4; border-color: #3f7a3f; }
+.dev-panel .tabs { margin: .4em 0; }
+.dev-row { display: flex; gap: .4em; align-items: center; flex-wrap: wrap; margin: .35em 0; }
+.dev-row > span:first-child { width: 5.5em; color: var(--muted); }
+.dev-row select { max-width: 230px; }
+.dev-panel select, .dev-panel input:not([type=checkbox]) { background: #1a140f; color: var(--text); border: 1px solid var(--edge); border-radius: 3px; padding: .15em .3em; font: inherit; }
+.dev-toggle { cursor: pointer; }
+.dev-small { font-size: .8em; }
+.dev-pre { font-size: .78em; max-height: 50vh; overflow: auto; background: #000; padding: .5em; border-radius: 4px; white-space: pre-wrap; }

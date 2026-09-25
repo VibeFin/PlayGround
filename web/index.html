@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ashes of Aether</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 L40 26 L60 32 L40 38 L32 60 L24 38 L4 32 L24 26 Z' fill='%23e8b04a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/world3d.css">
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+  <div id="world" aria-hidden="true"></div>
+  <div id="world-ui"></div>
+  <div id="app"><div class="loading">Kindling the Aether…</div></div>
+  <div id="overlay-root"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="tooltip" role="tooltip"></div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+{
+  "region": "kharum",
+  "_doc": "Authored 3D layouts for Kharum-Dur. Units are metres, north is -z, rot/yaw in degrees (0 faces south/+z). The engine decides what exists (exits, NPCs, features, services); these only decide where things stand and how the place looks. Validated by tests/test_scene_layouts.py.",
+  "locations": {
+    "kd_forgehall": {
+      "size": [48, 42],
+      "height": 18,
+      "exits": {
+        "kd_gate": { "side": "n", "at": 0, "width": 6, "height": 8, "style": "gate" },
+        "kd_market": { "side": "w", "at": 4, "width": 5 },
+        "kd_runehall": { "side": "e", "at": -8, "width": 4.5 },
+        "kd_brewery": { "side": "e", "at": 10, "width": 4.5 }
+      },
+      "props": [
+        { "type": "furnace_column", "pos": [0, -2], "r": 2.4, "h": 16 },
+        { "type": "anvil_ring", "pos": [0, -2], "radius": 8, "phase": 13.85 },
+        { "type": "pillar", "pos": [-14, -12], "h": 18, "w": 1.8 },
+        { "type": "pillar", "pos": [14, -12], "h": 18, "w": 1.8 },
+        { "type": "pillar", "pos": [-14, 9], "h": 18, "w": 1.8 },
+        { "type": "pillar", "pos": [14, 9], "h": 18, "w": 1.8 },
+        { "type": "forge", "pos": [-12, -18.8], "rot": 0 },
+        { "type": "forge", "pos": [12, -18.8], "rot": 0 },
+        { "type": "forge", "pos": [-12, 19.4], "rot": 180 },
+        { "type": "forge", "pos": [12, 19.4], "rot": 180 },
+        { "type": "banner", "pos": [-6, -20.3], "y": 6, "h": 6, "cloth": "cloth_red" },
+        { "type": "banner", "pos": [6, -20.3], "y": 6, "h": 6, "cloth": "cloth_red" },
+        { "type": "statue", "pos": [-20, -8], "rot": 90, "h": 7 },
+        { "type": "statue", "pos": [20, 1], "rot": -90, "h": 7 },
+        { "type": "brazier", "pos": [-19.5, 0] },
+        { "type": "brazier", "pos": [-19.5, 8.5], "light": false },
+        { "type": "hanging_lamp", "pos": [-8, 9], "y": 9, "top": 18, "color": "#ffcf80" },
+        { "type": "hanging_lamp", "pos": [8, 9], "y": 9, "top": 18, "color": "#ffcf80" },
+        { "type": "hanging_lamp", "pos": [-8, -13], "y": 10, "top": 18, "color": "#8ff0ff" },
+        { "type": "hanging_lamp", "pos": [8, -13], "y": 10, "top": 18, "color": "#8ff0ff" },
+        { "type": "crates", "pos": [-19, -15], "n": 5 },
+        { "type": "barrels", "pos": [19, 16], "n": 5 },
+        { "type": "scaffold", "pos": [17, -17], "w": 4, "h": 5 },
+        { "type": "rubble", "pos": [9, -15], "n": 7, "area": [2.5, 2] },
+        { "type": "rubble", "pos": [-15, 15], "n": 6, "area": [2, 2] },
+        { "type": "bench", "pos": [6, 17], "rot": 0, "w": 2.4 },
+        { "type": "bench", "pos": [-6, 17], "rot": 0, "w": 2.4 }
+      ],
+      "npcs": { "foreman_durga": [-6.5, 13, 115] },
+      "look": { "foreman_durga": { "beard": "braided", "beardColor": "#9a948a" } },
+      "features": {
+        "furnace": { "pos": [0, 3.4], "radius": 2.6, "h": 3 },
+        "twelve_anvils": { "pos": [3.8, 7.4], "radius": 2.4, "h": 1.2 }
+      },
+      "arena": { "pos": [0, 12], "yaw": 180 },
+      "spawn": { "default": [0, 17, 180] },
+      "particles": [{ "type": "dust", "pos": [0, 12, 0], "area": [40, 6, 36], "count": 70 }],
+      "showcase": { "target": [0, 6, -2], "dist": 18, "pitch": 0.24 },
+      "preview": [0, 12]
+    },
+
+    "kd_market": {
+      "size": [60, 20],
+      "height": 11,
+      "exits": {
+        "kd_forgehall": { "side": "e", "at": 0, "width": 5 },
+        "kd_galleries": { "side": "s", "at": -22, "width": 4, "style": "tunnel" }
+      },
+      "props": [
+        { "type": "stall", "pos": [-12, -8], "rot": 0, "cloth": "cloth_red" },
+        { "type": "stall", "pos": [-4, -8], "rot": 0, "cloth": "cloth_green" },
+        { "type": "stall", "pos": [4, -8], "rot": 0, "cloth": "cloth_blue" },
+        { "type": "stall", "pos": [12, -8], "rot": 0, "cloth": "cloth_tan" },
+        { "type": "stall", "pos": [20, -8], "rot": 0, "cloth": "cloth_red" },
+        { "type": "stall", "pos": [-12, 8], "rot": 180, "cloth": "cloth_tan" },
+        { "type": "stall", "pos": [-4, 8], "rot": 180, "cloth": "cloth_purple" },
+        { "type": "forge", "pos": [9, 8.4], "rot": 180, "w": 3 },
+        { "type": "stall", "pos": [20, 8], "rot": 180, "cloth": "cloth_green" },
+        { "type": "house", "pos": [-27.5, -1], "rot": 90, "w": 9, "d": 4, "h": 6, "mat": "stone" },
+        { "type": "banner", "pos": [-25.3, -6.5], "rot": 90, "y": 3, "h": 4, "cloth": "cloth_blue" },
+        { "type": "banner", "pos": [-25.3, 4.5], "rot": 90, "y": 3, "h": 4, "cloth": "cloth_blue" },
+        { "type": "notice_board", "pos": [-18, -8.8], "rot": 0 },
+        { "type": "lamp", "pos": [-16, -4.6], "light": true },
+        { "type": "lamp", "pos": [0, -4.6] },
+        { "type": "lamp", "pos": [16, -4.6], "light": true },
+        { "type": "lamp", "pos": [-8, 4.6] },
+        { "type": "lamp", "pos": [2, 4.6], "light": true },
+        { "type": "lamp", "pos": [24, 4.6] },
+        { "type": "crates", "pos": [26, -7.5], "n": 4 },
+        { "type": "barrels", "pos": [-14.5, 5.5], "n": 3 },
+        { "type": "barrels", "pos": [14.5, -5.5], "n": 2 },
+        { "type": "crates", "pos": [0, 7.2], "n": 3 }
+      ],
+      "npcs": {
+        "smith_hilde": [8, 5.4, 180],
+        "guildmaster_borrin": [-21.5, -3, 90],
+        "captain_ruk": [-21.5, 2.5, 90]
+      },
+      "features": { "guild_notices": { "pos": [-18, -6.8], "radius": 2.3, "h": 1.8 } },
+      "points": { "shop": [11, 5.6, 2.4] },
+      "arena": { "pos": [6, 0], "yaw": 90 },
+      "spawn": { "default": [25, 0, 270] }
+    },
+
+    "kd_runehall": {
+      "shape": "round",
+      "size": [30, 30],
+      "height": 14,
+      "exits": { "kd_forgehall": { "angle": 270, "width": 4.5 } },
+      "props": [
+        { "type": "dais", "pos": [0, 0], "r": 3.6 },
+        { "type": "rune_chains", "pos": [0, 0], "n": 42, "area": [19, 19], "top": 14, "dead": 0.45 },
+        { "type": "altar", "pos": [0, -11], "rot": 0 },
+        { "type": "shelf", "pos": [9.6, 8.8], "rot": -133, "w": 3.2, "h": 3.2 },
+        { "type": "shelf", "pos": [12, 4], "rot": -110, "w": 3, "h": 3.2 },
+        { "type": "lectern", "pos": [7.6, 6.2], "rot": -130 },
+        { "type": "mural", "pos": [-8.2, -11.4], "rot": 35, "w": 4, "h": 2.4, "y": 1.2 },
+        { "type": "crystals", "pos": [9.5, -8.5] },
+        { "type": "crystals", "pos": [-9, 8.5], "light": false },
+        { "type": "column", "pos": [-5.5, -5.5], "h": 14, "r": 0.5 },
+        { "type": "column", "pos": [5.5, -5.5], "h": 14, "r": 0.5 },
+        { "type": "column", "pos": [5.5, 5.5], "h": 14, "r": 0.5 },
+        { "type": "column", "pos": [-5.5, 5.5], "h": 14, "r": 0.5 }
+      ],
+      "npcs": { "runekeeper_halvar": [-4.5, 2.5, 250] },
+      "features": {
+        "failing_runes": { "pos": [2.6, -2.2], "radius": 2.6, "h": 3 },
+        "old_inscription": { "pos": [-6.9, -9.4], "radius": 2.2, "h": 2 },
+        "rune_books": { "pos": [6.6, 5], "radius": 2.2, "h": 1.4 }
+      },
+      "points": { "respec": [0, -8.8, 2.6] },
+      "lights": [{ "pos": [0, 9, 0], "color": "#8ff0ff", "intensity": 30, "distance": 26, "prio": 90 }],
+      "arena": { "pos": [-2, 0], "yaw": 90 },
+      "spawn": { "default": [-11, 0, 90] }
+    },
+
+    "kd_brewery": {
+      "size": [36, 26],
+      "height": 12,
+      "exits": { "kd_forgehall": { "side": "w", "at": 0, "width": 4.5 } },
+      "props": [
+        { "type": "vat", "pos": [-7, -8], "r": 2.6, "h": 5.5 },
+        { "type": "vat", "pos": [1, -8], "r": 2.6, "h": 6 },
+        { "type": "vat", "pos": [9, -8], "r": 2.4, "h": 5 },
+        { "type": "pipes", "pos": [1, -11.8], "len": 26, "n": 2 },
+        { "type": "bar_counter", "pos": [10, 7.2], "rot": 0, "w": 7 },
+        { "type": "shelf", "pos": [10, 12.3], "rot": 180, "w": 6, "h": 3 },
+        { "type": "tap", "pos": [15.8, 1], "rot": -90 },
+        { "type": "table", "pos": [-3, 5], "rot": 0 },
+        { "type": "table", "pos": [3, 8.5], "rot": 90 },
+        { "type": "table", "pos": [-4, 10.2], "rot": 0 },
+        { "type": "cot", "pos": [-15.8, 10.6], "rot": 0 },
+        { "type": "cot", "pos": [-13.4, 10.6], "rot": 0 },
+        { "type": "cot", "pos": [-11, 10.6], "rot": 0 },
+        { "type": "hearth", "pos": [-17, -8], "rot": 90 },
+        { "type": "barrels", "pos": [-15, -2.5], "n": 5 },
+        { "type": "barrels", "pos": [15, -10.5], "n": 4 },
+        { "type": "crates", "pos": [15.5, 10.5], "n": 3 },
+        { "type": "hanging_lamp", "pos": [-4, 1], "y": 7, "top": 12, "light": true },
+        { "type": "hanging_lamp", "pos": [7, 2], "y": 7, "top": 12 }
+      ],
+      "npcs": { "brewmaster_olga": [8, 4.4, 200] },
+      "features": { "stout_tap": { "pos": [13.8, 1], "radius": 2.2, "h": 1.8 } },
+      "points": { "shop": [12.4, 4.6, 2.2], "rest": [-13.4, 7.8, 2.6] },
+      "arena": { "pos": [0, 1], "yaw": 90 },
+      "spawn": { "default": [-14, 0, 90] }
+    },
+
+    "kd_galleries": {
+      "shape": "tunnel",
+      "size": [44, 16],
+      "height": 7,
+      "exits": {
+        "kd_market": { "side": "n", "at": -16, "width": 4, "style": "tunnel" },
+        "kd_nd_shaft": { "side": "e", "at": 3, "width": 4, "style": "tunnel", "barrier": "rubble" }
+      },
+      "props": [
+        { "type": "rails", "pos": [-1, 1], "rot": 90, "len": 40 },
+        { "type": "cart", "pos": [-5, 1], "rot": 90 },
+        { "type": "cart", "pos": [11, 1], "rot": 90 },
+        { "type": "supports", "pos": [-18, 0], "rot": 90, "w": 14, "h": 6.2 },
+        { "type": "supports", "pos": [-9, 0], "rot": 90, "w": 14, "h": 6.2 },
+        { "type": "supports", "pos": [0, 0], "rot": 90, "w": 14, "h": 6.2 },
+        { "type": "supports", "pos": [9, 0], "rot": 90, "w": 14, "h": 6.2 },
+        { "type": "supports", "pos": [17, 0], "rot": 90, "w": 14, "h": 6.2 },
+        { "type": "breach", "pos": [20.6, -3.6], "rot": -90, "w": 4 },
+        { "type": "crates", "pos": [-8.5, 5.8], "n": 5 },
+        { "type": "crystals", "pos": [4, -7] },
+        { "type": "rubble", "pos": [14, 6], "n": 8, "area": [3, 2] },
+        { "type": "barrels", "pos": [-19, -6], "n": 3 },
+        { "type": "hanging_lamp", "pos": [-13, -3], "y": 5, "top": 7, "light": true, "color": "#ffb060" },
+        { "type": "hanging_lamp", "pos": [5, 3], "y": 5, "top": 7, "light": true, "color": "#ffb060" }
+      ],
+      "features": {
+        "breach": { "pos": [18, -1.2], "radius": 2.6, "h": 2 },
+        "cask_spot": { "pos": [-8.5, 3.8], "radius": 2.2, "h": 1.2 },
+        "ore_vein": { "pos": [4, -5.2], "radius": 2.2, "h": 1.2 }
+      },
+      "arena": { "pos": [-2, -3.5], "yaw": 90 },
+      "spawn": { "default": [-16, -4, 180] },
+      "particles": [{ "type": "dust", "pos": [0, 3, 0], "area": [40, 5, 14], "count": 50 }]
+    },
+
+    "kd_gate": {
+      "size": [40, 30],
+      "exits": {
+        "kd_forgehall": { "side": "s", "at": 0, "width": 6 },
+        "kd_hb_foundry": { "side": "w", "at": -6, "width": 4.5 }
+      },
+      "props": [
+        { "type": "mountains", "pos": [0, 0], "r": 110 },
+        { "type": "statue", "pos": [-7, 12.6], "rot": 180, "h": 7 },
+        { "type": "statue", "pos": [7, 12.6], "rot": 180, "h": 7 },
+        { "type": "brazier", "pos": [-4.2, 12.4] },
+        { "type": "brazier", "pos": [4.2, 12.4] },
+        { "type": "map_table", "pos": [-9, 7.5], "rot": 20 },
+        { "type": "crates", "pos": [13, 9], "n": 4 },
+        { "type": "barrels", "pos": [15, 4], "n": 3 },
+        { "type": "tent", "pos": [12, -6], "cloth": "cloth_red" },
+        { "type": "boulder", "pos": [-14, -9], "r": 2 },
+        { "type": "boulder", "pos": [6, -11], "r": 1.4, "seed": 3 }
+      ],
+      "npcs": { "gate_warden_brokk": [3.5, 9.5, 190] },
+      "points": { "travel": [-9, 5.6, 2.6] },
+      "arena": { "pos": [0, 0], "yaw": 0 },
+      "spawn": { "default": [0, 10, 0] }
+    },
+
+    "kd_nd_shaft": {
+      "shape": "round",
+      "size": [26, 26],
+      "height": 16,
+      "exits": {
+        "kd_galleries": { "angle": 270, "width": 4, "style": "tunnel" },
+        "kd_nd_camp": { "angle": 90, "width": 4, "style": "stairs_down" }
+      },
+      "props": [
+        { "type": "shaft_pit", "pos": [0, 0], "r": 5 },
+        { "type": "crystals", "pos": [6.5, -8.5] },
+        { "type": "crystals", "pos": [-7, 8], "light": false },
+        { "type": "crystals", "pos": [-8, -7], "light": false },
+        { "type": "rubble", "pos": [7, 8], "n": 8, "area": [2.5, 2] },
+        { "type": "supports", "pos": [-9.8, 0], "rot": 90, "w": 5, "h": 5 }
+      ],
+      "lights": [{ "pos": [0, 7, 0], "color": "#6fe3ff", "intensity": 14, "distance": 22, "prio": 60 }],
+      "arena": { "pos": [0, 8.4], "yaw": 90 },
+      "spawn": { "default": [-10, 0, 90] }
+    },
+
+    "kd_nd_camp": {
+      "shape": "cavern",
+      "size": [36, 28],
+      "height": 12,
+      "exits": {
+        "kd_nd_shaft": { "side": "w", "at": 0, "width": 4, "style": "tunnel" },
+        "kd_nd_gate": { "side": "e", "at": -4, "width": 4, "style": "tunnel" }
+      },
+      "clear": [[0, -14, 9]],
+      "props": [
+        { "type": "mural", "pos": [0, -13.3], "rot": 0, "w": 12, "h": 5, "y": 1.2 },
+        { "type": "tent", "pos": [-9, -5], "cloth": "cloth_tan" },
+        { "type": "tent", "pos": [-4, 7.5], "rot": 180, "cloth": "cloth_tan" },
+        { "type": "tent", "pos": [9, -6.5], "cloth": "cloth_red" },
+        { "type": "campfire", "pos": [0, 1], "lit": false },
+        { "type": "bench", "pos": [0, 3], "w": 2 },
+        { "type": "crates", "pos": [-12.5, 8], "n": 6 },
+        { "type": "crates", "pos": [12, 7.5], "n": 4 },
+        { "type": "barrels", "pos": [-14, -8.5], "n": 4 },
+        { "type": "lamp", "pos": [-4, -2], "color": "#ffcf80", "light": true },
+        { "type": "lamp", "pos": [6, 3], "color": "#ffcf80", "light": true },
+        { "type": "map_table", "pos": [5, -2.5], "rot": 10 }
+      ],
+      "features": {
+        "camp_mural": { "pos": [0, -10.4], "radius": 2.8, "h": 3 },
+        "foreman_tent": { "pos": [9, -4], "radius": 2.3, "h": 1.6 }
+      },
+      "arena": { "pos": [-1, 4.5], "yaw": 90 },
+      "spawn": { "default": [-14, 0, 90] }
+    },
+
+    "kd_nd_gate": {
+      "shape": "cavern",
+      "size": [30, 26],
+      "height": 14,
+      "exits": {
+        "kd_nd_camp": { "side": "w", "at": 0, "width": 4, "style": "tunnel" },
+        "kd_nd_chamber": { "side": "n", "at": 0, "width": 5.5, "height": 6.5, "style": "round" }
+      },
+      "props": [
+        { "type": "bells", "pos": [0, -5], "rot": 0, "n": 3 },
+        { "type": "rubble", "pos": [-4.5, -10], "n": 8, "area": [2.5, 1.6], "mat": "rock_dark" },
+        { "type": "rubble", "pos": [4.8, -10.2], "n": 6, "area": [2, 1.4], "mat": "rock_dark" },
+        { "type": "crystals", "pos": [-10, -6] },
+        { "type": "crystals", "pos": [10, 5], "light": false },
+        { "type": "crates", "pos": [-10, 8], "n": 3 }
+      ],
+      "features": { "tone_bells": { "pos": [0, -2.6], "radius": 2.6, "h": 3.5 } },
+      "lights": [{ "pos": [0, 5, -8], "color": "#6fe3ff", "intensity": 12, "distance": 18, "prio": 70 }],
+      "arena": { "pos": [2, 3.5], "yaw": 90 },
+      "spawn": { "default": [-11, 0, 90] }
+    },
+
+    "kd_nd_chamber": {
+      "shape": "round",
+      "size": [32, 32],
+      "height": 18,
+      "exits": { "kd_nd_gate": { "angle": 180, "width": 5.5, "height": 6.5, "style": "round" } },
+      "props": [
+        { "type": "cradle", "pos": [0, -6] },
+        { "type": "sentinel", "pos": [0, -1.5], "rot": 0, "when": { "no_feature": "sentinel_wreck" }, "separate": true, "name": "sentinel", "hide_in_combat": true },
+        { "type": "wreck", "pos": [-3.5, 0], "when": { "feature": "sentinel_wreck" } },
+        { "type": "pylon", "pos": [-10, -6], "h": 5 },
+        { "type": "pylon", "pos": [10, -6], "h": 5 },
+        { "type": "crystals", "pos": [-9, 7], "light": false },
+        { "type": "crystals", "pos": [9, 7], "light": false },
+        { "type": "rubble", "pos": [12, -5], "n": 9, "area": [2.5, 2.5], "mat": "rock_dark", "when": { "feature": "sentinel_wreck" } }
+      ],
+      "features": {
+        "sentinel_wreck": { "pos": [-3.5, 2.6], "radius": 2.4, "h": 1.2 },
+        "empty_cradle": { "pos": [0, -2.6], "radius": 2.4, "h": 1.2 }
+      },
+      "lights": [{ "pos": [0, 10, -6], "color": "#8ff0ff", "intensity": 30, "distance": 30, "shadow": true, "prio": 95 }],
+      "arena": { "pos": [0, 3], "yaw": 180 },
+      "spawn": { "default": [0, 11, 180] }
+    },
+
+    "kd_hb_foundry": {
+      "size": [40, 30],
+      "height": 14,
+      "exits": {
+        "kd_gate": { "side": "e", "at": 6, "width": 4.5 },
+        "kd_hb_hall": { "side": "w", "at": 0, "width": 5, "style": "gate" }
+      },
+      "props": [
+        { "type": "forge", "pos": [-10, -13.4], "rot": 0, "w": 4 },
+        { "type": "forge", "pos": [0, -13.4], "rot": 0, "w": 4 },
+        { "type": "forge", "pos": [10, -13.4], "rot": 0, "w": 4 },
+        { "type": "cold_furnace", "pos": [-12, 12], "rot": 180 },
+        { "type": "pipes", "pos": [6, 14.3], "len": 20, "n": 3 },
+        { "type": "slag_pit", "pos": [8, 3.5], "w": 6, "d": 3 },
+        { "type": "crystals", "pos": [4, -9.5], "light": false },
+        { "type": "crystals", "pos": [-5, -9.5], "light": false },
+        { "type": "crates", "pos": [15, -8], "n": 5 },
+        { "type": "barrels", "pos": [-17, 3], "n": 4 },
+        { "type": "scaffold", "pos": [16, 11], "w": 4, "h": 4 },
+        { "type": "pillar", "pos": [-8, -4], "h": 14, "w": 1.4 },
+        { "type": "pillar", "pos": [8, -4], "h": 14, "w": 1.4 }
+      ],
+      "features": { "forgotten_fire": { "pos": [-12, 9.2], "radius": 2.4, "h": 2 } },
+      "arena": { "pos": [-2, 3], "yaw": 270 },
+      "spawn": { "default": [16, 6, 270] }
+    },
+
+    "kd_hb_hall": {
+      "size": [44, 30],
+      "height": 16,
+      "exits": {
+        "kd_hb_foundry": { "side": "e", "at": 0, "width": 5, "style": "gate" },
+        "kd_hb_heart": { "side": "w", "at": 4, "width": 4.5, "style": "stairs_down" }
+      },
+      "props": [
+        { "type": "war_machine", "pos": [-9, -7], "y": 7, "top": 16 },
+        { "type": "war_machine", "pos": [4, -9], "y": 8, "top": 16 },
+        { "type": "war_machine", "pos": [11, 8], "y": 7.5, "top": 16 },
+        { "type": "slag_pit", "pos": [-3, 9], "w": 12, "d": 4 },
+        { "type": "valves", "pos": [8, -14.2], "rot": 0, "n": 5 },
+        { "type": "pipes", "pos": [-6, -14.4], "len": 16, "n": 3 },
+        { "type": "crates", "pos": [-14, -11], "n": 6 },
+        { "type": "crates", "pos": [-17, -8], "n": 3 },
+        { "type": "scaffold", "pos": [16, -9], "w": 4, "h": 5 },
+        { "type": "pillar", "pos": [-12, 2], "h": 16, "w": 1.4 },
+        { "type": "pillar", "pos": [12, -2], "h": 16, "w": 1.4 }
+      ],
+      "features": {
+        "pressure_valves": { "pos": [8, -11.8], "radius": 2.4, "h": 1.8 },
+        "hb_crates": { "pos": [-13, -8], "radius": 2.4, "h": 1.4 }
+      },
+      "arena": { "pos": [3, 0], "yaw": 270 },
+      "spawn": { "default": [18, 0, 270] }
+    },
+
+    "kd_hb_heart": {
+      "size": [36, 34],
+      "height": 22,
+      "exits": {
+        "kd_hb_hall": { "side": "e", "at": 0, "width": 4.5 },
+        "kd_gate": { "side": "s", "at": -8, "width": 5, "style": "gate", "barrier": "portcullis" }
+      },
+      "props": [
+        { "type": "heart_furnace", "pos": [0, -10], "r": 4, "set": { "lit": { "exit_locked": "kd_gate" } } },
+        { "type": "slag_pit", "pos": [-11, 3], "w": 5, "d": 3 },
+        { "type": "slag_pit", "pos": [11, 3], "w": 5, "d": 3 },
+        { "type": "pipes", "pos": [-10, -16.4], "len": 12, "n": 3 },
+        { "type": "pipes", "pos": [10, -16.4], "len": 12, "n": 3 },
+        { "type": "war_machine", "pos": [-12, -8], "y": 9, "top": 22 },
+        { "type": "crates", "pos": [14, 12], "n": 5 },
+        { "type": "pillar", "pos": [-9, 10], "h": 22, "w": 1.6 },
+        { "type": "pillar", "pos": [9, 10], "h": 22, "w": 1.6 }
+      ],
+      "arena": { "pos": [0, 4], "yaw": 180 },
+      "spawn": { "default": [14, 0, 270] }
+    }
+  }
+}
