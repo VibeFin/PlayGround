@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Minecraft 3D — Pocket Voxel (Phone/Tablet)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <!-- crosshair -->
+  <div id="crosshair"><div class="h"></div><div class="v"></div></div>
+  <div id="target-label"></div>
+
+  <!-- top HUD -->
+  <div id="hud">
+    <div id="brand">⛏️ <b>MINECRAFT 3D</b> <span>pocket</span></div>
+    <div id="stats">…</div>
+    <div id="top-btns">
+      <button id="btn-fly" class="chip" title="Toggle fly">🕊️ Fly: Off</button>
+      <button id="btn-day" class="chip" title="Day/night">☀️ Day</button>
+      <button id="btn-regen" class="chip" title="New world">🎲 New</button>
+      <button id="btn-help" class="chip" title="Help">❓</button>
+    </div>
+  </div>
+
+  <!-- joystick -->
+  <div id="joystick">
+    <div id="stick-base"><div id="stick-knob"></div></div>
+    <div id="joy-label">MOVE</div>
+  </div>
+
+  <!-- action buttons (right side) -->
+  <div id="actions">
+    <button id="btn-jump" class="abtn jump">⬆<small>JUMP</small></button>
+    <button id="btn-break" class="abtn break">⛏<small>BREAK</small></button>
+    <button id="btn-place" class="abtn place">🧱<small>PLACE</small></button>
+  </div>
+
+  <!-- hotbar -->
+  <div id="hotbar"></div>
+  <div id="hint">Drag right side to look • Tap BREAK / PLACE • Left stick to walk</div>
+
+  <!-- start overlay -->
+  <div id="overlay">
+    <div class="card">
+      <div class="logo">⛏️🧱</div>
+      <h1>MINECRAFT 3D</h1>
+      <p class="sub">Pocket Voxel Edition — made for <b>Phone &amp; Tablet</b></p>
+      <div class="features">
+        <div>🌍 Infinite-feel terrain + trees + water</div>
+        <div>🕹️ Twin-stick touch: move + look</div>
+        <div>⛏️ Break &amp; place • Fly mode • Save</div>
+      </div>
+      <label class="seed-row">Seed
+        <input id="seed-input" inputmode="numeric" value="1337" />
+        <button id="btn-dice" type="button">🎲</button>
+      </label>
+      <button id="btn-play">▶ &nbsp;PLAY</button>
+      <p class="ctl">
+        <b>Phone:</b> left stick = walk · drag right = look · JUMP / BREAK / PLACE buttons<br/>
+        <b>Desktop:</b> WASD + mouse (click to lock) · Space jump · LMB break · RMB place · 1-8 blocks · F fly
+      </p>
+    </div>
+  </div>
+
+  <div id="help" class="hidden">
+    <div class="card small">
+      <h2>How to play</h2>
+      <ul>
+        <li>🕹️ Left thumb stick — walk / fly</li>
+        <li>👉 Drag anywhere on right half — look around</li>
+        <li>⬆ JUMP — jump (double-tap &amp; hold in Fly to go up)</li>
+        <li>⛏ BREAK — remove aimed block (crosshair)</li>
+        <li>🧱 PLACE — place selected hotbar block</li>
+        <li>🕊️ Fly — toggle flying for building</li>
+        <li>Progress auto-saves on this device.</li>
+      </ul>
+      <button id="btn-close-help">Close</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+<script type="importmap">{ "imports": { "three": "./three.module.js" } }</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
