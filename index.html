@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Strike Protocol — Dust Arena (Desktop 3D)</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="crosshair"><span class="dot"></span><span class="l t"></span><span class="l b"></span><span class="l l"></span><span class="l r"></span></div>
+    <div id="hitmarker"></div>
+    <div id="damage-vignette"></div>
+    <div id="topbar">
+      <div class="team ct"><span id="score-ct">0</span><small>CT</small></div>
+      <div id="timer">2:00</div>
+      <div class="team t"><small>T</small><span id="score-t">0</span></div>
+    </div>
+    <div id="round-label">ROUND 1 · FIRST TO 5</div>
+    <div id="killfeed"></div>
+    <div id="bottom-left">
+      <div id="hp-row"><div id="hp-num">100</div><div id="hp-bars"><div id="hp-fill"></div></div><div id="armor">⛨ 100</div></div>
+      <div id="alive-row"><span id="alive-ct">5 CT alive</span> · <span id="alive-t">5 T alive</span></div>
+    </div>
+    <div id="bottom-right">
+      <div id="weapon-name">AK-DUST</div>
+      <div id="ammo"><span id="ammo-mag">30</span><span id="ammo-res">/ 90</span></div>
+      <div id="hint">[R] reload · [1] rifle [2] pistol · [TAB] score · [M] mute</div>
+    </div>
+    <canvas id="minimap" width="170" height="170"></canvas>
+    <div id="banner" class="hidden"></div>
+  </div>
+
+  <!-- Menu -->
+  <div id="menu">
+    <div class="card">
+      <div class="kicker">DESKTOP · 3D · POINTER-LOCK FPS</div>
+      <h1>STRIKE<br/>PROTOCOL</h1>
+      <p class="sub">Dust Arena — CT vs T · 5v5 bots · bomb-site map · first to 5 rounds</p>
+      <ul class="controls">
+        <li><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> crouch</li>
+        <li><b>Mouse</b> aim · <b>Click</b> shoot · <b>R</b> reload · <b>1/2</b> weapons</li>
+        <li><b>TAB</b> scoreboard · <b>M</b> mute · <b>ESC</b> pause</li>
+      </ul>
+      <button id="play-btn">▶ &nbsp;CLICK TO DEPLOY (CT)</button>
+      <p class="note">Desktop only — requires mouse + keyboard. Best in Chrome/Edge.</p>
+      <p class="genex" id="genex-note">Genex art: code-built map + weapons now — sign in to swap in generated models/textures/audio.</p>
+    </div>
+  </div>
+
+  <div id="pause" class="hidden">
+    <div class="card small">
+      <h2>PAUSED</h2>
+      <p>Click to re-enter the arena.</p>
+      <button id="resume-btn">RESUME</button>
+    </div>
+  </div>
+
+  <div id="scoreboard" class="hidden">
+    <div class="card small">
+      <h2>SCOREBOARD</h2>
+      <div class="cols"><div><h3>CT (YOU)</h3><div id="sb-ct"></div></div><div><h3>T (ENEMY)</h3><div id="sb-t"></div></div></div>
+      <p class="note">First to 5 rounds. Kills give $300, round win $3250.</p>
+    </div>
+  </div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
