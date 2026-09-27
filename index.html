@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Claybound — A Modelling-Clay Platformer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟧</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="hud-left">
+    <div class="hud-pill" id="hud-chapter">1 · Canyon</div>
+    <div class="hud-pill">🔮 <span id="hud-beads">0/0</span></div>
+    <div class="hud-pill secret">🌸 <span id="hud-flowers">0</span></div>
+    <div class="hud-pill">⏱ <span id="hud-time">0:00</span></div>
+  </div>
+  <div id="hud-right">
+    <button class="hud-btn" id="btn-shape" title="Reshape clay (E)">🖐 Shape</button>
+    <button class="hud-btn" id="btn-pause" title="Pause (Esc)">⏸</button>
+  </div>
+  <div id="prompt" class="hidden">Press <b>E</b> to reshape clay</div>
+  <div id="toast" class="hidden"></div>
+</div>
+
+<!-- Touch controls -->
+<div id="touch" class="hidden">
+  <div id="stick"><div id="stick-nub"></div></div>
+  <div id="touch-btns">
+    <button id="t-jump">▲</button>
+    <button id="t-shape">🖐</button>
+  </div>
+</div>
+
+<!-- Title screen -->
+<div id="screen-title" class="screen">
+  <div class="card title-card">
+    <div class="logo">CLAYBOUND</div>
+    <div class="tagline">a stop-motion modelling-clay adventure</div>
+    <div class="menu">
+      <button class="big" id="m-play">▶ Play</button>
+      <button id="m-chapters">📖 Chapters</button>
+      <button id="m-editor">🧱 Level Editor</button>
+      <button id="m-settings">⚙ Settings</button>
+      <button id="m-help">❓ How to Play</button>
+    </div>
+    <div class="foot">WASD move · Space jump · E reshape · drag mouse for camera</div>
+  </div>
+</div>
+
+<!-- Chapters -->
+<div id="screen-chapters" class="screen hidden">
+  <div class="card">
+    <h1>📖 Chapters</h1>
+    <div id="chapter-grid"></div>
+    <div class="row"><button id="ch-back">← Back</button></div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="screen-settings" class="screen hidden">
+  <div class="card">
+    <h1>⚙ Settings</h1>
+    <label>Stop-motion rate <span id="s-fps-v"></span><input type="range" id="s-fps" min="6" max="24" step="1"></label>
+    <label>Camera sensitivity <span id="s-sen-v"></span><input type="range" id="s-sen" min="20" max="200" step="5"></label>
+    <label><input type="checkbox" id="s-wobble"> Clay wobble (stop-motion jitter)</label>
+    <label><input type="checkbox" id="s-sound"> Sound effects</label>
+    <label><input type="checkbox" id="s-shadow"> Shadows (quality)</label>
+    <div class="row">
+      <button id="s-back">← Back</button>
+      <button id="s-reset">Reset beads &amp; progress</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help -->
+<div id="screen-help" class="screen hidden">
+  <div class="card">
+    <h1>❓ How to Play</h1>
+    <ul class="help">
+      <li>🏃 <b>WASD / arrows</b> to run, <b>Space</b> to jump (double-jump allowed!).</li>
+      <li>🖐 Near a soft <b>glowing clay blob</b>, press <b>E</b> to reshape it: <b>Block → Ramp → Bridge → Block…</b></li>
+      <li>🔮 Collect beads. 🌸 Secret flowers hide off the main path.</li>
+      <li>🚩 Touch checkpoint flags to save your spot. 🏁 Reach the golden arch to finish.</li>
+      <li>🔺 Spikes send you back to the last flag.</li>
+      <li>📱 On touch screens use the left stick + ▲ button.</li>
+      <li>🧱 The <b>Level Editor</b> lets you build + playtest workshop levels (saved in your browser).</li>
+    </ul>
+    <div class="row"><button id="h-back">← Back</button></div>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="screen-pause" class="screen hidden">
+  <div class="card">
+    <h1>⏸ Paused</h1>
+    <div class="menu">
+      <button class="big" id="p-resume">▶ Resume</button>
+      <button id="p-restart">↻ Restart level</button>
+      <button id="p-chapters">📖 Chapters</button>
+      <button id="p-editor">🧱 Editor</button>
+      <button id="p-quit">🏠 Title</button>
+    </div>
+  </div>
+</div>
+
+<!-- Level complete -->
+<div id="screen-done" class="screen hidden">
+  <div class="card">
+    <h1>🏁 Chapter Complete!</h1>
+    <p id="done-stats"></p>
+    <p id="done-flowers"></p>
+    <div class="row">
+      <button id="d-replay">↻ Replay</button>
+      <button class="big" id="d-next">Next ▶</button>
+      <button id="d-chapters">📖 Chapters</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editor bar -->
+<div id="editorbar" class="hidden">
+  <div id="palette"></div>
+  <div class="ed-row">
+    <label>height <input type="range" id="ed-h" min="0" max="12" step="1" value="1"></label>
+    <button id="ed-playtest">▶ Playtest</button>
+    <button id="ed-stop" class="hidden">⏹ Stop</button>
+    <button id="ed-save">💾 Save</button>
+    <button id="ed-clear">🗑 Clear</button>
+    <button id="ed-exit">✖ Exit</button>
+  </div>
+  <div class="ed-hint">click: place · right-click / Del: remove · drag: orbit · wheel: zoom</div>
+</div>
+
+<div id="vignette"></div>
+<script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
