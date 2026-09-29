@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Open Sea — real-time ocean</title>
+<link rel="icon" href="data:,">
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:ui-sans-serif,system-ui,Helvetica,Arial,sans-serif}
   #app{position:fixed;inset:0}
@@ -54,6 +55,8 @@
   <button id="b-bolt" title="lightning">⚡ OFF</button>
   <button id="b-cycle" title="animate time">◷ AUTO</button>
   <button id="b-yacht" class="on" title="yacht">⛵</button>
+  <button id="b-battle" title="pirate battle">BATTLE</button>
+  <button id="b-fire" title="fire broadside">FIRE</button>
 </div>
 <div id="toast"></div>
 <div id="loader"><div class="spin"></div><div style="font-size:12px;letter-spacing:.2em">LOADING OPEN SEA</div></div>
@@ -67,7 +70,8 @@ const S = {
   sea: 4.0, time: 10.5, rain: 0, lightning: false, autoTime: false,
   mode: 'tour', tourT: 0, simT: 0, lastT: performance.now()/1000,
   yachtOn: true, flash: 0, nextBolt: 8, boltLife: 0,
-  camMode: 'tour'
+  camMode: 'tour',
+  battle: false, hitsDealt: 0, hitsTaken: 0,
 };
 const $ = id => document.getElementById(id);
 const toast = m => { const t=$('toast'); t.textContent=m; t.style.opacity=1; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity=0,2200); };
@@ -456,6 +460,160 @@ function buildYacht(){
 const yacht = buildYacht(); scene.add(yacht);
 const yachtHeading = -0.5;
 
+/* ============ pirate galleon ============ */
+function jollyRogerTexture(){
+  const c=document.createElement('canvas'); c.width=128; c.height=96;
+  const x=c.getContext('2d');
+  x.fillStyle='#0b0b0c'; x.fillRect(0,0,128,96);
+  x.strokeStyle='#e8e8e6'; x.lineWidth=7; x.lineCap='round';
+  x.beginPath(); x.moveTo(18,20); x.lineTo(110,76); x.moveTo(110,20); x.lineTo(18,76); x.stroke();
+  x.fillStyle='#e8e8e6';
+  x.beginPath(); x.arc(64,44,20,0,Math.PI*2); x.fill();           // skull
+  x.fillRect(48,52,32,14);
+  x.fillStyle='#0b0b0c';
+  x.beginPath(); x.arc(57,42,6,0,Math.PI*2); x.arc(71,42,6,0,Math.PI*2); x.fill();
+  x.beginPath(); x.moveTo(64,50); x.lineTo(60,58); x.lineTo(68,58); x.closePath(); x.fill();
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+function buildPirateShip(){
+  const g = new THREE.Group();
+  const hullMat = new THREE.MeshStandardMaterial({color:0x3a2417, roughness:.85, metalness:.05});
+  const trimMat = new THREE.MeshStandardMaterial({color:0x17110b, roughness:.9});
+  const deckMat = new THREE.MeshStandardMaterial({color:0x6b4e33, roughness:.9});
+  const sailMat = new THREE.MeshStandardMaterial({color:0xcfc4ae, roughness:.95, side:THREE.DoubleSide});
+  const mastMat = new THREE.MeshStandardMaterial({color:0x2b1c11, roughness:.85});
+  // hull: long dark hull with sheer + stern castle
+  const hullGeo = new THREE.BoxGeometry(4.2, 2.6, 16, 3, 2, 10);
+  const pos = hullGeo.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    let x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
+    const t=(z+8)/16; // 0 stern..1 bow
+    const taper = 1 - Math.pow(Math.max(0,t-0.5)/0.5,1.5)*0.8;
+    x*=taper*(y<0?0.6:1);
+    if(t>0.82&&y<0.4) y+=(t-0.82)*5.0;   // bow rise
+    if(t<0.18&&y>0) y+=(0.18-t)*4.0;      // stern castle lift
+    if(y>0) y*=0.7;
+    pos.setXYZ(i,x,y,z);
+  }
+  hullGeo.computeVertexNormals();
+  const hull = new THREE.Mesh(hullGeo, hullMat); hull.position.y=0.7; hull.castShadow=true; g.add(hull);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(4.3,0.28,15.2), trimMat); stripe.position.y=1.15; g.add(stripe);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(3.4,0.14,13.5), deckMat); deck.position.y=1.75; g.add(deck);
+  const castle = new THREE.Mesh(new THREE.BoxGeometry(3.2,1.4,3.0), hullMat); castle.position.set(0,2.6,-6.0); g.add(castle);
+  // gunports: dark squares both broadsides
+  const portGeo = new THREE.BoxGeometry(0.1,0.5,0.7);
+  const portMat = new THREE.MeshBasicMaterial({color:0x050505});
+  for(let s=-1;s<=1;s+=2) for(let k=0;k<5;k++){
+    const p=new THREE.Mesh(portGeo, portMat); p.position.set(s*2.12, 0.9, -4+k*2.1); g.add(p);
+  }
+  // two square-rigged masts + bowsprit
+  function squareSail(w,h){
+    const geo=new THREE.PlaneGeometry(w,h,8,6);
+    const p=geo.attributes.position;
+    for(let i=0;i<p.count;i++){ const x=p.getX(i)/w; p.setZ(i, Math.sin((x+.5)*Math.PI)*0.7); }
+    geo.computeVertexNormals();
+    return new THREE.Mesh(geo, sailMat);
+  }
+  const m1=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.17,15,8), mastMat); m1.position.set(0,9,-2.5); g.add(m1);
+  const m2=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.15,13,8), mastMat); m2.position.set(0,8,3.8); g.add(m2);
+  const y1=squareSail(7.5,4.2); y1.position.set(0,11.5,-2.5); g.add(y1);
+  const y2=squareSail(6.4,3.6); y2.position.set(0,8.2,-2.5); g.add(y2);
+  const y3=squareSail(6.8,3.8); y3.position.set(0,10.2,3.8); g.add(y3);
+  const sprit=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.09,6,6).rotateX(Math.PI/2-0.15), mastMat);
+  sprit.position.set(0,2.6,10); g.add(sprit);
+  // jolly roger on mainmast
+  const flag=new THREE.Mesh(new THREE.PlaneGeometry(2.6,1.9,6,1),
+    new THREE.MeshBasicMaterial({map:jollyRogerTexture(), side:THREE.DoubleSide}));
+  flag.position.set(1.4,15.4,-2.5); g.add(flag); g.userData.flag=flag;
+  g.traverse(o=>{ if(o.isMesh) o.castShadow=true; });
+  return g;
+}
+const pirate = buildPirateShip(); scene.add(pirate);
+pirate.visible = false;
+const battle = { ang: 0.6, radius: 34, heading: 0, nextVolley: 3, volleyQueue: [], muzzle: 0 };
+// cannonballs / splashes / smoke pools (dt-clamped updates, no feedback loops)
+const balls = [];
+const ballGeo = new THREE.SphereGeometry(0.28, 10, 8);
+const ballMat = new THREE.MeshBasicMaterial({color:0x111114});
+const splashes = [];
+const splashRingGeo = new THREE.RingGeometry(0.6, 1.6, 24).rotateX(-Math.PI/2);
+const sprayGeo = new THREE.ConeGeometry(1.1, 4.2, 10, 1, true);
+function spawnSplash(x, z, big){
+  const y = cpuWave(x, z, S.simT, S.sea);
+  const ring = new THREE.Mesh(splashRingGeo, new THREE.MeshBasicMaterial({color:0xe8ecec, transparent:true, opacity:0.85, depthWrite:false}));
+  ring.position.set(x, y+0.25, z); ring.renderOrder=3; scene.add(ring);
+  const spray = new THREE.Mesh(sprayGeo, new THREE.MeshBasicMaterial({color:0xdfe7e6, transparent:true, opacity:0.7, depthWrite:false}));
+  spray.position.set(x, y+2.0, z); scene.add(spray);
+  splashes.push({ring, spray, life: big?1.6:1.1, age:0, big});
+}
+function puffTexture(){
+  const c=document.createElement('canvas'); c.width=64; c.height=64;
+  const x=c.getContext('2d');
+  const g=x.createRadialGradient(32,32,2,32,32,30);
+  g.addColorStop(0,'rgba(235,235,232,0.9)'); g.addColorStop(0.6,'rgba(220,220,216,0.35)'); g.addColorStop(1,'rgba(210,210,205,0)');
+  x.fillStyle=g; x.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(c);
+}
+const puffTex = puffTexture();
+const smokes = [];
+function spawnSmoke(x, y, z, n, dark){
+  for(let i=0;i<n;i++){
+    const m=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTex, transparent:true, opacity:0.75, depthWrite:false, color: dark?0x555550:0xddddda}));
+    m.position.set(x+(Math.random()-.5)*3, y+Math.random()*2, z+(Math.random()-.5)*3);
+    const s=1.5+Math.random()*2; m.scale.set(s,s,1);
+    scene.add(m);
+    smokes.push({m, age:0, life:1.6+Math.random(), vx:(Math.random()-.5)*2, vy:2+Math.random()*2});
+  }
+}
+const muzzleLight = new THREE.PointLight(0xffc37a, 0, 120, 1.8);
+scene.add(muzzleLight);
+// procedural cannon thump (no assets; created on first user gesture)
+let actx=null;
+function boom(vol){
+  try{
+    if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended') actx.resume();
+    const t0=actx.currentTime;
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(90,t0); o.frequency.exponentialRampToValueAtTime(32,t0+0.5);
+    g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.001,t0+0.7);
+    o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0+0.75);
+    const len=actx.sampleRate*0.4, buf=actx.createBuffer(1,len,actx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/len*5)*vol*0.8;
+    const src=actx.createBufferSource(); src.buffer=buf;
+    const f=actx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=900;
+    src.connect(f).connect(actx.destination); src.start(t0);
+  }catch(e){}
+}
+function fireBall(from, target, spread){
+  const dx=target.x-from.x, dz=target.z-from.z;
+  const dist=Math.hypot(dx,dz);
+  const dirx=dx/dist, dirz=dz/dist;
+  const flight=dist/30;                       // ~30 m/s muzzle
+  const b=new THREE.Mesh(ballGeo, ballMat);
+  b.position.copy(from); scene.add(b);
+  balls.push({m:b,
+    vx:dirx*30+(Math.random()-.5)*spread, vy:6+flight*4.9+Math.random()*2, vz:dirz*30+(Math.random()-.5)*spread,
+    life:7});
+  spawnSmoke(from.x, from.y+0.5, from.z, 2, true);
+}
+function broadside(shipPos, targetPos, n){
+  for(let i=0;i<n;i++){
+    battle.volleyQueue.push({t: S.simT + i*0.22,
+      from: new THREE.Vector3(shipPos.x+(Math.random()-.5)*4, shipPos.y+2.2, shipPos.z+(Math.random()-.5)*6),
+      target: new THREE.Vector3(targetPos.x+(Math.random()-.5)*6, 0, targetPos.z+(Math.random()-.5)*6)});
+  }
+  muzzleLight.position.set(shipPos.x, shipPos.y+4, shipPos.z);
+  battle.muzzle=1;
+}
+function setBattle(on){
+  S.battle=on;
+  pirate.visible=on;
+  $('b-battle').textContent = on?'BATTLE ●':'BATTLE';
+  $('b-battle').classList.toggle('on', on);
+  if(on){ battle.nextVolley=2; toast('Pirate battle! 💥 FIRE fires your broadside'); }
+}
+
 /* wake: attached foam ribbon + V pattern */
 const wakeU = { uTime:{value:0}, uDay:{value:1}, uNight:{value:0}, uRain:{value:0}, uCam:{value:camera.position} };
 const wake = new THREE.Mesh(new THREE.PlaneGeometry(10, 26, 1, 1).rotateX(-Math.PI/2),
@@ -583,6 +741,13 @@ $('r-rain').addEventListener('input',e=>{ S.rain=+e.target.value; $('o-rain').te
 $('b-bolt').addEventListener('click',e=>{ S.lightning=!S.lightning; e.target.textContent=S.lightning?'⚡ ON':'⚡ OFF'; e.target.classList.toggle('on',S.lightning); });
 $('b-cycle').addEventListener('click',e=>{ S.autoTime=!S.autoTime; e.target.classList.toggle('on',S.autoTime); });
 $('b-yacht').addEventListener('click',e=>{ S.yachtOn=!S.yachtOn; yacht.visible=S.yachtOn; wake.visible=S.yachtOn; e.target.classList.toggle('on',S.yachtOn); });
+$('b-battle').addEventListener('click',()=> setBattle(!S.battle));
+$('b-fire').addEventListener('click',()=>{
+  if(!S.battle) setBattle(true);
+  broadside(yacht.position, pirate.position, 5);
+  boom(0.5);
+  toast('Broadside fired!');
+});
 function setMode(m){
   S.mode=m;
   $('mode-pill').textContent = m==='tour'?'TOUR':'FREE FLY';
@@ -681,6 +846,72 @@ function animate(){
   wake.rotation.y = yachtHeading;
   wakeU.uTime.value=t; wakeU.uDay.value=sm.dayF; wakeU.uNight.value=sm.nightF;
 
+  /* ---- pirate battle (all integration uses clamped dt — no blowups) ---- */
+  if(S.battle){
+    battle.ang += dt*0.06;
+    const px=Math.cos(battle.ang)*battle.radius, pz=Math.sin(battle.ang)*battle.radius;
+    const ph=cpuWave(px,pz,t,S.sea);
+    const phx=cpuWave(px+4,0+pz,t,S.sea), phz=cpuWave(px,pz+4,t,S.sea);
+    pirate.position.set(px, ph+0.15, pz);
+    battle.heading = -battle.ang;                       // tangent to orbit
+    pirate.rotation.y = battle.heading;
+    pirate.rotation.z += ((phz-ph)*0.10+0.05-pirate.rotation.z)*kDamp;
+    pirate.rotation.x += ((ph-phx)*0.10-pirate.rotation.x)*kDamp;
+    // flag flutter
+    const fl=pirate.userData.flag;
+    if(fl){ fl.rotation.y = Math.sin(t*6)*0.35; fl.scale.x = 1+Math.sin(t*9)*0.06; }
+    // auto volleys while in range
+    battle.nextVolley -= dt;
+    if(battle.nextVolley<=0){
+      broadside(pirate.position, yacht.position, 4);
+      boom(0.35);
+      battle.nextVolley = 5+Math.random()*4;
+    }
+    // free-fly hint: frame the duel
+  }
+  // staggered volley queue
+  for(let i=battle.volleyQueue.length-1;i>=0;i--){
+    const v=battle.volleyQueue[i];
+    if(S.simT>=v.t){ fireBall(v.from, v.target, 3.5); battle.volleyQueue.splice(i,1); }
+  }
+  battle.muzzle *= Math.exp(-dt*6);
+  muzzleLight.intensity = battle.muzzle*260;
+  // cannonballs: fixed gravity, clamped dt, splash on wave contact
+  for(let i=balls.length-1;i>=0;i--){
+    const b=balls[i];
+    b.life-=dt;
+    b.vy-=9.8*dt;
+    b.m.position.x+=b.vx*dt; b.m.position.y+=b.vy*dt; b.m.position.z+=b.vz*dt;
+    const wv=cpuWave(b.m.position.x, b.m.position.z, t, S.sea);
+    let dead=b.life<=0;
+    // hull hits (generous radius, above waterline)
+    if(!dead && S.battle){
+      if(b.m.position.distanceTo(pirate.position)<5 && b.m.position.y<pirate.position.y+4){ spawnSmoke(b.m.position.x,b.m.position.y,b.m.position.z,6,true); S.hitsDealt++; toast('HIT on the pirate! ('+S.hitsDealt+')'); boom(0.4); dead=true; }
+      else if(b.m.position.distanceTo(yacht.position)<4 && b.m.position.y<yacht.position.y+3){ spawnSmoke(b.m.position.x,b.m.position.y,b.m.position.z,5,true); S.hitsTaken++; boom(0.4); dead=true; }
+    }
+    if(!dead && b.m.position.y<=wv){ spawnSplash(b.m.position.x, b.m.position.z, false); dead=true; }
+    if(dead){ scene.remove(b.m); balls.splice(i,1); }
+  }
+  // splashes: expand + fade, dt-exponential
+  for(let i=splashes.length-1;i>=0;i--){
+    const s=splashes[i]; s.age+=dt;
+    const k=s.age/s.life;
+    if(k>=1){ scene.remove(s.ring); scene.remove(s.spray); s.ring.material.dispose(); s.spray.material.dispose(); splashes.splice(i,1); continue; }
+    const sc=1+k*(s.big?5:3.2);
+    s.ring.scale.set(sc,1,sc); s.ring.material.opacity=0.85*(1-k);
+    s.spray.scale.set(1+k*1.5, 1-k*0.6, 1+k*1.5); s.spray.material.opacity=0.7*(1-k);
+    s.spray.position.y+=dt*3*(1-k);
+  }
+  // smoke: rise + expand + fade
+  for(let i=smokes.length-1;i>=0;i--){
+    const s=smokes[i]; s.age+=dt;
+    const k=s.age/s.life;
+    if(k>=1){ scene.remove(s.m); s.m.material.dispose(); smokes.splice(i,1); continue; }
+    s.m.position.x+=s.vx*dt; s.m.position.y+=s.vy*dt;
+    const sc=s.m.scale.x+dt*3; s.m.scale.set(sc,sc,1);
+    s.m.material.opacity=0.75*(1-k);
+  }
+
   // rain update (velocity fixed, wrap; dt clamped above)
   rainMat.opacity += ((S.rain*0.6)-rainMat.opacity)*(1-Math.exp(-dt*3));
   rain.visible = rainMat.opacity>0.02;
@@ -763,6 +994,7 @@ setTimeout(()=>{ $('loader').classList.add('done'); }, 600);
 animate();
 // expose for screenshots/tests
 window.__sea = S; window.__cam = camera; window.__ctl = controls; window.__setMode = setMode;
+window.__battle = {S, battle, balls, splashes, setBattle, broadside, get pirate(){return pirate}, get yacht(){return yacht}};
 </script>
 </body>
 </html>
