@@ -1,0 +1,38 @@
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;font-family:"Trebuchet MS",Verdana,system-ui,sans-serif;background:#7ad7f0}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block}
+#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 62%,rgba(40,10,60,.28) 100%)}
+#hud{position:fixed;inset:0;pointer-events:none;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+#hud.hidden{display:none}
+#hud-top{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;background:rgba(20,8,40,.55);border:2px solid rgba(255,255,255,.7);border-radius:999px;padding:8px 18px;font-weight:800;backdrop-filter:blur(4px);white-space:nowrap}
+#hud-round{color:#ffe45e}#hud-timer{color:#fff}#hud-qual{color:#9dffb0}
+#hud-msg{position:absolute;top:22%;width:100%;text-align:center;font-size:52px;font-weight:900;letter-spacing:1px}
+#hud-sub{position:absolute;top:calc(22% + 62px);width:100%;text-align:center;font-size:20px;font-weight:700}
+#hud-controls{position:absolute;bottom:10px;width:100%;text-align:center;font-size:13px;opacity:.9;background:rgba(0,0,0,.3);padding:6px}
+#menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,120,200,.35),rgba(80,40,160,.55));padding:16px;overflow:auto}
+#menu.hidden{display:none}
+.card{background:linear-gradient(180deg,#fff,#ffe9f6);border:4px solid #fff;border-radius:22px;box-shadow:0 20px 60px rgba(60,0,80,.45);padding:26px 28px;max-width:640px;width:100%;color:#3a1650;text-align:center}
+.card.big{max-width:560px}
+.logo{font-size:56px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#ff2f92,#ff9d2e,#29d3ff,#7dff6a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #fff) drop-shadow(0 6px 12px rgba(0,0,0,.2))}
+.tagline{font-weight:800;margin:6px 0 16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0;flex-wrap:wrap}
+.row label{font-weight:900}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{border:3px solid #3a1650;border-radius:999px;padding:8px 14px;font-weight:900;cursor:pointer;background:#fff;color:#3a1650}
+.seg button.on{background:#3a1650;color:#ffe45e}
+.seg button.dot{width:38px;height:38px;border-radius:50%;padding:0}
+#play-btn{margin-top:14px;width:100%;font-size:22px;font-weight:900;padding:14px;border-radius:16px;border:0;cursor:pointer;background:linear-gradient(90deg,#ff2f92,#ff7a2e);color:#fff;box-shadow:0 6px 0 #a31354}
+#play-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #a31354}
+.ghost{margin-top:10px;width:100%;padding:10px;border-radius:12px;border:2px dashed #3a1650;background:transparent;cursor:pointer;font-weight:800;color:#3a1650}
+#sim-out{margin-top:10px;font-size:13px;text-align:left;background:#24103a;color:#c8ffb4;border-radius:12px;padding:10px;max-height:180px;overflow:auto;display:none;white-space:pre-wrap}
+.rounds-list{text-align:left;font-size:13.5px;background:rgba(58,22,80,.07);border-radius:12px;padding:10px 14px;margin-top:6px;line-height:1.65}
+.fine{font-size:12px;opacity:.75;margin-top:10px}
+#card-overlay,#result-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,5,35,.45);z-index:5}
+#card-overlay.hidden,#result-overlay.hidden{display:none}
+#card-kicker,#result-kicker{font-weight:900;letter-spacing:3px;color:#ff2f92}
+#card-title,#result-title{font-size:52px;font-weight:900;margin:6px 0}
+#card-desc{font-size:15px;margin:8px 0}
+#card-qual{display:inline-block;background:#3a1650;color:#ffe45e;font-weight:900;border-radius:999px;padding:8px 18px;margin-top:6px}
+#countdown{font-size:74px;font-weight:900;color:#3a1650;margin-top:8px}
+#next-btn{margin-top:14px;font-size:20px;font-weight:900;padding:12px 26px;border-radius:14px;border:0;background:#3a1650;color:#ffe45e;cursor:pointer}
+#toast{position:fixed;bottom:52px;left:50%;transform:translateX(-50%);background:rgba(20,8,40,.85);color:#fff;font-weight:800;padding:10px 18px;border-radius:999px;display:none;z-index:9}
+@media(max-width:640px){.logo{font-size:40px}#hud-msg{font-size:34px}#card-title{font-size:36px}}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fall Beans — Knockout Show</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="vignette"></div>
+<div id="hud" class="hidden">
+  <div id="hud-top">
+    <div id="hud-round">ROUND 1/5</div>
+    <div id="hud-timer">⏱ 0:00</div>
+    <div id="hud-qual">✅ 0/40 &nbsp;•&nbsp; 🏁 Pos <span id="hud-pos">–</span></div>
+  </div>
+  <div id="hud-msg"></div>
+  <div id="hud-sub"></div>
+  <div id="hud-controls">WASD / Arrows move • SPACE jump • SHIFT / E dive • R respawn • M mute</div>
+</div>
+<div id="menu">
+  <div class="card">
+    <div class="logo">FALL BEANS</div>
+    <div class="tagline">🍬 KNOCKOUT SHOW • you vs 59 bots • 5 rounds • 1 crown 👑</div>
+    <div class="row">
+      <label>Difficulty</label>
+      <div class="seg" id="diff-seg">
+        <button data-d="easy" class="on">Easy 🙂</button>
+        <button data-d="normal">Normal 😐</button>
+        <button data-d="hard">Hard 🥵</button>
+      </div>
+    </div>
+    <div class="row">
+      <label>Your bean</label>
+      <div class="seg" id="color-seg"></div>
+    </div>
+    <div class="rounds-list" id="rounds-list"></div>
+    <button id="play-btn">▶ &nbsp;START SHOW (60 players)</button>
+    <button id="sim-btn" class="ghost">⚙ Simulate full show with bots (fast)</button>
+    <div id="sim-out"></div>
+    <div class="fine">Movement: weighty jelly physics — momentum, dives, stumbles &amp; knockbacks. Bots make human mistakes. Easy is default so a casual player can win. Sound is 100% code (WebAudio). No assets downloaded.</div>
+    <div class="fine" id="test-note">Bot-tested only: pressing Simulate runs every round headless. Human keyboard testing still needed for feel.</div>
+  </div>
+</div>
+<div id="card-overlay" class="hidden">
+  <div class="card big">
+    <div id="card-kicker">ROUND 1 / 5</div>
+    <div id="card-title">CANDY DASH</div>
+    <div id="card-desc"></div>
+    <div id="card-qual"></div>
+    <div id="countdown">3</div>
+  </div>
+</div>
+<div id="result-overlay" class="hidden">
+  <div class="card big">
+    <div id="result-kicker">ROUND OVER</div>
+    <div id="result-title">QUALIFIED!</div>
+    <div id="result-desc"></div>
+    <button id="next-btn">NEXT ROUND ▶</button>
+  </div>
+</div>
+<div id="toast"></div>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
