@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#151614" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23151614'/%3E%3Cpath d='M11 8h8l-3 8H8zm9 0h8l-3 8h-8zM7 18h8l-3 8H4zm9 0h8l-3 8h-8zM3 28h8l-2 6H1zm9 0h8l-2 6h-8z' fill='%23ff6536'/%3E%3C/svg%3E" />
+    <meta name="description" content="Wreckyard. A full-contact 3D demolition derby. Pick your ride, hit the dirt, and be the last car standing." />
+    <title>WRECKYARD — Drive hard. Die last.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene"></div>
+      <div class="scene-vignette"></div>
+      <div id="blast-flash" class="blast-flash" aria-hidden="true"></div>
+      <header class="header">
+        <a class="brand" href="#" aria-label="Wreckyard home"><span class="brand-icon"><i></i><i></i><i></i><i></i><i></i><i></i></span>WRECK<span>YARD</span><span class="brand-dot">®</span></a>
+        <nav class="nav" aria-label="Main navigation">
+          <button class="nav-link active" data-page="play">PLAY <span>01</span></button>
+          <button class="nav-link" data-page="garage">GARAGE <span>02</span></button>
+          <button class="nav-link" data-page="records">LEADERBOARD <span>03</span></button>
+        </nav>
+        <div class="header-right"><button id="sound-toggle" class="icon-btn" title="Enable sound" aria-label="Enable sound"><i data-lucide="volume-x"></i></button><span class="header-divider"></span><div class="avatar">R</div><div class="player-name">ROOKIE<span><b></b> READY TO WRECK</span></div><button id="help-button" class="icon-btn" title="How to play" aria-label="How to play"><i data-lucide="circle-help"></i></button></div>
+      </header>
+
+      <main id="lobby" class="lobby">
+        <section class="hero-copy">
+          <div class="eyebrow"><span></span> FULL-CONTACT MOTORSPORT</div>
+          <h1>DRIVE HARD.<br /><span>DIE LAST.</span></h1>
+          <p>No clean racing. No second chances.<br />Just you, your ride, and a whole lot of wreckage.</p>
+          <div class="event-label"><span class="event-symbol"><i data-lucide="flag"></i></span><div>DEMOLITION DERBY<span>LAST CAR STANDING</span></div><span class="live-tag"><b></b> LIVE</span></div>
+        </section>
+        <div class="scene-label"><span class="small-cross">+</span><span>BUILT TO BREAK.<br /><b>NOT TO LOOK PRETTY.</b></span></div>
+        <div class="arena-label"><span class="orange-dot"></span><span id="scene-arena-label">THE DUSTBOWL</span><span class="arena-coords">34° 08′ N / 118° 19′ W</span></div>
+        <button class="camera-button" id="camera-button" aria-label="Rotate preview camera"><i data-lucide="scan"></i><span>CHANGE VIEW</span></button>
+
+        <section class="lobby-dock">
+          <button class="dock-card ride-card" id="choose-car"><div class="card-heading"><span>01 / YOUR RIDE</span><i data-lucide="arrow-up-right"></i></div><div class="ride-body"><div class="mini-car" id="mini-car"></div><div class="ride-details"><span class="class-tag" id="car-class">CLASS B</span><h2 id="car-name">THE RUST BUCKET</h2><span class="car-description" id="car-description">American muscle. Questionable brakes.</span></div></div><div class="car-stats"><span>POWER <b id="stat-power">7.8</b><i><em style="width:78%"></em></i></span><span>ARMOR <b id="stat-armor">8.5</b><i><em style="width:85%"></em></i></span><span>HANDLING <b id="stat-handling">6.2</b><i><em style="width:62%"></em></i></span></div></button>
+          <button class="dock-card track-card" id="choose-arena"><div class="card-heading"><span>02 / THE BATTLEGROUND</span><i data-lucide="arrow-up-right"></i></div><div class="track-body"><div class="track-map"><svg viewBox="0 0 100 72" fill="none"><path d="M26 14 70 10 90 27 84 56 64 65 25 59 10 41Z" stroke="currentColor" stroke-width="1"/><path d="M29 21 68 17 82 30 77 50 62 57 30 52 18 39Z" stroke="currentColor" stroke-width="1.5"/><path d="m50 25-9 11 9 11 9-11Z" stroke="currentColor" stroke-width="1"/><path d="M43 36h14M50 29v14" stroke="#ff6536"/><circle cx="30" cy="31" r="2" fill="#ff6536"/><circle cx="66" cy="43" r="2" fill="#ff6536"/></svg></div><div><h2 id="arena-name">THE DUSTBOWL</h2><span class="arena-description" id="arena-description">Dirt. Dust. Destruction.</span><div class="track-badges"><span><i data-lucide="users"></i> 8 DRIVERS</span><span><i data-lucide="sun"></i> GOLDEN HOUR</span></div></div></div></button>
+          <div class="start-card"><div class="ready-line"><span class="orange-dot"></span> YOUR NEXT BAD DECISION.</div><button class="start-button" id="start-button"><span>LET’S WRECK</span><i data-lucide="arrow-right"></i></button><div class="start-caption"><span>NO RULES. ALL GAS.</span><span>ENTER <kbd>↵</kbd></span></div></div>
+        </section>
+      </main>
+
+      <footer class="footer" id="lobby-footer"><span><span class="footer-status"></span> ALL SYSTEMS QUESTIONABLE</span><div><span>WASD <span class="footer-muted">TO DRIVE</span></span><span>SPACE <span class="footer-muted">HANDBRAKE</span></span><button id="controls-button">ALL CONTROLS <i data-lucide="arrow-up-right"></i></button></div><span class="build-label">EST. 2025 <span>/</span> BUILT FOR CHAOS</span></footer>
+
+      <section id="game-hud" class="game-hud hidden" aria-label="Game status">
+        <div class="hud-top"><div class="match-info"><span class="eyebrow">ARMED DEMOLITION DERBY</span><h2>LAST CAR STANDING</h2><div><span id="alive-count">8</span> / 8 DRIVERS LEFT</div></div><div class="match-timer"><span>TIME REMAINING</span><strong id="match-time">03:00</strong></div><button class="pause-btn" id="pause-button" aria-label="Pause game"><i data-lucide="pause"></i></button></div>
+        <div class="aim-reticle" aria-hidden="true"><span></span><i></i></div>
+        <div class="weapon-panel" aria-label="Weapons">
+          <button class="weapon-slot" id="minigun-button" data-key="f" aria-label="Hold to fire minigun" title="Hold F or this button to fire the minigun"><div class="weapon-heading"><i data-lucide="crosshair"></i><strong>MINIGUN</strong><kbd>F</kbd></div><div class="weapon-meter"><span id="gun-heat-bar"></span></div><div class="weapon-status"><span id="gun-status">READY</span><span id="gun-heat">0% HEAT</span></div></button>
+          <button class="weapon-slot" id="rocket-button" data-key="e" aria-label="Fire rocket" title="E or this button to fire a rocket"><div class="weapon-heading"><i data-lucide="rocket"></i><strong>ROCKETS</strong><kbd>E</kbd></div><div class="rocket-rounds" id="rocket-rounds"><span></span><span></span><span></span><span></span></div><div class="weapon-status"><span id="rocket-status">READY</span><span id="rocket-ammo">4 / 4</span></div></button>
+          <span class="weapon-hint">AIM WITH YOUR CAR · HOLD TO FIRE</span>
+        </div>
+        <div class="hit-notification" id="hit-notification"></div><div class="countdown hidden" id="countdown"></div>
+        <div class="hud-bottom"><div class="health-panel"><div><i data-lucide="shield"></i> VEHICLE INTEGRITY <b id="health-value">100%</b></div><div class="health-track"><span id="health-bar"></span></div><span id="wreck-count">0 TAKEDOWNS</span></div><div class="game-key-hints">W A S D <span>DRIVE</span><b>SPACE</b><span>HANDBRAKE</span><b>SHIFT</b><span>BOOST</span><b>R</b><span>RESET</span></div><div class="speedometer"><div class="speed-top"><span id="gear">N</span><strong id="speed">0</strong><span>KM/H</span></div><div class="boost-track"><span id="boost-bar"></span></div><span class="boost-label">NITRO <i data-lucide="zap"></i></span></div></div>
+      </section>
+      <div id="touch-controls" class="touch-controls hidden"><div><button data-key="a" aria-label="Steer left">◀</button><button data-key="d" aria-label="Steer right">▶</button></div><div><button data-key="s" aria-label="Brake and reverse">▼</button><button data-key="w" aria-label="Accelerate">▲</button><button data-key="Shift" aria-label="Nitro boost">⚡</button></div></div>
+      <div class="modal-backdrop hidden" id="modal-backdrop"><section class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"></section></div>
+      <div class="toast hidden" id="toast"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
