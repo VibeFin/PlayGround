@@ -1,0 +1,29 @@
+#live-progress { color: #deded3; font: 14px/1.6 system-ui, sans-serif; }
+.proof-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 22px 0; border-bottom: 1px solid #ad93632a; }
+.live-dot { width: 7px; height: 7px; background: #a5c78b; border-radius: 50%; box-shadow: 0 0 12px #a5c78b70; }
+.proof-status { font-size: 15px; font-weight: 600; }
+.proof-updated { color: #8a958f; margin-left: auto; font-size: 12px; }
+.proof-pieces { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0 36px; }
+.proof-piece, .proof-check, .proof-review { border: 1px solid #ad93632a; background: #121b1b; border-radius: 4px; padding: 22px; }
+.proof-eyebrow { color: #9b936f; font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; }
+#live-progress h3 { color: #efe9d6; font-size: 16px; font-weight: 500; margin: 8px 0; }
+#live-progress p { margin: 8px 0; }
+.proof-piece-status { color: #acc994; }
+.proof-critic { color: #9aaba5; font-size: 12px; }
+.proof-heading { color: #ece6d3; font: 28px/1.3 Georgia, serif; font-weight: 400; margin: 42px 0 20px; }
+.proof-checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.proof-check { position: relative; padding: 18px 22px; }
+.proof-result { color: #acc994; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.proof-check.failed .proof-result { color: #e79a8c; }
+.proof-check p, .proof-review p { color: #a3b2ac; font-size: 13px; }
+.proof-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.proof-shot { margin: 0; border: 1px solid #ad93632a; background: #121b1b; border-radius: 4px; overflow: hidden; }
+.proof-shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.proof-shot figcaption { padding: 12px 22px 18px; }
+.proof-shot p { font-size: 12px; color: #a3b2ac; }
+.proof-reviews { display: grid; gap: 12px; }
+.proof-review .proof-fix { color: #d4c495; }
+.proof-review .proof-verdict { color: #acc994; font-size: 12px; }
+.proof-method { border-top: 1px solid #ad93632a; padding-top: 24px; margin-top: 36px !important; font-size: 12px; color: #acb6b0; }
+.proof-renderer { font-size: 11px; color: #7b8b83; }
+@media (max-width: 720px) { .proof-pieces, .proof-checks, .proof-gallery { grid-template-columns: 1fr; } .proof-updated { width: 100%; margin-left: 19px; } }

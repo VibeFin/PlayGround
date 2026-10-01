@@ -1,0 +1,31 @@
+{
+  "updated": "2026-10-01",
+  "status": "Three independent critics PASS 8/10 each — gaps fixed and re-verified",
+  "stage": "verified",
+  "pieces": [
+    { "name": "Gameplay simulation", "builder": "Independent gameplay builder", "status": "14 simulation checks passing; full win/loss/restart proven headless", "critic": "PASS 8/10 — full select/move/gather/build/train/attack/Q/raid/defeat/restart loop exercised with real input" },
+    { "name": "3D battlefield", "builder": "Independent Three.js builder", "status": "Real low-poly WebGL; stronghold scaled up, mid-field landmarks added", "critic": "PASS 8/10 — readable geometry, team colors, selection/HP/construction/combat feedback, zero console errors" },
+    { "name": "Command interface", "builder": "Independent interface builder", "status": "H-trap, arrow-blocking, pick strictness and onboarding fixed; re-verified live", "critic": "PASS 8/10 — resources, costs, cooldowns, minimap, help, pause, restart all verified with real input" }
+  ],
+  "checks": [
+    { "name": "Simulation tests", "result": "passed", "detail": "npm test — 14 passed, 0 failed. Economy, construction/training and resuming interrupted sites, combat, hero power, complete win/loss and restart." },
+    { "name": "Browser input playtest", "result": "passed", "detail": "22 checks passed using real buttons, mouse and keyboard: drag selection, gold/lumber gather and deposit, farm and barracks placement, pause/resume construction, hero move, army select, attack-move, camera pan/zoom, restart. No uncaught browser exceptions." },
+    { "name": "Browser skirmish playtest", "result": "passed", "detail": "Victory at ~147s sim (9-unit army, staged attack-move, 2+ Sunburst casts), restart, unattended defeat at ~268s sim, restart again. Real canvas placement, hotkey training, minimap navigation. No resource/stat grants or status overrides. Passed on consecutive runs." },
+    { "name": "Production build", "result": "passed", "detail": "npm run build — Vite production build completed with separate Three.js and game bundles." }
+  ],
+  "screenshots": [
+    { "src": "/evidence/base-development.png", "title": "Base development", "detail": "Town hall, mine with cart, gathering workers, footman army, completed barracks with 2-unit training queue and costs on the command card." },
+    { "src": "/evidence/combat.png", "title": "Assault combat with hero power", "detail": "Sunburst shockwave ring around the Dawnwarden, enemy health bars, selection rings, red fortress under attack." },
+    { "src": "/evidence/stronghold-scaled.png", "title": "Enemy stronghold presence", "detail": "Scaled-up crimson keep with crenellated bastions, war flags and guards after the art-critic review." },
+    { "src": "/evidence/victory.png", "title": "Victory overlay", "detail": "The Vale Is Yours with elapsed time and kill count; New skirmish restart visible." },
+    { "src": "/evidence/defeat.png", "title": "Defeat overlay", "detail": "A Foothold Lost for an unattended settlement; identical restart path." },
+    { "src": "/evidence/battlefield.png", "title": "Fresh skirmish start", "detail": "Post-restart battlefield ready for a new match." }
+  ],
+  "reviews": [
+    { "piece": "Gameplay critic — 8/10 PASS", "finding": "Full loop verified with real input; arrows unverifiable in their session, win leg not completed by them, keydown handler threw on synthetic window-targeted events.", "fix": "Arrow path shares code with WASD (verified panning live); victory completed by the scripted skirmish playtest (147s); keydown guarded with instanceof Element.", "verdict": "All three critic findings addressed; no blocking gaps remain." },
+    { "piece": "3D art critic — 8/10 PASS", "finding": "Stronghold lacked fortress presence; mid-field empty of landmarks; HUD crowds small viewports.", "fix": "Stronghold model scaled 1.22x (screenshot verified); three rock-spire landmarks placed off-corridor (screenshot verified); HUD crowding noted as acceptable, onboarding now auto-dismisses on first order.", "verdict": "Both P1 visual gaps corrected and visually confirmed." },
+    { "piece": "HUD critic — 8/10 PASS", "finding": "H hotkey trapped after minimap use; single-click pick too strict; onboarding persisted; arrows blocked while buttons focused.", "fix": "HUD key isolation now only owns minimap-navigation and button-activation keys (H/arrows verified working live); 30px forgiving pick capsule for select/attack/gather (verified); onboarding dismisses on first successful order (verified); mode chip made click-through (verified CANVAS hit).", "verdict": "All functional HUD gaps fixed and re-verified in the running game." }
+  ],
+  "method": "Browser playtests use real DOM/canvas input. game.update advances unchanged simulation rules to shorten waits — no resources granted, no stats changed, no outcomes forced. Defeat verified by leaving the settlement unattended against escalating raids. Critics used independent browser sessions and their own screenshots.",
+  "renderer": "Three.js WebGL; Chromium / SwiftShader CPU software rendering for browser verification"
+}
