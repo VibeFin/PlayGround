@@ -1,0 +1,25 @@
+{
+  "title": "DEAD FREQUENCY", "stage": "Round two / closing the critic gaps", "updated": "2026-10-01",
+  "summary": "Four independent critics played the actual running game. Their biggest gaps are now being closed: readable squad status, a clearer aim sight picture, a battered station, and consistent field language.",
+  "pieces": [
+    {"name":"Station & lighting","status":"art pass complete","detail":"Boarded and darkened windows, soot damage, one dominant entrance light, debris clustered around a breached fence, varied pine groves, and a lit AMMO / 300 ESSENCE cache 7m from spawn."},
+    {"name":"Combat readability","status":"refining after critique","detail":"Crosshair now clears while aiming; sight-picture alignment, distant threat priority and impact feedback are the active combat pass."},
+    {"name":"Infected appearance","status":"rebuilt & behavior tested","detail":"Tapered anatomy, gaunt faces, grime, torn clothing and asymmetric reaching; shared geometry keeps cost near 3.3k triangles each."},
+    {"name":"Squad readability","status":"implemented after critique","detail":"Persistent roster with callsign, vitals and down state, plus projected nameplates over visible teammates; updates on leave and defeat."},
+    {"name":"Movement, waves & economy","status":"21 tests passing","detail":"Detours, nearest-target attacks, headshots, wall blocking, reload accounting, sprint, wave rewards, resupply and co-op spawn slots."},
+    {"name":"Ballistic cover","status":"corrected & tested","detail":"All 28 obstacle volumes carry real vertical bounds; low barriers are no longer invisible walls."},
+    {"name":"Sound & feedback","status":"implemented","detail":"Layered procedural cues and ambience with bounded voices. Unlock and disposal verified; a listening review is still pending."},
+    {"name":"Network co-op","status":"plumbing verified in browser","detail":"Two-browser critic confirmed room create/join, squad deployment, peer movement, shared enemy state, shot receipts, host abort and re-deploy. Remaining: confirmed shared kills, guest damage, squad restart."},
+    {"name":"Interface & onboarding","status":"refining after critique","detail":"Separated pointer capture, larger combat labels, narrow HUD breakpoints, explicit setting values, world-anchored supply locator, and singular/plural plus ESSENCE wording fixes."},
+    {"name":"Progress-page reliability","status":"critic findings addressed","detail":"Validated updates keep a complete last-good snapshot, expose freshness, and announce changes to assistive technology."}
+  ],
+  "reviews": [
+    "Regression suite: npm test — 21/21 passing (gameplay behaviors plus real-WebSocket transport). Production build passes.",
+    "Visual critic round 1: deployment hierarchy is the strongest piece, but the field read as a clean, evenly lit demo. Required abandonment history, lighting contrast, HUD readability and non-overlapping onboarding. Fixed in this round; new captures pending.",
+    "Combat critic round 1: movement, sprint and stamina, automatic fire, recoil, reload 29 to 30, headshot kills worth 150, body damage 84 to 52, seven legitimate kills and paid resupply all confirmed working. Biggest gap: the ADS receiver obscured the target area.",
+    "Co-op critic round 1: room code, squad deployment, peer movement, shared enemy IDs and positions, shot receipts, host abort and re-deploy confirmed across two live browser contexts. Biggest gap: teammate identification, now implemented as roster plus nameplates.",
+    "Progress critic round 1: five-second polling, injected 503 recovery, keyboard navigation and 320px layout passed; missing live-region announcements and stale markers addressed.",
+    "Documentation critic round 1: POSIX-only preview script and missing Node prerequisite corrected to Node 22.12 or newer.",
+    "Evidence boundary: all browser evidence uses CPU SwiftShader, not hardware acceleration. No installed Call of Duty reference exists here, so no blind A/B or parity claim is made. Critics certify only what they directly observed."
+  ]
+}

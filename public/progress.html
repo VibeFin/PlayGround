@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="/favicon.svg">
+  <title>Dead Frequency / Field notes</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#101714;color:#e6eadf;font:15px/1.65 system-ui,sans-serif}main{max-width:980px;margin:auto;padding:60px 28px}a{color:#d0e59a;text-decoration:none}a:focus-visible{outline:2px solid #d0e59a;outline-offset:5px}.eyebrow,small{font:11px monospace;letter-spacing:2px;text-transform:uppercase;color:#9da995}h1{font-size:clamp(38px,7vw,78px);letter-spacing:-3px;line-height:1;margin:28px 0}h2{font-size:20px;font-weight:500}.intro{color:#aeb8ab;max-width:680px}.connection{font-size:12px;color:#d0e59a}.connection.stale{color:#e7ad89}.checked{font:11px/1.7 monospace;color:#9aa892}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:34px 0}.card{border:1px solid #344135;padding:22px;background:#17201b}.card p{color:#aab4a5;font-size:13px}.status{font:11px monospace;text-transform:uppercase;letter-spacing:1px;color:#d0e59a}.review{padding:20px 0;border-top:1px solid #344135}footer{margin-top:35px;color:#9aa892;font-size:12px}.dot{display:inline-block;background:#cddd9a;width:7px;height:7px;border-radius:50%;margin-right:8px;box-shadow:0 0 12px #cddd9a60}@media(max-width:380px){main{padding-inline:22px}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main>
+    <a href="/">← BACK TO BLACKPINE</a>
+    <p class="eyebrow" style="margin-top:50px">Development transmission / field log</p>
+    <h1>FIELD NOTES.</h1>
+    <p id="connection" class="connection" role="status" aria-live="polite">Connecting to the field log…</p>
+    <p id="checked" class="checked">No successful transmission yet.</p>
+    <h2 id="stage" aria-live="polite">Acquiring signal</h2>
+    <p class="intro" id="summary"></p>
+    <div class="grid" id="pieces"></div>
+    <h2>Review log</h2>
+    <div id="reviews"></div>
+    <footer><span class="dot"></span>Checks every 5 seconds · Evidence-based review. A commercial-game blind comparison requires a playable reference and independent judges.</footer>
+  </main>
+  <script>
+    let lastSuccess=null;
+    const setText=(id,text)=>{const node=document.getElementById(id);if(node.textContent!==text)node.textContent=text;};
+    function valid(data){
+      return data&&typeof data.stage==='string'&&typeof data.summary==='string'&&Array.isArray(data.pieces)&&data.pieces.length>0&&data.pieces.every(x=>x&&['name','status','detail'].every(key=>typeof x[key]==='string'))&&Array.isArray(data.reviews)&&data.reviews.every(x=>typeof x==='string');
+    }
+    function render(data){
+      const pieces=document.createDocumentFragment();
+      for(const item of data.pieces){
+        const card=document.createElement('article');card.className='card';
+        const status=document.createElement('span');status.className='status';status.textContent='● '+item.status;
+        const title=document.createElement('h2');title.textContent=item.name;
+        const detail=document.createElement('p');detail.textContent=item.detail;
+        card.append(status,title,detail);pieces.append(card);
+      }
+      const reviews=document.createDocumentFragment();
+      for(const text of data.reviews.length?data.reviews:['Awaiting the first running-game inspection.']){
+        const row=document.createElement('div');row.className='review';row.textContent=text;reviews.append(row);
+      }
+      setText('stage',data.stage);setText('summary',data.summary);
+      document.getElementById('pieces').replaceChildren(pieces);
+      document.getElementById('reviews').replaceChildren(reviews);
+    }
+    async function refresh(){
+      try{
+        const response=await fetch('/progress.json?t='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(4500)});
+        if(!response.ok)throw new Error('Transmission unavailable');
+        const data=await response.json();
+        if(!valid(data))throw new Error('Incomplete transmission');
+        render(data);lastSuccess=new Date();
+        setText('connection','● LIVE — connected to the field log');
+        document.getElementById('connection').classList.remove('stale');
+        setText('checked','Last successful sync: '+lastSuccess.toLocaleTimeString());
+      }catch{
+        setText('connection',lastSuccess?'Connection lost — showing the last verified transmission.':'Connection unavailable — retrying automatically.');
+        document.getElementById('connection').classList.add('stale');
+        if(lastSuccess)setText('checked','Last updated: '+lastSuccess.toLocaleTimeString()+' · Content may be stale.');
+      }finally{setTimeout(refresh,5000);}
+    }
+    refresh();
+  </script>
+</body>
+</html>
