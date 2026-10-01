@@ -1,0 +1,37 @@
+# Independent combat / CTF critic
+
+**Verdict: PASS — prototype combat/CTF acceptance (quality-bar.md, piece 2).**
+Reviewed the live artifact at `http://localhost:3002/` on 2026-10-01 in the independent `combat-critic` Playwright browser. No app code changed. This verdict does not certify the separate arena/movement acceptance piece.
+
+## Method and artifact
+
+- Opened the browser without configuration; clicked **DEPLOY TO FROSTLINE** normally. Used real W + Shift, LMB, Escape/resume, and **PLAY AGAIN**. Normal W + Shift moved the player 1.061 m during 0.300 simulated seconds (2 seconds wall time under software rendering); normal LMB created a blue projectile. Escape displayed the paused/resume screen.
+- Deterministic tests used `gameApp.testMode=true` and `step(1/60)` loops, never a huge timestep. **Teleports, bot isolation (launchDelay/cooldown=999 and distant placements), health hooks, and clock/score setup below are artificial test setup**, not claims of ordinary player achievement. Initial hook restarts displayed the deployment overlay; later pixel/carrier checks were repeated with the match normally deployed, using `game.restart()` to retain the active view. Match-complete UI was checked with automatic frames restored.
+- Actually inspected screenshot pixels, including the reference `public/screenshots/reference-skiing.png`. Final evidence: [critic-combat.png](../public/screenshots/critic-combat.png). It shows the actual snowy 3D arena, first-person launcher, turquoise airborne disc near the reticle, score/armor/radar, and the guidance gap described below. The final screenshot is a disclosed deterministic flag/shot setup, not an unassisted match.
+- No unavailable-module failure or blocking runtime error; browser console error query returned **0 errors**.
+
+## Measured acceptance evidence
+
+| Check | Live browser result |
+| --- | --- |
+| Traveling discs, not hitscan | High-altitude isolation: shot started at `(0,99.72,-1.7)` with velocity `(0,0,-170)`; after twelve 1/60 updates it was at `(0,99.72,-35.7)`: **34 m in 0.2 s**. At a 30 m bot target, HP remained **100 at 0.1 s**, then became **22 by 0.2 s**, with the disc removed at impact. Pixels showed the separate glowing disc in front of the launcher. |
+| Meaningful direct and explosive damage | Isolated stationary enemy, 30 m shot: **78 damage**. A second shot killed it and incremented player eliminations to **1**. Another bot offset **5 m** from the direct target lost **39.839 HP** from the same impact (100 → 60.161), demonstrating area damage rather than only a direct-hit counter. |
+| Active opposition and allies | **90 simulated seconds**, fresh normal game state, idle player, no bot teleports/AI modifications: **7 bots** (3 allies, 4 enemies), peak **7 simultaneous discs**. At 10 s, blue attacker had traveled **348.207 m**, red attacker **237.027 m**. At 20 s red-0 was carrying blue flag; by 30 s red had scored. At 40 s blue-1 and red-1 were carrying opposing flags; by 50 s score was **1–1**; by 80 s **1–2**. Player HP fell naturally **100 → 22**. Bots killed and respawned during this run. They genuinely threaten flags rather than merely orbiting spawn. |
+| Pickup / carrier / notification | Teleport player to red flag and red bot to blue flag; one real update produced red carrier **player**, blue carrier **red-0**. HUD showed **FLAG SECURED** and player carrying objective. Independently teleported ally onto red flag: carrier **blue-0**, notification **“Ally 1 took the Red flag!”**, with no false player FLAG SECURED indicator. |
+| Drop / return | `dropFlag('player')` dropped red flag at `(100,25.632,0)`, carrier null. Enemy owner's bot touching this drop returned it home. Lethal damage to red-0 while carrying blue produced a dropped blue flag; player touching it returned blue home. Player death while carrying red dropped red and cleared carrier. No automatic return occurred during a separate 30 s isolated wait; automatic return is not a stated acceptance requirement. |
+| Own flag must be home | With both flags carried, teleported player carrying red to blue base and advanced **1 s**: blue score remained **0**, red still carried by player. Killed enemy carrier with disclosed damage hook, touched dropped blue flag to return it home, then touched blue base: score became **1**, red returned home/carrier null. |
+| Death / respawn | Disclosed lethal hooks: player armor **0**, death overlay **BACK IN 4**, carried flag dropped. Exact 1/60-step measurement: player respawn **4.000 s**, HP **100**, blue base; bot respawn **7.017 s**, HP **100**. Combat projectile kills were tested separately above. |
+| First-to-3 endpoint | Two more teleport-assisted grabs/returns changed score **1 → 2 → 3**; at 3, `ended=true`, winner blue. Another **2 s** of steps did not change the clock. Automatic UI frames displayed **MATCH COMPLETE / FRONTIER SECURED / 3—0 / PLAY AGAIN**. |
+| Restart / time endpoint | Real **PLAY AGAIN** click reset score **0–0**, time **480**, `ended=false`, HP **100**, both flags home, **7 alive bots**. Separate disclosed endpoint setup (`timeLeft=0.1`, blue score 1) and twelve 1/60 steps produced time **0**, ended true, blue winner. |
+
+## Largest meaningful gaps
+
+1. **Misleading guidance when carrying red while blue is missing (non-blocking tactical UI defect).** Exact reproduction: reset game; isolate other bots; put player on red flag and red-0 on blue flag; update once; move red-0 to `(100, terrainHeight(100,0)+2.2, 0)`; move player carrying red to blue base `(0,45.2,230)`; update. Score correctly stays **0**. However, the HUD still says **“FLAG SECURED. RETURN TO BLUE BASE.”** despite the player already being there, and **“RETURN HERE” points ~251 m away at the stolen blue flag**, not the blue capture base. The screenshot preserves this state plus a fired disc. The marker needs a recover/blocked-capture label or distinct fixed-base marker. Runtime reproduction preceded source inspection; `src/main.js:122–124` then confirmed carrying takes priority over own-flag status and the blue marker uses the flag's moving position.
+2. **Ally-carrier objective is generic.** With red carrier `blue-0` and own flag home, notification correctly names the ally, but the objective still says **“TAKE THEIR FLAG. BRING IT HOME.”** and marker **ENEMY FLAG** follows that ally. An escort/defend objective would better explain the current task. This does not falsify player carrying state or prevent play.
+3. **Bot lethality is modest in the tested idle-base run.** Player survived 90 s at **22 HP** while opponents achieved two captures. This is actual objective pressure and meaningful damage, but not continuous lethal combat. Tuning gap, not a rejection of active bots.
+
+## Reference comparison
+
+Read the [official Tribes guide](https://www.tribes3rivals.com/how-to-play): light armor is for flag capture/chasing; Spinfusor is projectile-based; projectile travel is the relevant combat bar. The provided official skiing screenshot has a first-person disc launcher, reticle and health/energy HUD. The prototype's inspected pixels retain those cues in simpler original alpine art, and the measured delayed hits plus splash damage establish the required projectile engagement loop. Neither multiple classes nor commercial-grade art is required for this acceptance verdict.
+
+**Conclusion:** All required combat/CTF state transitions passed. The largest remaining defect is objective/marker guidance during a blocked capture, not missing scoring, damage, AI, or respawn behavior.

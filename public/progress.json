@@ -1,0 +1,29 @@
+{
+  "phase": "Critic loop 2 — slow-motion fixed; fresh integrated browser review in progress",
+  "updated": "2026-10-01",
+  "pieces": [
+    {"name":"Arena & movement","status":"retesting","detail":"Critic passed core physics and full-arena traversal, rejected software-browser slow motion. Clock and costly full-screen compositing fixed; normal-input lead retest reached 30 FPS."},
+    {"name":"Combat & capture the flag","status":"passed","detail":"Independent critic verified delayed hits, splash damage, active bot captures, all flag rules, death/respawn and match restart."},
+    {"name":"Integrated playtest","status":"in review","detail":"Fresh reviewer is checking final gameplay responsiveness, objective guidance, controls, responsive layout and live evidence."}
+  ],
+  "evidence": [
+    {"result":"FIXED — AWAITING INDEPENDENT RETEST","title":"Largest critic failure: software-renderer slow motion","detail":"Initial critic measured 2.99 FPS and only 0.90 simulated seconds in 6.02 real seconds. Fixed elapsed-time consumption using 60 Hz physics substeps; removed backdrop blur and limited the full-screen gradient. Normal W+Shift lead retest: 181 frames / 6.009 seconds = 30.12 FPS; 5.983 game seconds elapsed. A separate 0.6-scale render probe measured 25.40 FPS. CPU software rendering; no hardware GPU claim."},
+    {"result":"INDEPENDENT PASS","title":"Traveling explosive discs and active opponents","detail":"Combat critic measured 34 m projectile travel in 0.2 s, no instant hit at 0.1 s, then 78 direct damage. A target 5 m to the side took 39.84 splash damage. Unmodified 90-second deterministic bot simulation reached 1–2 captures and reduced idle-player armor from 100 to 22."},
+    {"result":"INDEPENDENT PASS","title":"Capture-the-flag and restart rules","detail":"Controlled browser setups verified pickup, death/drop, friendly return, no capture with a missing home flag, 4-second player respawn, first-to-3, clock expiry and normal PLAY AGAIN restart. Teleports and damage hooks were disclosed test setup, not an unassisted match win."},
+    {"result":"PHYSICS PASS","title":"Downhill momentum, flight and arena traversal","detail":"Independent movement critic measured ski-only acceleration from 0 to 43.08 m/s in 4 seconds, 98.6% flat ski momentum retention over 0.5 s, and 97.6% air momentum retention over 2 s. Controlled continuous waypoint traversal reached both bases and all four outer regions; minimum terrain clearance was 2.20 m. Setup used fixed simulation steps."},
+    {"result":"NORMAL INPUT PLAYTEST","title":"Actual deployed flight and firing screenshot","detail":"Lead clicked Deploy, used normal W / Shift / Space / arrow-look and left mouse fire. Live screenshot shows airborne movement, spent jet energy, visible cyan disc, active bots and an opponent capture. No teleport or manual score setup used for this image."},
+    {"result":"REFERENCE INSPECTED","title":"Official skiing gameplay inspected in the browser","detail":"Viewed the official 7.77-second HowToSki clip and captured its 5-second frame: first-person disc launcher, downhill acceleration, ski-engaged indicator, energy bar, and 147 speed reading. IGN's full video was identified but playback required a YouTube sign-in."}
+  ],
+  "screenshots": [
+    {"url":"/screenshots/arena.png","caption":"Current running build: actual navigable alpine arena and deployment HUD, after software-rendering optimizations."},
+    {"url":"/screenshots/live-flight.png","caption":"Normal keyboard/mouse playtest: live jet flight and disc firing with a naturally occurring red-team capture."},
+    {"url":"/screenshots/critic-movement.png","caption":"Independent movement critic's controlled elevated viewpoint showing both bases and volumetric terrain; position set for visual inspection."},
+    {"url":"/screenshots/reference-skiing.png","caption":"Reference: official Tribes 3 skiing tutorial, 5-second frame. Source: tribes3rivals.com; Prophecy Games."}
+  ],
+  "comparison":"The running prototype reproduces the inspected reference's first-person downhill ski loop, energy-limited jets, momentum through flight, disc travel and health/energy HUD. Independent browser checks add an actual bot CTF match and restartable rules. Original procedural alpine art is deliberately simpler; one class and one projectile weapon keep this a focused playable browser interpretation.",
+  "rendering":"CPU software rendering in the supplied headed Chromium configuration; actual renderer identifies ANGLE/Mesa llvmpipe. Adaptive resolution preserves gameplay responsiveness.",
+  "references": [
+    {"title":"Tribes 3: Rivals — official gameplay (IGN)","url":"https://www.youtube.com/watch?v=P9bvc1RyeME"},
+    {"title":"Official movement and CTF guide","url":"https://www.tribes3rivals.com/how-to-play"}
+  ]
+}

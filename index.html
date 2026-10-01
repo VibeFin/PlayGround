@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b151d" />
+  <title>Tribes: Frontier — Capture the Flag</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="/" aria-label="Tribes Frontier home"><svg viewBox="0 0 44 40" aria-hidden="true"><path d="M3 3h38l-6 9H9zM11 16h22l-5 8H16zM18 28h8l-4 9z" fill="currentColor"/></svg><span>TRIBES<small>F R O N T I E R</small></span></a>
+    <nav class="nav"><button class="nav-item active" id="play-tab">PLAY <span>01</span></button><button class="nav-item" id="manual-tab">FIELD MANUAL <span>02</span></button></nav>
+    <div class="header-right"><span class="prototype"><i></i> PLAYABLE PROTOTYPE</span><a href="/progress.html" class="progress-link" target="_blank" rel="noopener">BUILD LOG <span>↗</span></a></div>
+  </header>
+  <main id="arena" class="arena">
+    <canvas id="game-canvas" aria-label="Playable three-dimensional snowy capture-the-flag arena"></canvas>
+    <div class="vignette"></div><div id="damage-overlay"></div>
+    <div class="match-info"><div class="eyebrow">QUICK MATCH <span> / </span> 4 VS 4</div><h2>FROSTLINE <span>CTF</span></h2><p><i></i> ALPINE SECTOR · 04</p></div>
+    <div class="scoreboard"><div class="team blue"><span>DIAMOND SWORD</span><strong id="blue-score">0</strong></div><div class="match-clock"><span id="timer">08:00</span><small>FIRST TO 3</small></div><div class="team red"><strong id="red-score">0</strong><span>BLOOD EAGLE</span></div></div>
+    <div class="session-actions"><button id="sound-button" aria-label="Toggle sound" title="Toggle sound">♪ <span>SOUND ON</span></button><button id="restart-button" title="Restart match">↻ <span>RESTART</span></button></div>
+    <div class="compass" id="compass"><span>NW</span><span>·</span><span>N</span><span>·</span><span>NE</span></div>
+    <div id="world-markers" aria-hidden="true"><div id="blue-marker" class="world-marker blue"><b>⚑</b><span>DEFEND</span><small>30 M</small></div><div id="red-marker" class="world-marker red"><b>⚑</b><span>ENEMY FLAG</span><small>460 M</small></div></div>
+    <div id="reticle" class="reticle"><i></i><i></i><i></i><i></i><b></b></div><div id="hit-marker">×</div>
+    <div id="toast" class="toast" role="status"></div>
+    <div id="objective" class="objective"><span class="objective-icon">⚑</span><div><small>YOUR OBJECTIVE</small><strong id="objective-text">TAKE THEIR FLAG. BRING IT HOME.</strong></div></div>
+    <section id="deploy-panel" class="deploy-panel">
+      <div class="panel-eyebrow"><span class="live-dot"></span><span id="panel-label">THE FRONTIER IS YOURS</span><span class="tag">LIGHT CLASS</span></div>
+      <h1 id="panel-title">OWN THE<br><em>MOMENTUM.</em></h1>
+      <p id="panel-description">Ski the slopes. Take to the skies.<br>Capture their flag before they capture yours.</p>
+      <div class="loadout"><div class="loadout-icon">⌁</div><div><small>YOUR LOADOUT</small><strong>PATHFINDER <span> / </span> SPINFUSOR</strong></div><span class="loadout-ready">READY</span></div>
+      <button id="deploy-button" class="deploy-button">DEPLOY TO FROSTLINE <span>→</span></button>
+      <div class="deploy-note"><span>4V4 BOT MATCH</span><i></i><span>8 MINUTES</span><i></i><span>NO DOWNLOAD</span></div>
+    </section>
+    <section id="manual-panel" class="manual-panel hidden">
+      <button id="close-manual" class="close-button" aria-label="Close field manual">×</button><div class="eyebrow">FIELD MANUAL / 02</div><h2>FAST IS A<br>STATE OF MIND.</h2>
+      <div class="manual-row"><kbd>W A S D</kbd><div><strong>MOVE & STEER</strong><p>Mouse to look. Arrow keys also turn your view.</p></div></div>
+      <div class="manual-row"><kbd>SHIFT</kbd><div><strong>SKI THE TERRAIN</strong><p>Hold to glide. Downhill builds speed; carry that momentum into the air.</p></div></div>
+      <div class="manual-row"><kbd>SPACE</kbd><div><strong>FIRE YOUR JETPACK</strong><p>Hold to fly. Watch your energy; release to recharge.</p></div></div>
+      <div class="manual-row"><kbd>CLICK</kbd><div><strong>LEAD YOUR SHOTS</strong><p>Your disc is a projectile. Aim ahead of moving enemies, or at the ground for splash damage.</p></div></div>
+      <div class="manual-row"><kbd>⚑</kbd><div><strong>CAPTURE THE FLAG</strong><p>Touch the enemy flag, then return to your base. Your own flag must be home to score. First to 3 wins.</p></div></div>
+      <div class="manual-foot">ESC TO PAUSE <span>·</span> R TO RESTART <span>·</span> FRIENDLY FIRE OFF</div>
+    </section>
+    <div id="respawn-panel" class="respawn-panel hidden"><small>ARMOR COMPROMISED</small><h2>BACK IN <span id="respawn-time">3</span></h2><p>Your flag drops where you fall. Get back in the fight.</p></div>
+    <div class="radar-panel"><div class="radar-heading"><span>TACTICAL RADAR</span><span id="radar-range">600 M</span></div><canvas id="radar" width="180" height="180" aria-label="Radar showing bases, teammates and enemies"></canvas><div class="radar-legend"><span><i class="blue-dot"></i> ALLY</span><span><i class="red-dot"></i> ENEMY</span><span>▲ YOU</span></div></div>
+    <div class="player-status"><div class="class-label"><span class="class-symbol">⌁</span><div><strong>PATHFINDER</strong><small>DIAMOND SWORD · LIGHT ARMOR</small></div><span id="kills">0 <small>ELIMS</small></span></div><div class="stat"><span>ARMOR</span><div class="bar"><i id="health-bar"></i></div><strong id="health-value">100</strong><small>%</small></div><div class="stat energy"><span>ENERGY</span><div class="bar"><i id="energy-bar"></i></div><strong id="energy-value">100</strong><small>%</small></div></div>
+    <div class="speedometer"><span id="movement-mode">ON FOOT</span><div><strong id="speed">0</strong><span>KM/H</span></div><div class="speed-ticks" id="speed-ticks"></div><small>KEEP YOUR MOMENTUM</small></div>
+    <div class="weapon-status"><div class="weapon-slot">01</div><div><small>DISC PROJECTILE</small><strong>SPINFUSOR</strong><div class="weapon-ready"><i id="weapon-ready-bar"></i></div></div><b>∞</b></div>
+    <div class="touch-controls" id="touch-controls"><div><button data-key="KeyW">↑</button><div><button data-key="KeyA">←</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button></div></div><div><button data-key="ShiftLeft">SKI</button><button data-key="Space">JET</button><button id="touch-fire">FIRE</button></div></div>
+    <footer class="controls"><div><kbd>W A S D</kbd><span>MOVE</span></div><div><kbd>SHIFT</kbd><span>SKI</span></div><div><kbd>SPACE</kbd><span>JETPACK</span></div><div><kbd>LMB</kbd><span>FIRE</span></div><div><kbd>ESC</kbd><span>PAUSE</span></div><span class="controls-tip">SPEED IS YOUR BEST DEFENSE <b>↗</b></span></footer>
+    <div id="loading" class="loading"><span class="live-dot"></span> ESTABLISHING UPLINK…</div>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
