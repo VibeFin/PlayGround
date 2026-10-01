@@ -1,0 +1,66 @@
+/* Playtest-driven layout refinements: preserve the collision corridor. */
+.modal { max-height: calc(100dvh - 40px); overflow-y: auto; }
+.hit-flash { box-shadow: none; background: radial-gradient(ellipse at center,transparent 42%,#e7582580 100%); }
+.opponent-label { filter: none; text-shadow: 0 1px 3px #000; }
+.software-rendering .grain { display: none; }
+.software-rendering .event-panel, .software-rendering .modal-backdrop { backdrop-filter: none; }
+.software-rendering .modal-backdrop { background: #0a110cee; }
+.hud { text-shadow: 0 1px 5px #10200ddd; }
+.hud-stat small { color: #e0e8d5; font-size: 9px; }
+.health-title { font-size: 10px; }
+.boost-caption { color: #e3edd5; font-size: 9px; }
+.mini-map { left: 3.5%; bottom: 166px; transform: none; width: 125px; height: 94px; }
+.playing .topbar { padding-top: 17px; padding-bottom: 17px; border-bottom: 0; background: linear-gradient(#10190d80,transparent); }
+.playing .topbar .status, .playing .brand small { display: none; }
+.playing .brand { font-size: 25px; }
+.playing .footer { border-top: 0; }
+.playing .footer p, .playing .footer .version { display: none; }
+.playing .control-hints { color: #dbe8c8; text-shadow: 0 1px 4px #000; }
+.mobile-controls button small { display: block; font: 700 9px 'Barlow',sans-serif; letter-spacing: 1px; }
+.mobile-controls [data-input=throttle], .mobile-controls [data-input=reverse] { font-size: 18px; }
+
+@media (max-height: 650px) and (min-width: 601px) {
+  .hero { top: 23%; }
+  h1 { font-size: 72px; margin: 18px 0; }
+  .hero p { font-size: 11px; line-height: 1.6; margin: 14px 0; }
+  .hero-tags { display: none; }
+  .event-cell { padding: 15px 18px; }
+  .event-cell.action-cell { padding: 12px; }
+  .event-cell h3 { font-size: 22px; }
+  .event-heading { margin-bottom: 10px; }
+}
+
+@media (max-width: 600px) {
+  .top-right { gap: 6px; }
+  .icon-button { width: 44px; height: 44px; }
+  .mobile-guide { min-height: 44px; }
+  .footer { height: 46px; }
+  .playing .topbar { padding-top: 12px; padding-bottom: 12px; }
+  .playing .brand { font-size: 20px; }
+  .race-top { top: 76px; left: 5%; right: 5%; justify-content: space-between; gap: 12px; }
+  .hud-stat small { font-size: 8px; letter-spacing: 1.1px; }
+  .hud-stat strong { font-size: 31px; }
+  .objective { top: 139px; right: 5%; left: 5%; text-align: left; font-size: 7px; }
+  .objective strong { font-size: 12px; letter-spacing: .7px; margin-top: 3px; }
+  .mini-map { left: auto; right: 5%; top: 139px; bottom: auto; width: 83px; height: 62px; }
+  .player-vitals { bottom: 59px; width: 138px; }
+  .health-title { font-size: 9px; letter-spacing: .7px; }
+  .boost-caption { font-size: 8px; }
+  .mobile-controls button { bottom: 146px; width: 55px; height: 55px; }
+  .mobile-controls [data-input=boost], .mobile-controls [data-input=brake] { bottom: 211px; }
+  .playing .footer { justify-content: flex-end; }
+  .impact-label { top: 29%; }
+  .impact-label strong { font-size: 34px; }
+  .impact-label small { font-size: 8px; letter-spacing: 1.5px; }
+  .opponent-label span { font-size: 7px; letter-spacing: .7px; }
+  .controls-grid { gap: 14px; }
+  .modal { max-height: 90dvh; overflow-y: auto; }
+}
+
+@media (max-height: 520px) {
+  .modal { max-height: 94dvh; overflow-y: auto; }
+  .mini-map { display: none; }
+  .hero { top: 23%; }
+  h1 { font-size: 56px; margin: 14px 0; }
+  .hero p { display: none; }
+}
