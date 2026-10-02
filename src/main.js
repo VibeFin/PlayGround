@@ -25,7 +25,7 @@ function onEvent(event) {
   if (['fire','shot'].includes(event.type)) beep(220,.17,.045,'sawtooth');
 }
 const game = createGame(world,onEvent);
-function clearInput(){keys.clear();input.forward=0;input.right=0;input.ski=false;input.jet=false;input.jump=false;input.fire=false;input.lookX=0;input.lookY=0;}
+function clearInput(){keys.clear();joy.x=0;joy.y=0;joy.id=null;$('stick').style.transform='translate(-50%,-50%)';input.forward=0;input.right=0;input.ski=false;input.jet=false;input.jump=false;input.fire=false;input.lookX=0;input.lookY=0;}
 function lockMouse(){ if(!matchMedia('(pointer:coarse)').matches) canvas.requestPointerLock?.(); }
 function setPanel(mode) {
   $('deploy-panel').classList.remove('hidden');
@@ -50,6 +50,7 @@ function start() {
   if(!audio) {try{audio=new (window.AudioContext||window.webkitAudioContext)();}catch{}}
   audio?.resume();active=true;started=true;document.body.classList.add('started');document.body.classList.remove('paused');
   $('deploy-panel').classList.add('hidden');$('manual-panel').classList.add('hidden');lockMouse();
+  if(document.body.classList.contains('touch')&&!document.fullscreenElement){try{const p=document.documentElement.requestFullscreen?.();p?.catch?.(()=>{});}catch{}try{screen.orientation?.lock?.('landscape')?.catch?.(()=>{});}catch{}}
   notify('SHIFT to ski · SPACE to jet · Take the red flag home');
 }
 function pause() {if(!active)return;active=false;clearInput();document.body.classList.add('paused');if(document.pointerLockElement)document.exitPointerLock();setPanel(game.state.ended?'end':'pause');}
@@ -74,12 +75,25 @@ document.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{if(active&&!window.gameApp.testMode)pause();clearInput();});
 document.addEventListener('mousemove',e=>{if(active&&document.pointerLockElement===canvas){input.lookX+=e.movementX;input.lookY+=e.movementY;}});
 canvas.addEventListener('mousedown',e=>{if(active&&e.button===0)input.fire=true;});document.addEventListener('mouseup',()=>input.fire=false);
-let touchLast;
-canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'){touchLast={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);}});
-canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&touchLast&&active){input.lookX+=(e.clientX-touchLast.x)*1.7;input.lookY+=(e.clientY-touchLast.y)*1.7;touchLast={x:e.clientX,y:e.clientY};}});
-canvas.addEventListener('pointerup',()=>touchLast=null);
-document.querySelectorAll('[data-key]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(button.dataset.key);button.setPointerCapture(e.pointerId);});button.addEventListener('pointerup',()=>keys.delete(button.dataset.key));button.addEventListener('pointercancel',()=>keys.delete(button.dataset.key));});
-$('touch-fire').addEventListener('pointerdown',e=>{e.preventDefault();input.fire=true;e.target.setPointerCapture(e.pointerId);});$('touch-fire').addEventListener('pointerup',()=>input.fire=false);
+if(matchMedia('(pointer:coarse)').matches||'ontouchstart'in window||navigator.maxTouchPoints>0)document.body.classList.add('touch');
+window.addEventListener('touchstart',()=>document.body.classList.add('touch'),{once:true,passive:true});
+let lookPointer=null,touchLast=null;
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&lookPointer===null){lookPointer=e.pointerId;touchLast={x:e.clientX,y:e.clientY};try{canvas.setPointerCapture(e.pointerId);}catch{}}});
+canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&e.pointerId===lookPointer&&touchLast&&active){input.lookX+=(e.clientX-touchLast.x)*1.7;input.lookY+=(e.clientY-touchLast.y)*1.7;touchLast={x:e.clientX,y:e.clientY};}});
+function endLook(e){if(e.pointerId===lookPointer){lookPointer=null;touchLast=null;}}
+canvas.addEventListener('pointerup',endLook);canvas.addEventListener('pointercancel',endLook);
+const joy={x:0,y:0,id:null};
+const joystick=$('joystick'),stick=$('stick'),JOY_RADIUS=42;
+function joyMove(e){const r=joystick.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const d=Math.hypot(dx,dy);if(d>JOY_RADIUS){dx*=JOY_RADIUS/d;dy*=JOY_RADIUS/d;}joy.x=dx/JOY_RADIUS;joy.y=-dy/JOY_RADIUS;stick.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;}
+function joyEnd(e){if(e.pointerId===joy.id){joy.id=null;joy.x=0;joy.y=0;stick.style.transform='translate(-50%,-50%)';}}
+if(joystick){joystick.addEventListener('pointerdown',e=>{e.preventDefault();joy.id=e.pointerId;try{joystick.setPointerCapture(e.pointerId);}catch{}joyMove(e);});joystick.addEventListener('pointermove',e=>{if(e.pointerId===joy.id)joyMove(e);});joystick.addEventListener('pointerup',joyEnd);joystick.addEventListener('pointercancel',joyEnd);joystick.addEventListener('lostpointercapture',joyEnd);}
+document.querySelectorAll('[data-key]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(button.dataset.key);try{button.setPointerCapture(e.pointerId);}catch{}});button.addEventListener('pointerup',()=>keys.delete(button.dataset.key));button.addEventListener('pointercancel',()=>keys.delete(button.dataset.key));button.addEventListener('lostpointercapture',()=>keys.delete(button.dataset.key));button.addEventListener('contextmenu',e=>e.preventDefault());});
+function releaseFire(){input.fire=false;}
+$('touch-fire').addEventListener('pointerdown',e=>{e.preventDefault();input.fire=true;try{e.target.setPointerCapture(e.pointerId);}catch{}});$('touch-fire').addEventListener('pointerup',releaseFire);$('touch-fire').addEventListener('pointercancel',releaseFire);$('touch-fire').addEventListener('lostpointercapture',releaseFire);
+$('touch-pause').addEventListener('click',()=>{if(active)pause();});
+function updateFullscreenLabel(){$('fullscreen-button').innerHTML=`⛶ <span>${document.fullscreenElement?'EXIT':'FULL'}</span>`;}
+$('fullscreen-button').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else{await document.documentElement.requestFullscreen?.();try{await screen.orientation?.lock?.('landscape');}catch{}}}catch{}});
+document.addEventListener('fullscreenchange',updateFullscreenLabel);
 window.addEventListener('resize',()=>world.resize());
 const directions=['N','NE','E','SE','S','SW','W','NW'];
 const markerVector=new THREE.Vector3();
@@ -131,7 +145,7 @@ function updateHud(){
   drawRadar();
 }
 function updateInput(dt){
-  input.forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);input.right=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0);
+  input.forward=Math.max(-1,Math.min(1,(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)+joy.y));input.right=Math.max(-1,Math.min(1,(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+joy.x));
   input.ski=keys.has('ShiftLeft')||keys.has('ShiftRight');input.jet=keys.has('Space');
   input.lookX+=((keys.has('ArrowRight')?1:0)-(keys.has('ArrowLeft')?1:0))*dt*620;
   input.lookY+=((keys.has('ArrowDown')?1:0)-(keys.has('ArrowUp')?1:0))*dt*450;

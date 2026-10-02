@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b151d" />
   <title>Tribes: Frontier — Capture the Flag</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -22,7 +22,7 @@
     <div class="vignette"></div><div id="damage-overlay"></div>
     <div class="match-info"><div class="eyebrow">QUICK MATCH <span> / </span> 4 VS 4</div><h2>FROSTLINE <span>CTF</span></h2><p><i></i> ALPINE SECTOR · 04</p></div>
     <div class="scoreboard"><div class="team blue"><span>DIAMOND SWORD</span><strong id="blue-score">0</strong></div><div class="match-clock"><span id="timer">08:00</span><small>FIRST TO 3</small></div><div class="team red"><strong id="red-score">0</strong><span>BLOOD EAGLE</span></div></div>
-    <div class="session-actions"><button id="sound-button" aria-label="Toggle sound" title="Toggle sound">♪ <span>SOUND ON</span></button><button id="restart-button" title="Restart match">↻ <span>RESTART</span></button></div>
+    <div class="session-actions"><button id="sound-button" aria-label="Toggle sound" title="Toggle sound">♪ <span>SOUND ON</span></button><button id="restart-button" title="Restart match">↻ <span>RESTART</span></button><button id="fullscreen-button" aria-label="Toggle fullscreen" title="Fullscreen">⛶ <span>FULL</span></button></div>
     <div class="compass" id="compass"><span>NW</span><span>·</span><span>N</span><span>·</span><span>NE</span></div>
     <div id="world-markers" aria-hidden="true"><div id="blue-marker" class="world-marker blue"><b>⚑</b><span>DEFEND</span><small>30 M</small></div><div id="red-marker" class="world-marker red"><b>⚑</b><span>ENEMY FLAG</span><small>460 M</small></div></div>
     <div id="reticle" class="reticle"><i></i><i></i><i></i><i></i><b></b></div><div id="hit-marker">×</div>
@@ -50,7 +50,7 @@
     <div class="player-status"><div class="class-label"><span class="class-symbol">⌁</span><div><strong>PATHFINDER</strong><small>DIAMOND SWORD · LIGHT ARMOR</small></div><span id="kills">0 <small>ELIMS</small></span></div><div class="stat"><span>ARMOR</span><div class="bar"><i id="health-bar"></i></div><strong id="health-value">100</strong><small>%</small></div><div class="stat energy"><span>ENERGY</span><div class="bar"><i id="energy-bar"></i></div><strong id="energy-value">100</strong><small>%</small></div></div>
     <div class="speedometer"><span id="movement-mode">ON FOOT</span><div><strong id="speed">0</strong><span>KM/H</span></div><div class="speed-ticks" id="speed-ticks"></div><small>KEEP YOUR MOMENTUM</small></div>
     <div class="weapon-status"><div class="weapon-slot">01</div><div><small>DISC PROJECTILE</small><strong>SPINFUSOR</strong><div class="weapon-ready"><i id="weapon-ready-bar"></i></div></div><b>∞</b></div>
-    <div class="touch-controls" id="touch-controls"><div><button data-key="KeyW">↑</button><div><button data-key="KeyA">←</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button></div></div><div><button data-key="ShiftLeft">SKI</button><button data-key="Space">JET</button><button id="touch-fire">FIRE</button></div></div>
+    <div class="touch-controls" id="touch-controls"><div class="joystick" id="joystick" aria-label="Move: drag to steer"><div class="stick" id="stick"></div></div><div class="touch-actions"><button data-key="ShiftLeft" aria-label="Hold to ski">SKI</button><button data-key="Space" aria-label="Hold for jetpack">JET</button><button id="touch-fire" aria-label="Hold to fire">FIRE</button><button id="touch-pause" aria-label="Pause match">II</button></div></div>
     <footer class="controls"><div><kbd>W A S D</kbd><span>MOVE</span></div><div><kbd>SHIFT</kbd><span>SKI</span></div><div><kbd>SPACE</kbd><span>JETPACK</span></div><div><kbd>LMB</kbd><span>FIRE</span></div><div><kbd>ESC</kbd><span>PAUSE</span></div><span class="controls-tip">SPEED IS YOUR BEST DEFENSE <b>↗</b></span></footer>
     <div id="loading" class="loading"><span class="live-dot"></span> ESTABLISHING UPLINK…</div>
   </main>

@@ -7,3 +7,16 @@
    full-canvas backdrop readback on every software-rendered frame. */
 .deploy-panel,.manual-panel,.objective,.radar-panel,.session-actions button{backdrop-filter:none}
 .vignette{top:auto;height:215px;box-shadow:none;background:linear-gradient(180deg,transparent,#04101bd9)}
+/* Mobile controls: virtual joystick + fullscreen-friendly layout. */
+body.touch.started .touch-controls{display:flex}
+.deploy-panel:not(.hidden)~.touch-controls{display:none!important}
+.touch-controls{align-items:flex-end;bottom:calc(215px + env(safe-area-inset-bottom,0px))}
+.touch-controls button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.joystick{pointer-events:auto;touch-action:none;width:124px;height:124px;border-radius:50%;border:1px solid #a5e8e677;background:radial-gradient(circle,#0a263855 0 62%,#0a2638b0 63%);position:relative}
+.stick{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#73f7e355;border:1px solid #73f7e3;transform:translate(-50%,-50%)}
+.touch-actions{display:flex;align-items:flex-end;gap:6px}
+.touch-actions button{width:56px;height:56px;font-size:10px}
+#touch-fire{width:72px;height:72px;border-color:var(--cyan);color:var(--cyan);font-weight:700}
+#touch-pause{width:40px;height:40px;font-size:12px;opacity:.85}
+@media(max-width:700px){.touch-controls{bottom:190px}.joystick{width:108px;height:108px}.stick{width:48px;height:48px}.touch-actions button{width:50px;height:50px}#touch-fire{width:64px;height:64px}}
+@media(pointer:coarse){body.started .touch-controls{bottom:calc(215px + env(safe-area-inset-bottom,0px))}}
