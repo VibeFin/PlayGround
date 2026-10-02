@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Quake III Arena Mobile — Tribute</title>
+<meta name="description" content="Fan-made mobile-friendly Quake III Arena style arena shooter. Touch + keyboard. No assets needed.">
+<style>
+  :root{ --q3-orange:#ff7a00; --q3-red:#e33; --bg:#0b0d12; --panel:#141926; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:#e8ecf4;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;overscroll-behavior:none}
+  #wrap{max-width:1100px;margin:0 auto;padding:10px 12px 28px}
+  header{display:flex;align-items:center;gap:12px;padding:10px 4px}
+  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#ff7a00,#c81e1e);display:grid;place-items:center;font-weight:900;font-size:22px;color:#fff;box-shadow:0 4px 18px rgba(255,122,0,.35)}
+  h1{font-size:clamp(18px,3.4vw,28px);margin:0;letter-spacing:.5px}
+  h1 span{color:var(--q3-orange)}
+  .sub{color:#9aa3b8;font-size:13px;margin:2px 0 0}
+  #stage{position:relative;border-radius:16px;overflow:hidden;background:#000;border:1px solid #2a3348;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  canvas#game{display:block;width:100%;height:min(62vh,560px);touch-action:none;background:#05070c}
+  #hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;pointer-events:none;font-size:13px}
+  .pill{background:rgba(10,14,22,.72);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:999px;padding:5px 10px;display:flex;gap:8px;align-items:center}
+  .pill b{color:#fff}
+  #health.low{color:#ff6b6b;animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.5}}
+  #overlay{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.78));text-align:center;padding:18px}
+  #overlay.hidden{display:none}
+  .card{background:rgba(16,21,33,.92);border:1px solid #2b3650;border-radius:16px;padding:20px;max-width:560px;width:min(92%,560px)}
+  .card h2{margin:0 0 6px;font-size:clamp(20px,4vw,30px);letter-spacing:1px}
+  .card h2 em{color:var(--q3-orange);font-style:normal}
+  .card p{color:#aeb7cc;font-size:14px;line-height:1.5;margin:8px 0}
+  #playBtn{appearance:none;border:0;border-radius:12px;padding:14px 22px;font-size:18px;font-weight:800;letter-spacing:.5px;color:#fff;background:linear-gradient(180deg,#ff8c1a,#e04e00);box-shadow:0 6px 22px rgba(255,122,0,.45);cursor:pointer;width:100%}
+  #playBtn:active{transform:translateY(1px)}
+  .keys{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+  kbd{background:#0f1420;border:1px solid #2c3650;border-bottom-width:2px;border-radius:6px;padding:2px 7px;font-size:12px;font-family:inherit}
+  #touchUI{position:absolute;inset:auto 0 0 0;display:none;justify-content:space-between;align-items:flex-end;padding:12px;pointer-events:none}
+  #touchUI.on{display:flex}
+  #joy{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);position:relative;pointer-events:auto;touch-action:none}
+  #stick{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,122,0,.85);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  #btns{display:flex;gap:10px;pointer-events:auto}
+  .tbtn{width:72px;height:72px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(224,78,0,.85);color:#fff;font-weight:800;font-size:14px;touch-action:none}
+  .tbtn.alt{background:rgba(30,40,60,.8)}
+  #cross{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;pointer-events:none;opacity:.9}
+  #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 4px #000}
+  #cross:before{left:6px;top:0;width:2px;height:14px}
+  #cross:after{top:6px;left:0;width:14px;height:2px}
+  #mflash{position:absolute;left:50%;top:58%;width:120px;height:60px;margin-left:-60px;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(255,200,60,.9),rgba(255,122,0,0) 70%)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr} canvas#game{height:58vh}}
+  .panel{background:var(--panel);border:1px solid #27314a;border-radius:14px;padding:14px}
+  .panel h3{margin:0 0 8px;font-size:15px;letter-spacing:.4px;color:#ffd9ad}
+  .panel p,.panel li{font-size:13.5px;color:#aeb7cc;line-height:1.55}
+  .panel ul{margin:6px 0 0 18px;padding:0}
+  a{color:#ff9a3c}
+  footer{color:#6b7690;font-size:12px;text-align:center;margin-top:14px;line-height:1.6}
+  #fragmsg{position:absolute;top:44px;left:0;right:0;text-align:center;pointer-events:none;font-weight:800;letter-spacing:.5px;text-shadow:0 2px 8px #000;opacity:0;transition:opacity .3s}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <div class="logo">Q3</div>
+    <div>
+      <h1>QUAKE III <span>ARENA MOBILE</span></h1>
+      <p class="sub">Fan-made tribute · touch + keyboard · runs 100% in your browser · no downloads</p>
+    </div>
+  </header>
+
+  <div id="stage">
+    <canvas id="game" width="960" height="540"></canvas>
+    <div id="cross"></div><div id="mflash"></div>
+    <div id="hud">
+      <div class="pill"><span>❤️</span><b id="health">100</b><span style="opacity:.6">HP</span><span>🛡️</span><b id="armor">50</b></div>
+      <div class="pill"><span>☠️</span><b id="frags">0</b><span style="opacity:.6">FRAGS</span><span>⏱️</span><b id="time">0:00</b></div>
+      <div class="pill"><span>🔫</span><b id="ammo">∞</b><span style="opacity:.6">PLASMA</span></div>
+    </div>
+    <div id="fragmsg"></div>
+    <div id="touchUI">
+      <div id="joy"><div id="stick"></div></div>
+      <div id="btns"><button class="tbtn alt" id="jumpBtn">JUMP</button><button class="tbtn" id="fireBtn">FIRE</button></div>
+    </div>
+    <div id="overlay">
+      <div class="card">
+        <h2>ENTER THE <em>ARENA</em></h2>
+        <p>Lightweight <b style="color:#fff">Quake-III-style</b> arena shooter rebuilt for mobile browsers. Strafe-jump, control the plasma, frag 5 bots. Desktop: click to lock mouse.</p>
+        <button id="playBtn" aria-label="Play">▶ &nbsp;PLAY</button>
+        <div class="keys"><kbd>W A S D</kbd><kbd>Mouse</kbd><kbd>Click = Fire</kbd><kbd>Touch: left stick move · drag right to look · FIRE</kbd></div>
+        <p style="font-size:12px;opacity:.8">Unofficial fan tribute. Not affiliated with id Software / Bethesda. All art + audio are procedural — no Q3 assets included or required.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel"><h3>📱 How to play on mobile</h3><ul><li>Left thumb-stick to move / strafe</li><li>Drag right side to turn &amp; aim</li><li>Hold <b>FIRE</b> for plasma · JUMP to dodge</li><li>Add to Home Screen for fullscreen</li></ul></div>
+    <div class="panel"><h3>🖥️ Desktop controls</h3><ul><li><kbd>WASD</kbd> move · <kbd>Shift</kbd> sprint · <kbd>Space</kbd> jump</li><li>Click canvas for pointer-lock, mouse to look</li><li>Click / <kbd>F</kbd> to fire · <kbd>R</kbd> respawn bots</li></ul></div>
+    <div class="panel"><h3>⚖️ Real Quake 3 on phones?</h3><p>Want the original? You need your own <code>baseq3/pak0.pk3</code> + an open engine:</p><ul><li><b>Android:</b> OpenArena2026 / ioquake3 ports (Deltatouch, Kwaak3, sdlioq3a) on Play Store / F-Droid</li><li><b>iOS / Apple TV:</b> Quake3-iOS (tomkidd) — build with Xcode + copy baseq3</li><li><b>Browser:</b> dos.zone/q3 works on Android + iOS</li></ul></div>
+    <div class="panel"><h3>🛠️ About this demo</h3><p>Single-file canvas raycaster: 16×16 arena, 5 bots with simple AI, particles, weapon bob, procedural WebAudio (no files). Score persists in <code>localStorage</code>. Best frags: <b id="best">0</b>.</p></div>
+  </div>
+  <footer>Fan tribute for learning — Quake III Arena © id Software / Bethesda. This page contains no id assets.<br>Made for touch: 390×844 mobile + 1440×900 desktop tested.</footer>
+</div>
+<script>
+(function(){
+"use strict";
+var canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+var W=480,H=270; // internal low-res for speed
+var overlay=document.getElementById('overlay'),playBtn=document.getElementById('playBtn');
+var healthEl=document.getElementById('health'),armorEl=document.getElementById('armor'),fragsEl=document.getElementById('frags'),timeEl=document.getElementById('time'),fragmsg=document.getElementById('fragmsg'),mflash=document.getElementById('mflash'),bestEl=document.getElementById('best');
+var touchUI=document.getElementById('touchUI'),joy=document.getElementById('joy'),stick=document.getElementById('stick'),fireBtn=document.getElementById('fireBtn'),jumpBtn=document.getElementById('jumpBtn');
+var MAP=["################","#..............#","#.##.####.##...#","#.#..........#.#","#.#.##.##.#...#","#...#....#..#.#","#.###.##.###..#","#..............#","#.####..####..#","#..##......##.#","#..#..##..#...#","#.....####....#","#.##........#.#","#....##.##....#","#..............#","################"];
+var MW=16,MH=16;
+function solid(x,y){if(x<0||y<0||x>=MW||y>=MH)return true;return MAP[Math.floor(y)][Math.floor(x)]==='#';}
+var player={x:1.5,y:7.5,a:0,hp:100,armor:50,frags:0,bob:0,vy:0,z:0,dead:0};
+var bots=[],parts=[],shots=[];
+var started=false,startT=Date.now();
+var best=parseInt(localStorage.getItem('q3m-best')||'0',10)||0;bestEl.textContent=best;
+var keys={};
+function spawnBots(){bots=[];var spots=[[7.5,7.5],[10.5,7.5],[5.5,6.5],[12.5,7.5],[7.5,5.5]];var names=['Visor','Hunter','Klesk','Ranger','Xaero'];var cols=['#ff5252','#40c4ff','#69f0ae','#ffd740','#ea80fc'];for(var i=0;i<5;i++){bots.push({x:spots[i][0],y:spots[i][1],a:Math.random()*6.28,hp:100,alive:true,respawn:0,name:names[i],col:cols[i],fire:Math.random()*2+1,speed:.9+Math.random()*.7});}}
+spawnBots();
+function msg(t){fragmsg.textContent=t;fragmsg.style.opacity=1;clearTimeout(msg._t);msg._t=setTimeout(function(){fragmsg.style.opacity=0;},1400);}
+function audio(){try{if(!audio.ctx)audio.ctx=new (window.AudioContext||window.webkitAudioContext)();return audio.ctx;}catch(e){return null;}}
+function beep(f,d,type,g){var c=audio();if(!c)return;try{var o=c.createOscillator(),gn=c.createGain();o.type=type||'square';o.frequency.value=f;gn.gain.value=g||.06;o.connect(gn);gn.connect(c.destination);o.start();gn.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);o.stop(c.currentTime+d);}catch(e){}}
+function shoot(){if(!started||player.dead>0)return;shots.push({x:player.x,y:player.y,a:player.a,life:.6,foe:false});mflash.style.opacity=1;setTimeout(function(){mflash.style.opacity=0;},70);beep(220+Math.random()*120,.12,'sawtooth',.05);player.bob+=1.5;}
+function hurtBot(b,d){b.hp-=d;for(var i=0;i<6;i++)parts.push({x:b.x,y:b.y,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:.5,col:'#ffd54f'});if(b.hp<=0&&b.alive){b.alive=false;b.respawn=3;player.frags++;fragsEl.textContent=player.frags;msg('FRAGGED '+b.name+'! +1');beep(880,.25,'square',.08);setTimeout(function(){beep(1320,.3,'square',.06);},120);if(player.frags>best){best=player.frags;localStorage.setItem('q3m-best',String(best));bestEl.textContent=best;}if(player.frags>=15){msg('🏆 CHAMPION! 15 frags');}}}
+function damagePlayer(d){if(!started||player.dead>0)return;if(player.armor>0){var ab=Math.min(player.armor,d*.6);player.armor-=ab;d-=ab;}player.hp-=d;if(player.hp<=0){player.hp=0;player.dead=2;msg('YOU WERE FRAGGED — respawning…');beep(110,.6,'sawtooth',.09);setTimeout(function(){player.x=1.5;player.y=7.5;player.a=0;player.hp=100;player.armor=50;player.dead=0;},2000);}}
+// input
+document.addEventListener('keydown',function(e){keys[e.code]=true;if(e.code==='KeyF')shoot();if(e.code==='KeyR')spawnBots();if(['Space','ArrowUp'].indexOf(e.code)>=0)e.preventDefault();});
+document.addEventListener('keyup',function(e){keys[e.code]=false;});
+canvas.addEventListener('mousedown',function(){if(!started)return;try{canvas.requestPointerLock&&canvas.requestPointerLock();}catch(e){}shoot();});
+document.addEventListener('mousemove',function(e){if(document.pointerLockElement===canvas&&started){player.a+=e.movementX*.0032;}});
+canvas.addEventListener('touchstart',function(e){e.preventDefault();},{passive:false});
+// joystick
+var joyAct={x:0,y:0,id:null},lookT={id:null,lx:0},firing=false;
+function isTouch(){return ('ontouchstart' in window)||navigator.maxTouchPoints>0;}
+if(isTouch())touchUI.classList.add('on');
+joy.addEventListener('touchstart',function(e){e.preventDefault();var t=e.changedTouches[0];joyAct.id=t.identifier;moveStick(t);},{passive:false});
+function moveStick(t){var r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;var dx=t.clientX-cx,dy=t.clientY-cy;var m=Math.hypot(dx,dy),mx=r.width/2-10;if(m>mx){dx*=mx/m;dy*=mx/m;}stick.style.transform='translate('+dx+'px,'+dy+'px)';joyAct.x=dx/mx;joyAct.y=dy/mx;}
+document.addEventListener('touchmove',function(e){for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];if(t.identifier===joyAct.id)moveStick(t);else if(t.identifier===lookT.id){player.a+=(t.clientX-lookT.lx)*.008;lookT.lx=t.clientX;}}},{passive:true});
+document.addEventListener('touchend',function(e){for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];if(t.identifier===joyAct.id){joyAct.id=null;joyAct.x=0;joyAct.y=0;stick.style.transform='';}if(t.identifier===lookT.id)lookT.id=null;}firing=false;});
+canvas.addEventListener('touchstart',function(e){for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];var r=canvas.getBoundingClientRect();if(t.clientX>r.left+r.width*.4&&lookT.id===null){lookT.id=t.identifier;lookT.lx=t.clientX;}}},{passive:true});
+fireBtn.addEventListener('touchstart',function(e){e.preventDefault();firing=true;shoot();},{passive:false});
+fireBtn.addEventListener('touchend',function(){firing=false;});
+jumpBtn.addEventListener('touchstart',function(e){e.preventDefault();if(player.z===0)player.vy=2.6;beep(330,.1,'sine',.05);},{passive:false});
+var fireHold=false;setInterval(function(){if(firing)shoot();},180);
+playBtn.addEventListener('click',function(){started=true;startT=Date.now();overlay.classList.add('hidden');audio();beep(523,.12,'square',.07);setTimeout(function(){beep(784,.15,'square',.07);},130);msg('FRAG 15 BOTS — GOOD LUCK!');if(isTouch())touchUI.classList.add('on');try{canvas.requestPointerLock&&document.body.clientWidth>800&&canvas.requestPointerLock();}catch(e){}});
+// resize canvas backing
+function fit(){var r=canvas.getBoundingClientRect();canvas.width=Math.max(480,Math.floor(r.width));canvas.height=Math.floor(r.width*9/16);}window.addEventListener('resize',fit);
+// update
+var last=performance.now(),fireCd=0;
+function update(dt){
+  if(started&&player.dead===0){
+    var sp=(keys['ShiftLeft']||keys['ShiftRight'])?3.4:2.2;
+    var f=0,s=0;
+    if(keys['KeyW']||keys['ArrowUp'])f+=1;if(keys['KeyS']||keys['ArrowDown'])f-=1;
+    if(keys['KeyA'])s-=1;if(keys['KeyD'])s+=1;
+    f+=-joyAct.y;s+=joyAct.x;
+    var ca=Math.cos(player.a),sa=Math.sin(player.a);
+    var nx=player.x+(ca*f-sa*s)*sp*dt,ny=player.y+(sa*f+ca*s)*sp*dt;
+    if(!solid(nx+.2,player.y+.2)&&!solid(nx-.2,player.y+.2)&&!solid(nx+.2,player.y-.2)&&!solid(nx-.2,player.y-.2))player.x=nx;
+    if(!solid(player.x+.2,ny+.2)&&!solid(player.x-.2,ny+.2)&&!solid(player.x+.2,ny-.2)&&!solid(player.x-.2,ny-.2))player.y=ny;
+    if(keys['Space']&&player.z===0){player.vy=2.6;}
+    if(keys['KeyF']||firing){fireCd-=dt;if(fireCd<=0){shoot();fireCd=.22;}}
+    player.bob+=Math.abs(f)+Math.abs(s)>0.1?dt*10:0;
+  } else if(!started){player.a+=dt*.25;}
+  // jump physics
+  if(player.vy!==0||player.z>0){player.z+=player.vy*dt;player.vy-=7*dt;if(player.z<=0){player.z=0;player.vy=0;}}
+  // bots AI
+  for(var i=0;i<bots.length;i++){var b=bots[i];if(!b.alive){b.respawn-=dt;if(b.respawn<=0){b.alive=true;b.hp=100;b.x=2+Math.random()*12;b.y=2+Math.random()*12;}continue;}
+    var dx=player.x-b.x,dy=player.y-b.y,d=Math.hypot(dx,dy);
+    b.a=Math.atan2(dy,dx)+(Math.sin(performance.now()/700+i)*.2);
+    if(d>1.2&&d<9){var mx=b.x+Math.cos(b.a)*b.speed*dt,my=b.y+Math.sin(b.a)*b.speed*dt;if(!solid(mx,my)){b.x=mx;b.y=my;}}
+    b.fire-=dt;if(b.fire<=0&&d<8&&started&&player.dead===0){b.fire=1+Math.random()*1.6;shots.push({x:b.x,y:b.y,a:Math.atan2(dy,dx)+(Math.random()-.5)*.15,life:.8,foe:true});beep(140,.1,'sawtooth',.03);}
+    // player shots hit
+    for(var j=shots.length-1;j>=0;j--){var sh=shots[j];if(!sh.foe&&Math.hypot(sh.x-b.x,sh.y-b.y)<.35){hurtBot(b,12+Math.random()*10);shots.splice(j,1);break;}}
+  }
+  // shots move
+  for(var k=shots.length-1;k>=0;k--){var st=shots[k];st.x+=Math.cos(st.a)*9*dt;st.y+=Math.sin(st.a)*9*dt;st.life-=dt;if(solid(st.x,st.y)){for(var p=0;p<5;p++)parts.push({x:st.x,y:st.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:.4,col:st.foe?'#ff5252':'#7cff6b'});shots.splice(k,1);continue;}if(st.foe&&Math.hypot(st.x-player.x,st.y-player.y)<.35){damagePlayer(6+Math.random()*7);shots.splice(k,1);continue;}if(st.life<=0)shots.splice(k,1);}
+  for(var q=parts.length-1;q>=0;q--){var pt=parts[q];pt.x+=pt.vx*dt;pt.y+=pt.vy*dt;pt.life-=dt;if(pt.life<=0)parts.splice(q,1);}
+  healthEl.textContent=Math.ceil(player.hp);armorEl.textContent=Math.ceil(player.armor);
+  healthEl.parentElement.id='';healthEl.id='health';document.getElementById('health').classList.toggle('low',player.hp<30);
+  var el=Math.floor((Date.now()-startT)/1000);timeEl.textContent=Math.floor(el/60)+':'+('0'+el%60).slice(-2);
+}
+// render raycaster
+function cast(px,py,ang){var dx=Math.cos(ang),dy=Math.sin(ang),t=0;for(var i=0;i<80;i++){t+=.08;if(solid(px+dx*t,py+dy*t))return t;}return 10;}
+function render(){
+  var cw=canvas.width,ch=canvas.height;ctx.imageSmoothingEnabled=false;
+  // sky + floor (full-res, no ImageData mismatch)
+  var grd=ctx.createLinearGradient(0,0,0,ch/2);grd.addColorStop(0,'#060a16');grd.addColorStop(1,'#14203a');
+  ctx.fillStyle=grd;ctx.fillRect(0,0,cw,ch/2+1);
+  var grd2=ctx.createLinearGradient(0,ch/2,0,ch);grd2.addColorStop(0,'#3a2410');grd2.addColorStop(1,'#120c06');
+  ctx.fillStyle=grd2;ctx.fillRect(0,ch/2,cw,ch-ch/2);
+  // walls
+  var fov=Math.PI/3;
+  for(var i=0;i<cw;i+=2){
+    var ra=player.a-fov/2+fov*i/cw;var dist=cast(player.x,player.y,ra);dist*=Math.cos(ra-player.a);if(dist<.05)dist=.05;
+    var wh=ch/dist*(1+player.z*.15);var wy=ch/2-wh/2+player.z*26+Math.sin(player.bob)*3;
+    var shade=Math.max(.25,1-dist/9);var side=Math.abs(Math.sin(ra))>.7?0.85:1;
+    var r=Math.floor(150*shade*side),g=Math.floor(70*shade*side),bl=Math.floor(20*shade);
+    // wall detail stripes
+    var hx=player.x+Math.cos(ra)*dist,hy=player.y+Math.sin(ra)*dist;var tex=((hx+hy)*4%2+2)%2;
+    if(tex<1){r=Math.floor(r*.7);g=Math.floor(g*.7);}
+    ctx.fillStyle='rgb('+r+','+g+','+bl+')';ctx.fillRect(i,wy,2,wh);
+    ctx.fillStyle='rgba(255,122,0,'+(0.12*shade)+')';ctx.fillRect(i,wy,2,3);
+  }
+  // floor grid glow
+  ctx.fillStyle='rgba(255,122,0,.08)';ctx.fillRect(0,ch/2+40,cw,2);
+  // bots as billboards
+  var order=bots.slice().sort(function(a,b){return Math.hypot(b.x-player.x,b.y-player.y)-Math.hypot(a.x-player.x,a.y-player.y);});
+  for(var k=0;k<order.length;k++){var b=order[k];if(!b.alive)continue;var dx=b.x-player.x,dy=b.y-player.y;var d=Math.hypot(dx,dy);if(d>9)continue;var ang=Math.atan2(dy,dx)-player.a;while(ang>Math.PI)ang-=2*Math.PI;while(ang<-Math.PI)ang+=2*Math.PI;if(Math.abs(ang)>fov/2+.3)continue;if(cast(player.x,player.y,Math.atan2(dy,dx))<d-.3)continue;var sx=(ang/(fov/2)+1)/2*cw;var sz=ch/d*.9;var sy=ch/2-sz/2+player.z*26/d;ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(sx-sz*.3,sy+sz*.9,sz*.6,sz*.1);ctx.fillStyle=b.col;var bob=Math.sin(performance.now()/300+k)*sz*.03;ctx.fillRect(sx-sz*.25,sy+bob,sz*.5,sz*.75);ctx.fillStyle='#111';ctx.fillRect(sx-sz*.15,sy+sz*.08+bob,sz*.3,sz*.18);ctx.fillStyle='#fff';ctx.fillRect(sx-sz*.1,sy+sz*.12+bob,sz*.07,sz*.06);ctx.fillRect(sx+sz*.03,sy+sz*.12+bob,sz*.07,sz*.06);ctx.fillStyle='#000';ctx.font=Math.floor(sz*.14)+'px sans-serif';ctx.textAlign='center';ctx.fillText(b.name,sx,sy-4);var hpb=(sz*.5)*(b.hp/100);ctx.fillStyle='#300';ctx.fillRect(sx-sz*.25,sy-8,sz*.5,4);ctx.fillStyle='#0f0';ctx.fillRect(sx-sz*.25,sy-8,hpb,4);}
+  // shots tracers
+  ctx.fillStyle='#aef';for(var s=0;s<shots.length;s++){var sh2=shots[s];var dx2=sh2.x-player.x,dy2=sh2.y-player.y;var d2=Math.hypot(dx2,dy2);if(d2>.2&&d2<6){var a2=Math.atan2(dy2,dx2)-player.a;var sx2=(a2/(fov/2)+1)/2*cw;var sy2=ch/2+ (Math.random()-.5)*20;ctx.fillStyle=sh2.foe?'#ff6b6b':'#b6ff5e';ctx.beginPath();ctx.arc(sx2,sy2,Math.max(2,8-d2),0,7);ctx.fill();}}
+  // particles projected roughly center
+  for(var q=0;q<parts.length;q++){var pt=parts[q];var pdx=pt.x-player.x,pdy=pt.y-player.y;var pd=Math.hypot(pdx,pdy);if(pd<6){var pa=Math.atan2(pdy,pdx)-player.a;var psx=(pa/(fov/2)+1)/2*cw;ctx.fillStyle=pt.col;ctx.fillRect(psx,ch/2+(Math.random()-.5)*60,3,3);}}
+  // gun
+  var gw=cw*.16,gh=cw*.12,gx=cw/2-gw/2+Math.sin(player.bob)*4,gy=ch-gh-8+Math.abs(Math.cos(player.bob))*-6;
+  ctx.fillStyle='#1a1f2b';ctx.fillRect(gx,gy,gw,gh);ctx.fillStyle='#2c3650';ctx.fillRect(gx,gy,gw,6);ctx.fillStyle='#ff7a00';ctx.fillRect(gx+gw*.4,gy-8, gw*.2,10);ctx.fillStyle='#0ff';ctx.fillRect(gx+gw*.45,gy-6,gw*.1,4);
+  if(!started){ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(0,0,cw,26);ctx.fillStyle='#fff';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('DEMO MODE — press PLAY for full arena',cw/2,17);}
+}
+function loop(t){var dt=Math.min(.05,(t-last)/1000);last=t;update(dt);render();requestAnimationFrame(loop);}
+fit();setTimeout(fit,300);requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
