@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ori — In a Nutshell | Kurzgesagt Style</title>
+<meta name="description" content="Ori and the Blind Forest reimagined in Kurzgesagt – In a Nutshell flat infographic style." />
+<style>
+  :root{
+    --bg:#07081f; --panel:#12153a; --line:#ffffff22;
+    --cyan:#00e5ff; --blue:#3d8bff; --purple:#b388ff; --yellow:#ffd166; --red:#ff6b6b; --teal:#3ddad7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 700px at 50% 20%,#2a2a5e,#14143a 45%,#07081f);color:#fff;font-family:Inter,Arial,Helvetica,sans-serif;min-height:100vh}
+  header{max-width:1100px;margin:0 auto;padding:28px 20px 0;text-align:center}
+  .pill{display:inline-block;border:2px solid #fff;border-radius:999px;padding:10px 26px;font-weight:800;letter-spacing:2px;background:#0b0e2a}
+  h1{font-size:clamp(26px,4vw,44px);margin:18px 0 8px;letter-spacing:.5px}
+  h1 span{background:linear-gradient(90deg,var(--cyan),var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  p.sub{opacity:.8;max-width:720px;margin:0 auto;line-height:1.6}
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 20px 80px #0008}
+  .stage svg{display:block;width:100%;height:auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
+  .card{background:#0b0e2a;border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px}
+  .card h2{font-size:15px;margin:0 0 8px;letter-spacing:1px}
+  .card p{margin:0;font-size:14px;line-height:1.6;opacity:.85}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .controls{display:flex;gap:10px;justify-content:center;margin:16px 0 6px;flex-wrap:wrap}
+  button{cursor:pointer;border:2px solid #fff;background:#0b0e2a;color:#fff;border-radius:999px;padding:10px 20px;font-weight:700}
+  button.active,button:hover{background:#fff;color:#0b0e2a}
+  footer{max-width:1100px;margin:0 auto;padding:10px 20px 40px;text-align:center;opacity:.6;font-size:13px;line-height:1.6}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+  .ori-float{animation:float 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  .tw{animation:twinkle 2.6s ease-in-out infinite}
+  @media(max-width:600px){.pill{letter-spacing:1px;padding:8px 16px}main{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="pill">ORI — IN A NUTSHELL</div>
+  <h1>Ori and the Blind Forest <span>x Kurzgesagt</span></h1>
+  <p class="sub">What if the glowing forest spirit was redesigned as a flat, geometric, thick-outlined infographic bird-universe? Dark space background, vibrant gradients, cute ducks included.</p>
+  <div class="controls">
+    <button id="btn-day" class="active" type="button">Forest Day</button>
+    <button id="btn-night" type="button">Deep Space</button>
+    <button id="btn-party" type="button">Sein Party</button>
+  </div>
+</header>
+<main>
+  <div class="stage">
+  <svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-label="Ori in Kurzgesagt style under the Spirit Tree">
+    <defs>
+      <radialGradient id="bgGlow" cx="50%" cy="42%" r="70%">
+        <stop offset="0%" stop-color="#2A2A5E"/><stop offset="45%" stop-color="#14143A"/><stop offset="100%" stop-color="#07081F"/>
+      </radialGradient>
+      <radialGradient id="oriGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/><stop offset="30%" stop-color="#CFF6FF" stop-opacity="0.6"/><stop offset="65%" stop-color="#7AD9FF" stop-opacity="0.18"/><stop offset="100%" stop-color="#7AD9FF" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="leafGrad" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#00E5FF"/><stop offset="55%" stop-color="#3D8BFF"/><stop offset="100%" stop-color="#B388FF"/>
+      </linearGradient>
+    </defs>
+    <rect width="1920" height="1080" fill="url(#bgGlow)"/>
+    <g fill="#fff">
+      <circle class="tw" cx="120" cy="120" r="3"/><circle cx="340" cy="80" r="2"/><circle class="tw" cx="620" cy="140" r="2.5"/><circle cx="890" cy="70" r="2"/><circle class="tw" cx="1140" cy="110" r="3"/><circle cx="1380" cy="60" r="2"/><circle cx="1590" cy="130" r="2.5"/><circle cx="1800" cy="90" r="2.5"/>
+      <circle cx="220" cy="300" r="2"/><circle cx="480" cy="250" r="2.2"/><circle cx="1020" cy="220" r="2.2"/><circle cx="1290" cy="280" r="2"/><circle cx="1520" cy="240" r="2.5"/><circle cx="1740" cy="310" r="2"/>
+    </g>
+    <g>
+      <circle cx="1640" cy="220" r="58" fill="#FF6B6B" stroke="#0B0E2A" stroke-width="10"/>
+      <circle cx="1622" cy="202" r="12" fill="#FF8E8E" opacity="0.8"/>
+      <circle cx="280" cy="200" r="36" fill="none" stroke="#3D445F" stroke-width="3" stroke-dasharray="6 8"/>
+      <circle cx="280" cy="200" r="18" fill="#FFD166" stroke="#0B0E2A" stroke-width="8"/>
+    </g>
+    <ellipse cx="960" cy="420" rx="520" ry="380" fill="#3D8BFF" opacity="0.16"/>
+    <g stroke-linecap="round" fill="none">
+      <path d="M960 880 L960 480" stroke="#0B0E2A" stroke-width="120"/>
+      <path d="M960 880 L960 480" stroke="#2E3A6B" stroke-width="92"/>
+      <path d="M960 620 L720 480 L620 380" stroke="#2E3A6B" stroke-width="20"/>
+      <path d="M960 620 L1200 480 L1300 380" stroke="#2E3A6B" stroke-width="20"/>
+      <path d="M960 540 L800 380" stroke="#46549A" stroke-width="15"/>
+      <path d="M960 540 L1120 380" stroke="#46549A" stroke-width="15"/>
+    </g>
+    <g stroke="#0B0E2A" stroke-width="10" stroke-linejoin="round">
+      <ellipse cx="960" cy="300" rx="380" ry="130" fill="url(#leafGrad)"/>
+      <ellipse cx="720" cy="380" rx="190" ry="90" fill="#00E5FF"/>
+      <ellipse cx="1200" cy="380" rx="190" ry="90" fill="#B388FF"/>
+      <ellipse cx="960" cy="220" rx="260" ry="90" fill="#7AD9FF"/>
+    </g>
+    <g stroke="#7AD9FF" stroke-width="4" stroke-linecap="round" opacity="0.9">
+      <line x1="780" y1="430" x2="780" y2="500"/><line x1="850" y1="430" x2="850" y2="540"/><line x1="960" y1="430" x2="960" y2="560"/><line x1="1070" y1="430" x2="1070" y2="540"/><line x1="1140" y1="430" x2="1140" y2="500"/>
+    </g>
+    <g id="wisps" fill="#CFF6FF">
+      <circle cx="780" cy="510" r="9"/><circle cx="850" cy="550" r="11"/><circle cx="960" cy="572" r="13"/><circle cx="1070" cy="550" r="11"/><circle cx="1140" cy="510" r="9"/>
+    </g>
+    <ellipse cx="960" cy="920" rx="900" ry="180" fill="#1E2A5A" stroke="#0B0E2A" stroke-width="10"/>
+    <ellipse cx="960" cy="900" rx="750" ry="120" fill="#24306B"/>
+    <ellipse cx="960" cy="885" rx="580" ry="80" fill="#2E3D85"/>
+    <g transform="translate(380,820)">
+      <ellipse cx="0" cy="0" rx="55" ry="38" fill="#FFD166" stroke="#0B0E2A" stroke-width="8"/>
+      <circle cx="38" cy="-28" r="24" fill="#FFD166" stroke="#0B0E2A" stroke-width="8"/>
+      <circle cx="44" cy="-30" r="5" fill="#0B0E2A"/>
+      <polygon points="58,-32 75,-26 58,-20" fill="#FF6B6B" stroke="#0B0E2A" stroke-width="4" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(1540,820) scale(-1,1)">
+      <ellipse cx="0" cy="0" rx="55" ry="38" fill="#3DDAD7" stroke="#0B0E2A" stroke-width="8"/>
+      <circle cx="38" cy="-28" r="24" fill="#3DDAD7" stroke="#0B0E2A" stroke-width="8"/>
+      <circle cx="44" cy="-30" r="5" fill="#0B0E2A"/>
+      <polygon points="58,-32 75,-26 58,-20" fill="#FF6B6B" stroke="#0B0E2A" stroke-width="4" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(960,740)">
+    <g class="ori-float">
+      <ellipse cx="0" cy="20" rx="180" ry="60" fill="url(#oriGlow)"/>
+      <g fill="#fff" stroke="#0B0E2A" stroke-width="9" stroke-linejoin="round">
+        <polygon points="-38,-40 -95,-145 -30,-85"/><polygon points="38,-40 95,-145 30,-85"/>
+      </g>
+      <ellipse cx="0" cy="0" rx="68" ry="78" fill="#fff" stroke="#0B0E2A" stroke-width="9"/>
+      <ellipse cx="-18" cy="-18" rx="28" ry="32" fill="#E6FBFF"/>
+      <ellipse cx="-28" cy="-5" rx="16" ry="22" fill="#0B0E2A"/>
+      <ellipse cx="28" cy="-5" rx="16" ry="22" fill="#0B0E2A"/>
+      <circle cx="-23" cy="-12" r="5.5" fill="#fff"/><circle cx="33" cy="-12" r="5.5" fill="#fff"/>
+      <g id="sein" transform="translate(135,-60)">
+        <circle cx="0" cy="0" r="42" fill="#7AD9FF" opacity="0.3"/>
+        <circle cx="0" cy="0" r="24" fill="#FFF9C4" stroke="#0B0E2A" stroke-width="7"/>
+        <circle cx="-6" cy="-6" r="7" fill="#fff"/>
+      </g>
+      <g fill="#fff" stroke="#0B0E2A" stroke-width="7"><ellipse cx="-28" cy="75" rx="16" ry="12"/><ellipse cx="28" cy="75" rx="16" ry="12"/></g>
+    </g>
+    </g>
+    <g font-family="Arial, sans-serif" text-anchor="middle" font-weight="bold">
+      <rect x="660" y="60" width="600" height="72" rx="36" fill="#0B0E2A" stroke="#fff" stroke-width="3"/>
+      <text x="960" y="107" fill="#fff" font-size="36" letter-spacing="2">ORI — IN A NUTSHELL</text>
+      <rect x="130" y="620" width="300" height="54" rx="27" fill="#0B0E2A" stroke="#fff" stroke-width="2"/>
+      <text x="280" y="655" fill="#7AD9FF" font-size="22">LIGHT: 99.9% PURE</text>
+      <rect x="1490" y="620" width="300" height="54" rx="27" fill="#0B0E2A" stroke="#fff" stroke-width="2"/>
+      <text x="1640" y="655" fill="#FFF9C4" font-size="22">SEIN: TINY &amp; ANGRY</text>
+    </g>
+  </svg>
+  </div>
+  <div class="grid">
+    <div class="card"><h2><span class="dot" style="background:var(--cyan)"></span>ORI, GEOMETRIFIED</h2><p>Soft painterly fur becomes pure white flat shapes with a 9px dark outline. Big Kurzgesagt eyes, triangular ears, glow aura.</p></div>
+    <div class="card"><h2><span class="dot" style="background:var(--blue)"></span>SPIRIT TREE, DIAGRAMMED</h2><p>The ancient tree turns into stacked ellipses — cyan to purple gradient canopy, labelled like a science video still frame.</p></div>
+    <div class="card"><h2><span class="dot" style="background:var(--yellow)"></span>DUCKS INCLUDED</h2><p>No Kurzgesagt frame is complete without ducks. Two observers judge Ori's light purity from the forest floor.</p></div>
+    <div class="card"><h2><span class="dot" style="background:var(--red)"></span>INFOGRAPHIC HUMOR</h2><p>Deadpan labels: LIGHT 99.9% PURE, SEIN TINY &amp; ANGRY. Space planets and orbit rings for cosmic scale.</p></div>
+  </div>
+</main>
+<footer>Static demo inside <code>/dist</code> · No build step · Fan-art concept merging Moon Studios' Ori with Kurzgesagt's flat vector cosmos.</footer>
+<script>
+(function(){
+  var root=document.documentElement;
+  var bD=document.getElementById('btn-day'),bN=document.getElementById('btn-night'),bP=document.getElementById('btn-party');
+  function setActive(b){[bD,bN,bP].forEach(function(x){x.classList.remove('active')});b.classList.add('active')}
+  bD.onclick=function(){setActive(bD);document.body.style.filter='none';party(false)};
+  bN.onclick=function(){setActive(bN);document.body.style.filter='saturate(1.2) brightness(.85) hue-rotate(15deg)';party(false)};
+  var t=null;
+  function party(on){
+    var w=document.getElementById('wisps');if(!w)return;
+    if(t){clearInterval(t);t=null}
+    if(on){var s=0;t=setInterval(function(){s++;w.setAttribute('opacity',0.5+0.5*Math.abs(Math.sin(s/3)));var sein=document.getElementById('sein');if(sein)sein.setAttribute('transform','translate('+(135+20*Math.sin(s/2))+','+(-60+12*Math.cos(s))+')')},80)}
+    else{w.setAttribute('opacity','1');var sein2=document.getElementById('sein');if(sein2)sein2.setAttribute('transform','translate(135,-60)')}
+  }
+  bP.onclick=function(){setActive(bP);document.body.style.filter='saturate(1.4)';party(true)};
+  window.__appReady=true;
+})();
+</script>
+</body>
+</html>
